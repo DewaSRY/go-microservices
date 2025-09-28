@@ -11,6 +11,7 @@ import (
 	"time"
 
 	httpHandler "DewaSRY/go-microservices/services/api-gateway/internal/infrastructure/http"
+	"DewaSRY/go-microservices/services/api-gateway/internal/infrastructure/ws"
 	"DewaSRY/go-microservices/shared/env"
 )
 
@@ -26,8 +27,11 @@ func main() {
 	handler := httpHandler.NewHttpHandler()
 
 	//REGISTER HANDLER
-	mux.HandleFunc("GET /", handler.GetHealthCheck)
+	mux.HandleFunc("GET /health", handler.GetHealthCheck)
 	mux.HandleFunc("POST /trip/preview", handler.PostTripPreview)
+
+	mux.HandleFunc("/ws/riders", ws.WsHandleRider)
+	mux.HandleFunc("/ws/drivers", ws.WsHandleDriver)
 
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%s", PORT),
