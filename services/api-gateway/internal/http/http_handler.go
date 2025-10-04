@@ -3,6 +3,7 @@ package http
 import (
 	"DewaSRY/go-microservices/services/api-gateway/internal/domain"
 	"DewaSRY/go-microservices/services/api-gateway/internal/dto"
+	grpcclient "DewaSRY/go-microservices/services/api-gateway/internal/infrastructure/grpc"
 	"DewaSRY/go-microservices/shared/types"
 	"DewaSRY/go-microservices/shared/util"
 	"bytes"
@@ -30,6 +31,24 @@ func (h *httpHandler) PostTripPreview(w http.ResponseWriter, r *http.Request) {
 		util.WriteJSONResponse(w, http.StatusUnprocessableEntity, errorResponse)
 		return
 	}
+
+	tripService, err := grpcclient.NewTripServiceClient()
+
+	if err != nil {
+		errorResponse := make(map[string]any)
+		errorResponse["message"] = err.Error()
+		util.WriteJSONResponse(w, http.StatusUnprocessableEntity, errorResponse)
+	}
+	defer tripService.Close()
+
+	tripService, err := grpcclient.NewTripServiceClient()
+
+	if err != nil {
+		errorResponse := make(map[string]any)
+		errorResponse["message"] = err.Error()
+		util.WriteJSONResponse(w, http.StatusUnprocessableEntity, errorResponse)
+	}
+	defer tripService.Close()
 
 	jsonData, err := json.Marshal(reqBody)
 
