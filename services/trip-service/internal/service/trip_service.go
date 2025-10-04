@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -30,16 +31,19 @@ func (t *tripService) GetRoute(ctx context.Context, pickup *types.Coordinate, de
 
 	res, err := http.Get(url)
 	if err != nil {
+		log.Print(err)
 		return nil, ErrFailedToGetRoute
 	}
 	defer res.Body.Close()
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
+		log.Print(err)
 		return nil, ErrFailedToRead
 	}
 
 	var routeResponse types.OsrmApiResponse
 	if err := json.Unmarshal(body, &routeResponse); err != nil {
+		log.Print(err)
 		return nil, ErrFailedToParse
 	}
 

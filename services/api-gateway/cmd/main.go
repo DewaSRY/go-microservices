@@ -10,8 +10,8 @@ import (
 	"syscall"
 	"time"
 
-	httpHandler "DewaSRY/go-microservices/services/api-gateway/internal/infrastructure/http"
-	"DewaSRY/go-microservices/services/api-gateway/internal/infrastructure/ws"
+	httpHandler "DewaSRY/go-microservices/services/api-gateway/internal/http"
+	"DewaSRY/go-microservices/services/api-gateway/internal/ws"
 	"DewaSRY/go-microservices/shared/env"
 )
 
@@ -21,7 +21,6 @@ var (
 )
 
 func main() {
-	log.Printf("starting_app:%s\n", serviceName)
 	// INIT
 	mux := http.NewServeMux()
 	handler := httpHandler.NewHttpHandler()
@@ -39,6 +38,7 @@ func main() {
 	}
 
 	go func() {
+		log.Printf("starting_app:%s\n", serviceName)
 		if err := server.ListenAndServe(); err != nil {
 			log.Fatalf("failed_to_run:%s", serviceName)
 		}
