@@ -10,7 +10,7 @@ import (
 	"syscall"
 	"time"
 
-	httpHandler "DewaSRY/go-microservices/services/api-gateway/internal/http_handler"
+	httpHandler "DewaSRY/go-microservices/services/api-gateway/internal/http"
 	"DewaSRY/go-microservices/services/api-gateway/internal/ws"
 	"DewaSRY/go-microservices/shared/env"
 	"DewaSRY/go-microservices/shared/middleware"

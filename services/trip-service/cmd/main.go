@@ -9,9 +9,11 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	grpcserver "google.golang.org/grpc"
 )
@@ -28,6 +30,16 @@ func main() {
 
 	tripRepo := repository.NewInMemoryTripRepository()
 	tripService := service.NewTripService(tripRepo)
+	tripHttpHandler := handlers.NewHttpHandler(tripService)
+
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("POST /preview", tripHttpHandler.GetTripPreview)
+
+	srv := &http.Server{
+		Addr:    fmt.Sprintf(":%s", PORT),
+		Handler: mux,
+	}
 	tripFareService := service.NewTripFareService(tripRepo)
 	// tripHandler := handlers.NewHttpHandler(tripService)
 
@@ -46,6 +58,20 @@ func main() {
 		}
 	}()
 
+	{
+		quit := make(chan os.Signal, 1)
+		signal.Notify(quit, syscall.SIGINT, syscall.SIGALRM)
+		<-quit
+		log.Println("shutting down server...")
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		if err := srv.Shutdown(ctx); err != nil {
+			log.Fatalf("server_forced_to_shutdown:%v", err)
+		}
+	}
+
+	log.Println("server_exiting_gracefully")
 	go func() {
 		sigCh := make(chan os.Signal, 1)
 		signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
