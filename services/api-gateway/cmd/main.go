@@ -13,6 +13,7 @@ import (
 	httpHandler "DewaSRY/go-microservices/services/api-gateway/internal/http"
 	"DewaSRY/go-microservices/services/api-gateway/internal/ws"
 	"DewaSRY/go-microservices/shared/env"
+	"DewaSRY/go-microservices/shared/middleware"
 )
 
 var (
@@ -32,9 +33,12 @@ func main() {
 	mux.HandleFunc("/ws/riders", ws.WsHandleRider)
 	mux.HandleFunc("/ws/drivers", ws.WsHandleDriver)
 
+	// wrap the handler
+	warpHandler := middleware.WithCORS(mux)
+
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%s", PORT),
-		Handler: mux,
+		Handler: warpHandler,
 	}
 
 	go func() {
