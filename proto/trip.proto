@@ -19,13 +19,13 @@ message PreviewTripResponse {
 }
 
 message Route {
-     Geometry geometry = 1;
+    Geometry geometry = 1;
     double distance = 2;
     double duration = 3;
 }
 
 message Geometry{
-    repeated Coordinate Coordinate =1;
+    repeated Coordinate coordinates =1;
 }
 
 message Coordinate {

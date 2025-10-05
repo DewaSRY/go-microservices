@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type TripServiceClient struct {
@@ -13,11 +14,12 @@ type TripServiceClient struct {
 }
 
 func NewTripServiceClient() (*TripServiceClient, error) {
+
 	tripServiceUrl := os.Getenv("TRIP_SERVICE_URL")
 	if tripServiceUrl == "" {
 		tripServiceUrl = "trip-service:9093"
 	}
-	coon, err := grpc.NewClient(tripServiceUrl)
+	coon, err := grpc.NewClient(tripServiceUrl, grpc.WithTransportCredentials(insecure.NewCredentials()))
 
 	if err != nil {
 		return nil, err
