@@ -204,7 +204,7 @@ func (x *Route) GetDuration() float64 {
 
 type Geometry struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Coordinate    []*Coordinate          `protobuf:"bytes,1,rep,name=Coordinate,proto3" json:"Coordinate,omitempty"`
+	Coordinates   []*Coordinate          `protobuf:"bytes,1,rep,name=coordinates,proto3" json:"coordinates,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -239,9 +239,9 @@ func (*Geometry) Descriptor() ([]byte, []int) {
 	return file_trip_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *Geometry) GetCoordinate() []*Coordinate {
+func (x *Geometry) GetCoordinates() []*Coordinate {
 	if x != nil {
-		return x.Coordinate
+		return x.Coordinates
 	}
 	return nil
 }
@@ -383,11 +383,9 @@ const file_trip_proto_rawDesc = "" +
 	"\x05Route\x12/\n" +
 	"\bgeometry\x18\x01 \x01(\v2\x13.TripProto.GeometryR\bgeometry\x12\x1a\n" +
 	"\bdistance\x18\x02 \x01(\x01R\bdistance\x12\x1a\n" +
-	"\bduration\x18\x03 \x01(\x01R\bduration\"A\n" +
-	"\bGeometry\x125\n" +
-	"\n" +
-	"Coordinate\x18\x01 \x03(\v2\x15.TripProto.CoordinateR\n" +
-	"Coordinate\"F\n" +
+	"\bduration\x18\x03 \x01(\x01R\bduration\"C\n" +
+	"\bGeometry\x127\n" +
+	"\vcoordinates\x18\x01 \x03(\v2\x15.TripProto.CoordinateR\vcoordinates\"F\n" +
 	"\n" +
 	"Coordinate\x12\x1a\n" +
 	"\blatitude\x18\x01 \x01(\x01R\blatitude\x12\x1c\n" +
@@ -427,7 +425,7 @@ var file_trip_proto_depIdxs = []int32{
 	2, // 2: TripProto.PreviewTripResponse.route:type_name -> TripProto.Route
 	5, // 3: TripProto.PreviewTripResponse.rideFare:type_name -> TripProto.RideFare
 	3, // 4: TripProto.Route.geometry:type_name -> TripProto.Geometry
-	4, // 5: TripProto.Geometry.Coordinate:type_name -> TripProto.Coordinate
+	4, // 5: TripProto.Geometry.coordinates:type_name -> TripProto.Coordinate
 	0, // 6: TripProto.TripService.PreviewTrip:input_type -> TripProto.PreviewTripRequest
 	1, // 7: TripProto.TripService.PreviewTrip:output_type -> TripProto.PreviewTripResponse
 	7, // [7:8] is the sub-list for method output_type
