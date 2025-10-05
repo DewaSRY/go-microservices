@@ -10,9 +10,10 @@ import (
 	"syscall"
 	"time"
 
-	httpHandler "DewaSRY/go-microservices/services/api-gateway/internal/infrastructure/http"
-	"DewaSRY/go-microservices/services/api-gateway/internal/infrastructure/ws"
+	httpHandler "DewaSRY/go-microservices/services/api-gateway/internal/http_handler"
+	"DewaSRY/go-microservices/services/api-gateway/internal/ws"
 	"DewaSRY/go-microservices/shared/env"
+	"DewaSRY/go-microservices/shared/middleware"
 )
 
 var (
@@ -21,7 +22,6 @@ var (
 )
 
 func main() {
-	log.Printf("starting_app:%s\n", serviceName)
 	// INIT
 	mux := http.NewServeMux()
 	handler := httpHandler.NewHttpHandler()
@@ -29,16 +29,21 @@ func main() {
 	//REGISTER HANDLER
 	mux.HandleFunc("GET /health", handler.GetHealthCheck)
 	mux.HandleFunc("POST /trip/preview", handler.PostTripPreview)
+	mux.HandleFunc("POST /trip/start", handler.PostTripPreview)
 
 	mux.HandleFunc("/ws/riders", ws.WsHandleRider)
 	mux.HandleFunc("/ws/drivers", ws.WsHandleDriver)
 
+	// wrap the handler
+	warpHandler := middleware.WithCORS(mux)
+
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%s", PORT),
-		Handler: mux,
+		Handler: warpHandler,
 	}
 
 	go func() {
+		log.Printf("starting_app:%s\n", serviceName)
 		if err := server.ListenAndServe(); err != nil {
 			log.Fatalf("failed_to_run:%s", serviceName)
 		}

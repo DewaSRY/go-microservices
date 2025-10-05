@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -23,6 +24,20 @@ type tripService struct {
 	Repo domain.TripRepository
 }
 
+// GetUserRideFare implements domain.TripService.
+func (t *tripService) GetUserRideFare(ctx context.Context, userID string, fareId string) (*domain.RideFareModel, error) {
+	fare, err := t.Repo.GetRideFareById(ctx, fareId)
+	if err != nil {
+		return nil, err
+	}
+
+	if fare.UserID != userID {
+		return nil, errors.New("ride_fare_not_found")
+	}
+
+	return fare, nil
+}
+
 // GetRoute implements domain.TripService.
 func (t *tripService) GetRoute(ctx context.Context, pickup *types.Coordinate, destination *types.Coordinate) (*types.OsrmApiResponse, error) {
 	url := fmt.Sprintf(
@@ -30,16 +45,19 @@ func (t *tripService) GetRoute(ctx context.Context, pickup *types.Coordinate, de
 
 	res, err := http.Get(url)
 	if err != nil {
+		log.Print(err)
 		return nil, ErrFailedToGetRoute
 	}
 	defer res.Body.Close()
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
+		log.Print(err)
 		return nil, ErrFailedToRead
 	}
 
 	var routeResponse types.OsrmApiResponse
 	if err := json.Unmarshal(body, &routeResponse); err != nil {
+		log.Print(err)
 		return nil, ErrFailedToParse
 	}
 
