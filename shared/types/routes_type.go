@@ -1,6 +1,8 @@
 package types
 
-import tripgrpc "DewaSRY/go-microservices/shared/proto/trip_proto"
+import (
+	tripgrpc "DewaSRY/go-microservices/shared/proto/trip_proto"
+)
 
 type Routes struct {
 	Legs       []Legs   `json:"legs"`
