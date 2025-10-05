@@ -33,7 +33,7 @@ func WsHandleRider(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
-		log.Println(messageType, p)
+		log.Println("message", messageType, p)
 		// if err := conn.WriteMessage(messageType, p); err != nil {
 		// 	log.Printf("failed_to_write_message:%v", err)
 		// 	return
