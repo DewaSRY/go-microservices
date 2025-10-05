@@ -15,11 +15,12 @@ import (
 
 type grpcHandler struct {
 	tripgrpc.UnimplementedTripServiceServer
-	service domain.TripService
+	service         domain.TripService
+	tripFareService domain.TripFareService
 }
 
-func NewGRPCHandler(server *grpc.Server, service domain.TripService) *grpcHandler {
-	handler := &grpcHandler{service: service}
+func NewGRPCHandler(server *grpc.Server, service domain.TripService, tripFareService domain.TripFareService) *grpcHandler {
+	handler := &grpcHandler{service: service, tripFareService: tripFareService}
 
 	tripgrpc.RegisterTripServiceServer(server, handler)
 	return handler
@@ -60,13 +61,6 @@ func (t *grpcHandler) PreviewTrip(ctx context.Context, request *tripgrpc.Preview
 		return nil, errors.New("get_error")
 	}
 
-	tripRideFare := &tripgrpc.RideFare{
-		Id:                "",
-		UserID:            request.UserID,
-		PackageSlug:       "",
-		TotalPriceInCents: 160,
-	}
-
 	currentDataRoute := route.Routes[0]
 	responseCoordinate := make([]*tripgrpc.Coordinate, 0, len(currentDataRoute.Geometry.Coordinates))
 	for _, currentCor := range currentDataRoute.Geometry.Coordinates {
@@ -85,8 +79,29 @@ func (t *grpcHandler) PreviewTrip(ctx context.Context, request *tripgrpc.Preview
 		Duration: currentDataRoute.Duration,
 	}
 
-	rideFareList := make([]*tripgrpc.RideFare, 0)
-	rideFareList = append(rideFareList, tripRideFare)
+	// 1. Estimation the ride fare price base on the route (ex distance)
+	// 2. store the ride fares for the create trip (next leason) to fetch and validation
+	tripFareList := t.tripFareService.EstimatePackagesPrice(
+		float32(currentDataRoute.Distance),
+		currentDataRoute.Duration,
+	)
+
+	generatedTripFareList, err := t.tripFareService.GenerateTripFares(ctx, tripFareList, request.UserID, route)
+	if err != nil {
+		log.Printf("error %v", err)
+		return nil, errors.New("get_error")
+	}
+
+	rideFareList := make([]*tripgrpc.RideFare, 0, len(generatedTripFareList))
+
+	for i, fare := range generatedTripFareList {
+		rideFareList[i] = &tripgrpc.RideFare{
+			Id:                fare.ID.Hex(),
+			UserID:            fare.UserID,
+			PackageSlug:       fare.PackageSlug,
+			TotalPriceInCents: fare.TotalPriceInCents,
+		}
+	}
 
 	result := &tripgrpc.PreviewTripResponse{
 		TripID:   "",
