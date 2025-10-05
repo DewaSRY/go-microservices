@@ -7,7 +7,9 @@ import (
 	"context"
 	"errors"
 	"log"
+	"time"
 
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc"
 )
 
@@ -23,9 +25,27 @@ func NewGRPCHandler(server *grpc.Server, service domain.TripService) *grpcHandle
 	return handler
 }
 
-func (t *grpcHandler) PreviewTrip(ctx context.Context, request *tripgrpc.PreviewTripRequest) (*tripgrpc.PreviewTripResponse, error) {
-	log.Print("get call")
+func (t *grpcHandler) CreateTrip(ctx context.Context, request *tripgrpc.CreateTripRequest) (*tripgrpc.CreateTripResponse, error) {
+	createdTrip, err := t.service.CreateTrip(ctx, &domain.RideFareModel{
+		ID:                primitive.NewObjectID(),
+		UserID:            request.UserID,
+		PackageSlug:       "some-test",
+		TotalPriceInCents: 18,
+		ExpiresAt:         time.Now(),
+	})
 
+	if err != nil {
+		log.Printf("error %v", err)
+		return nil, errors.New("get_error")
+	}
+
+	response := &tripgrpc.CreateTripResponse{
+		TripID: createdTrip.ID.Hex(),
+	}
+	return response, nil
+}
+
+func (t *grpcHandler) PreviewTrip(ctx context.Context, request *tripgrpc.PreviewTripRequest) (*tripgrpc.PreviewTripResponse, error) {
 	route, err := t.service.GetRoute(ctx,
 		&types.Coordinate{
 			Latitude:  request.StartLocation.Latitude,

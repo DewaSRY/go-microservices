@@ -29,6 +29,7 @@ func main() {
 	//REGISTER HANDLER
 	mux.HandleFunc("GET /health", handler.GetHealthCheck)
 	mux.HandleFunc("POST /trip/preview", handler.PostTripPreview)
+	mux.HandleFunc("POST /trip/start", handler.PostTripPreview)
 
 	mux.HandleFunc("/ws/riders", ws.WsHandleRider)
 	mux.HandleFunc("/ws/drivers", ws.WsHandleDriver)
