@@ -7,10 +7,10 @@ import (
 	"context"
 	"errors"
 	"log"
-	"time"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type grpcHandler struct {
@@ -27,17 +27,18 @@ func NewGRPCHandler(server *grpc.Server, service domain.TripService, tripFareSer
 }
 
 func (t *grpcHandler) CreateTrip(ctx context.Context, request *tripgrpc.CreateTripRequest) (*tripgrpc.CreateTripResponse, error) {
-	createdTrip, err := t.service.CreateTrip(ctx, &domain.RideFareModel{
-		ID:                primitive.NewObjectID(),
-		UserID:            request.UserID,
-		PackageSlug:       "some-test",
-		TotalPriceInCents: 18,
-		ExpiresAt:         time.Now(),
-	})
+	userID := request.GetUserID()
+	rideFareID := request.GetRideFareID()
 
+	userRideFare, err := t.service.GetUserRideFare(ctx, userID, rideFareID)
 	if err != nil {
 		log.Printf("error %v", err)
-		return nil, errors.New("get_error")
+		return nil, status.Errorf(codes.Internal, "failed_to_get_user_route:%v", err)
+	}
+
+	createdTrip, err := t.service.CreateTrip(ctx, userRideFare)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed_to_create_user_error: %v", err)
 	}
 
 	response := &tripgrpc.CreateTripResponse{
@@ -61,31 +62,10 @@ func (t *grpcHandler) PreviewTrip(ctx context.Context, request *tripgrpc.Preview
 		return nil, errors.New("get_error")
 	}
 
-	currentDataRoute := route.Routes[0]
-	responseCoordinate := make([]*tripgrpc.Coordinate, 0, len(currentDataRoute.Geometry.Coordinates))
-	for _, currentCor := range currentDataRoute.Geometry.Coordinates {
-		responseCoordinate = append(responseCoordinate, &tripgrpc.Coordinate{
-			Latitude:  currentCor[0],
-			Longitude: currentCor[1],
-		})
-
-	}
-
-	responseRoute := &tripgrpc.Route{
-		Geometry: &tripgrpc.Geometry{
-			Coordinates: responseCoordinate,
-		},
-		Distance: currentDataRoute.Distance,
-		Duration: currentDataRoute.Duration,
-	}
-
+	responseRoute := route.Routes[0].ToRouteProto()
 	// 1. Estimation the ride fare price base on the route (ex distance)
 	// 2. store the ride fares for the create trip (next leason) to fetch and validation
-	tripFareList := t.tripFareService.EstimatePackagesPrice(
-		float32(currentDataRoute.Distance),
-		currentDataRoute.Duration,
-	)
-
+	tripFareList := t.tripFareService.EstimatePackagesPrice(responseRoute.Distance, responseRoute.Duration)
 	generatedTripFareList, err := t.tripFareService.GenerateTripFares(ctx, tripFareList, request.UserID, route)
 	if err != nil {
 		log.Printf("error %v", err)
