@@ -5,7 +5,6 @@ import (
 	tripgrpc "DewaSRY/go-microservices/shared/proto/trip_proto"
 	"DewaSRY/go-microservices/shared/types"
 	"context"
-	"errors"
 	"log"
 
 	"google.golang.org/grpc"
@@ -59,21 +58,18 @@ func (t *grpcHandler) PreviewTrip(ctx context.Context, request *tripgrpc.Preview
 
 	if err != nil {
 		log.Printf("error %v", err)
-		return nil, errors.New("get_error")
+		return nil, status.Errorf(codes.Internal, "failed_to_get_route:%v", err)
 	}
-
 	responseRoute := route.Routes[0].ToRouteProto()
-	// 1. Estimation the ride fare price base on the route (ex distance)
-	// 2. store the ride fares for the create trip (next leason) to fetch and validation
+
 	tripFareList := t.tripFareService.EstimatePackagesPrice(responseRoute.Distance, responseRoute.Duration)
 	generatedTripFareList, err := t.tripFareService.GenerateTripFares(ctx, tripFareList, request.UserID, route)
 	if err != nil {
 		log.Printf("error %v", err)
-		return nil, errors.New("get_error")
+		return nil, status.Errorf(codes.Internal, "failed_to_get_generate_ride_fare:%v", err)
 	}
 
-	rideFareList := make([]*tripgrpc.RideFare, 0, len(generatedTripFareList))
-
+	rideFareList := make([]*tripgrpc.RideFare, len(generatedTripFareList))
 	for i, fare := range generatedTripFareList {
 		rideFareList[i] = &tripgrpc.RideFare{
 			Id:                fare.ID.Hex(),
@@ -84,9 +80,8 @@ func (t *grpcHandler) PreviewTrip(ctx context.Context, request *tripgrpc.Preview
 	}
 
 	result := &tripgrpc.PreviewTripResponse{
-		TripID:   "",
-		RideFare: rideFareList,
-		Route:    responseRoute,
+		RideFares: rideFareList,
+		Route:     responseRoute,
 	}
 
 	return result, nil
