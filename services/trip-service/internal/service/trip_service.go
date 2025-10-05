@@ -24,6 +24,20 @@ type tripService struct {
 	Repo domain.TripRepository
 }
 
+// GetUserRideFare implements domain.TripService.
+func (t *tripService) GetUserRideFare(ctx context.Context, userID string, fareId string) (*domain.RideFareModel, error) {
+	fare, err := t.Repo.GetRideFareById(ctx, fareId)
+	if err != nil {
+		return nil, err
+	}
+
+	if fare.UserID != userID {
+		return nil, errors.New("ride_fare_not_found")
+	}
+
+	return fare, nil
+}
+
 // GetRoute implements domain.TripService.
 func (t *tripService) GetRoute(ctx context.Context, pickup *types.Coordinate, destination *types.Coordinate) (*types.OsrmApiResponse, error) {
 	url := fmt.Sprintf(

@@ -13,6 +13,16 @@ type inMemoryTripRepository struct {
 	rideFares map[string]*domain.RideFareModel
 }
 
+// GetRideFareById implements domain.TripRepository.
+func (i *inMemoryTripRepository) GetRideFareById(ctx context.Context, rideFareID string) (*domain.RideFareModel, error) {
+	fare, exist := i.rideFares[rideFareID]
+	if exist {
+		return fare, nil
+	}
+
+	return nil, errors.New("fare_not_found")
+}
+
 // SaveRIdeFareList implements domain.TripRepository.
 func (i *inMemoryTripRepository) SaveRIdeFareList(ctx context.Context, fares []*domain.RideFareModel) error {
 

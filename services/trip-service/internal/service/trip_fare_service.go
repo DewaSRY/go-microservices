@@ -13,7 +13,7 @@ type tripFareService struct {
 	repo domain.TripRepository
 }
 
-func (t *tripFareService) EstimatePackagesPrice(distanceInKm float32, duration float64) []*domain.RideFareModel {
+func (t *tripFareService) EstimatePackagesPrice(distanceInKm float64, duration float64) []*domain.RideFareModel {
 	baseFareList := getBaseFares()
 	priceConfig := domain.DefaultPricingConfig()
 	estimateFareList := make([]*domain.RideFareModel, len(baseFareList))
@@ -49,10 +49,10 @@ func (t *tripFareService) GenerateTripFares(ctx context.Context, fares []*domain
 	return fareList, nil
 }
 
-func (t *tripFareService) estimatePackagePice(fare *domain.RideFareModel, priceConfig *domain.PricingConfig, distanceInKm float32, duration float64) *domain.RideFareModel {
+func (t *tripFareService) estimatePackagePice(fare *domain.RideFareModel, priceConfig *domain.PricingConfig, distanceInKm float64, duration float64) *domain.RideFareModel {
 	carPackagePrice := fare.TotalPriceInCents
 
-	distanceFare := float64(distanceInKm) * priceConfig.PricePerUnitOfDistance
+	distanceFare := distanceInKm * priceConfig.PricePerUnitOfDistance
 	timeFare := duration * priceConfig.PricingPerMinute
 	totalPrice := carPackagePrice + distanceFare*timeFare
 
