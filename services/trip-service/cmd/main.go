@@ -28,6 +28,7 @@ func main() {
 
 	tripRepo := repository.NewInMemoryTripRepository()
 	tripService := service.NewTripService(tripRepo)
+	tripFareService := service.NewTripFareService(tripRepo)
 	// tripHandler := handlers.NewHttpHandler(tripService)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", PORT))
@@ -36,7 +37,7 @@ func main() {
 	}
 
 	grpcService := grpcserver.NewServer()
-	handlers.NewGRPCHandler(grpcService, tripService)
+	handlers.NewGRPCHandler(grpcService, tripService, tripFareService)
 
 	go func() {
 		log.Printf("success_run_service:%s on port %s\n", serverName, fmt.Sprintf(":%s", PORT))

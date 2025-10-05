@@ -13,6 +13,16 @@ type inMemoryTripRepository struct {
 	rideFares map[string]*domain.RideFareModel
 }
 
+// SaveRIdeFareList implements domain.TripRepository.
+func (i *inMemoryTripRepository) SaveRIdeFareList(ctx context.Context, fares []*domain.RideFareModel) error {
+
+	for _, fare := range fares {
+		i.rideFares[fare.ID.Hex()] = fare
+	}
+
+	return nil
+}
+
 // CreateTrip implements domain.TripRepository.
 func (i *inMemoryTripRepository) CreateTrip(ctx context.Context, trip *domain.TripModel) (*domain.TripModel, error) {
 	_, exist := i.tripsMap[trip.ID.Hex()]
