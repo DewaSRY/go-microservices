@@ -11,6 +11,8 @@ import (
 	"log"
 	"net/http"
 
+	triptype "DewaSRY/go-microservices/services/trip-service/pkg/types"
+
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -25,7 +27,7 @@ type tripService struct {
 }
 
 // GetUserRideFare implements domain.TripService.
-func (t *tripService) GetUserRideFare(ctx context.Context, userID string, fareId string) (*domain.RideFareModel, error) {
+func (t *tripService) GetUserRideFare(ctx context.Context, userID string, fareId string) (*triptype.RideFareModel, error) {
 	fare, err := t.Repo.GetRideFareById(ctx, fareId)
 	if err != nil {
 		return nil, err
@@ -64,8 +66,8 @@ func (t *tripService) GetRoute(ctx context.Context, pickup *types.Coordinate, de
 	return &routeResponse, nil
 }
 
-func (t *tripService) CreateTrip(ctx context.Context, fare *domain.RideFareModel) (*domain.TripModel, error) {
-	newTrip := &domain.TripModel{
+func (t *tripService) CreateTrip(ctx context.Context, fare *triptype.RideFareModel) (*triptype.TripModel, error) {
+	newTrip := &triptype.TripModel{
 		ID:       primitive.NewObjectID(),
 		UserID:   fare.UserID,
 		Status:   "pending",
