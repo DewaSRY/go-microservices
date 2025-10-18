@@ -27,6 +27,14 @@ type DriverTripResponseData struct {
 	RiderId string             `json:"riderID"`
 }
 
+type AcceptedPayment struct {
+	TripID  string `json:"tripID"`
+	RiderID string `json:"riderID"`
+}
+
+//  tripID: trip?.tripID ?? "",
+//   riderID: userID ?? "",
+
 type PaymentEventSessionCreatedData struct {
 	TripID    string  `json:"tripID"`
 	SessionID string  `json:"sessionID"`

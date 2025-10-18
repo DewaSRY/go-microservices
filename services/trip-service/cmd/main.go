@@ -51,9 +51,11 @@ func main() {
 	tripService := service.NewTripService(tripRepo)
 	tripFareService := service.NewTripFareService(tripRepo)
 	tripDriverEventHandler := handlers.NewTripDriverEventHandler(conn, tripService, tripFareService)
+	tripPaymentEventHandler := handlers.NewTripPaymentEventHandler(conn, tripService)
 
 	tripEventPublisher := events.NewTripEventPublisher(conn)
 	tripDriverEventConsumer := events.NewDriverConsumer(conn, tripDriverEventHandler)
+	tripPaymentEventConsumer := events.NewPaymentConsumer(conn, tripPaymentEventHandler)
 
 	// tripHandler := handlers.NewHttpHandler(tripService)
 	handlers.NewGRPCHandler(grpcService, tripService, tripFareService, tripEventPublisher)
@@ -68,6 +70,12 @@ func main() {
 	go func() {
 		if err := tripDriverEventConsumer.Listen(); err != nil {
 			log.Fatalf("failed_to_make_listener_to_driven_event:%v", err)
+		}
+	}()
+
+	go func() {
+		if err := tripPaymentEventConsumer.Listen(); err != nil {
+			log.Fatalf("failed_to_make_listener_to_payment_event:%v", err)
 		}
 	}()
 

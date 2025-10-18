@@ -54,18 +54,17 @@ func (t *tripService) GenerateTripFares(ctx context.Context, fares []*triptype.R
 
 // GetFareById implements domain.TripService.
 func (t *tripService) GetFareById(ctx context.Context, fareId string) (*triptype.RideFareModel, error) {
-	// return  t.Repo.ge
-	panic("unimplemented")
+	return t.Repo.GetFareById(ctx, fareId)
 }
 
 // GetTripByID implements domain.TripService.
 func (t *tripService) GetTripByID(ctx context.Context, id string) (*triptype.TripModel, error) {
-	panic("unimplemented")
+	return t.Repo.GetTripByID(ctx, id)
 }
 
 // UpdateTrip implements domain.TripService.
 func (t *tripService) UpdateTrip(ctx context.Context, tripID string, status string, driver *drivergrpc.Driver) error {
-	panic("unimplemented")
+	return t.Repo.UpdateTrip(ctx, tripID, status, driver)
 }
 
 // GetUserRideFare implements domain.TripService.

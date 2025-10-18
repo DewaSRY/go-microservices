@@ -8,7 +8,9 @@ import {
   ServerWsMessage,
   isValidWsMessage,
   BackendEndpoints,
+  ClientWsMessage,
 } from "../contracts";
+import { useRouter } from "next/navigation";
 
 export function useRiderStreamConnection(location: Coordinate, userID: string) {
   const [drivers, setDrivers] = useState<Driver[]>([]);
@@ -19,6 +21,8 @@ export function useRiderStreamConnection(location: Coordinate, userID: string) {
     null
   );
   const [error, setError] = useState<string | null>(null);
+  const [ws, setWs] = useState<WebSocket | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     if (!userID) return;
@@ -26,6 +30,7 @@ export function useRiderStreamConnection(location: Coordinate, userID: string) {
     const ws = new WebSocket(
       `${WEBSOCKET_URL}${BackendEndpoints.WS_RIDERS}?userID=${userID}`
     );
+    setWs(ws);
 
     ws.onopen = () => {
       // Send initial location
@@ -67,9 +72,14 @@ export function useRiderStreamConnection(location: Coordinate, userID: string) {
           break;
         case TripEvents.Created:
           setTripStatus(message.type);
+          console.log("this is trep", message.data);
           break;
         case TripEvents.NoDriversFound:
           setTripStatus(message.type);
+          break;
+        case TripEvents.PaymentEventComplete:
+          console.log("success");
+          router.push("?payment=success");
           break;
       }
     };
@@ -97,6 +107,14 @@ export function useRiderStreamConnection(location: Coordinate, userID: string) {
     setPaymentSession(null);
   };
 
+  const sendMessage = (message: ClientWsMessage) => {
+    if (ws?.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify(message));
+    } else {
+      setError("WebSocket is not connected");
+    }
+  };
+
   return {
     drivers,
     assignedDriver,
@@ -104,5 +122,6 @@ export function useRiderStreamConnection(location: Coordinate, userID: string) {
     tripStatus,
     paymentSession,
     resetTripStatus,
+    sendMessage,
   };
 }

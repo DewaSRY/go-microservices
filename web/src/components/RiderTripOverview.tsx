@@ -18,6 +18,7 @@ interface TripOverviewProps {
   assignedDriver?: Driver | null;
   paymentSession?: PaymentEventSessionCreatedData | null;
   onPackageSelect: (carPackage: RouteFare) => void;
+  handleAcceptPayment: () => void;
   onCancel: () => void;
 }
 
@@ -28,6 +29,7 @@ export const RiderTripOverview = ({
   paymentSession,
   onPackageSelect,
   onCancel,
+  handleAcceptPayment,
 }: TripOverviewProps) => {
   if (!trip) {
     return (
@@ -53,7 +55,10 @@ export const RiderTripOverview = ({
             </p>
             <p>Trip ID: {paymentSession.tripID}</p>
           </div>
-          <StripePaymentButton paymentSession={paymentSession} />
+          <StripePaymentButton
+            paymentSession={paymentSession}
+            handleAcceptPayment={handleAcceptPayment}
+          />
         </div>
       </TripOverviewCard>
     );
@@ -143,10 +148,21 @@ export const RiderTripOverview = ({
       </TripOverviewCard>
     );
   }
-  if (
-    (trip.rideFares && trip.rideFares.length >= 0 && !trip.tripID) ||
-    trip.tripID.length === 0
-  ) {
+  // if (
+  //   (trip.rideFares && trip.rideFares.length >= 0 && !trip.tripID) ||
+  //   trip.tripID.length === 0
+  // ) {
+  //   return (
+  //     <DriverList
+  //       trip={trip}
+  //       onPackageSelect={onPackageSelect}
+  //       onCancel={onCancel}
+  //     />
+  //   );
+  // }
+
+  console.log(trip);
+  if (trip.rideFares && trip.rideFares.length >= 0) {
     return (
       <DriverList
         trip={trip}
