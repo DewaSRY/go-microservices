@@ -2,6 +2,7 @@ package service
 
 import (
 	"DewaSRY/go-microservices/services/trip-service/internal/domain"
+	drivergrpc "DewaSRY/go-microservices/shared/proto/driver_proto"
 	"DewaSRY/go-microservices/shared/types"
 	"context"
 	"encoding/json"
@@ -24,6 +25,47 @@ var (
 
 type tripService struct {
 	Repo domain.TripRepository
+}
+
+// GenerateTripFares implements domain.TripService.
+func (t *tripService) GenerateTripFares(ctx context.Context, fares []*triptype.RideFareModel, userId string, route *types.OsrmApiResponse) ([]*triptype.RideFareModel, error) {
+	fareList := make([]*triptype.RideFareModel, len(fares))
+
+	for i, f := range fares {
+		Id := primitive.NewObjectID()
+		fare := triptype.RideFareModel{
+			UserID:            userId,
+			ID:                Id,
+			TotalPriceInCents: f.TotalPriceInCents,
+			PackageSlug:       f.PackageSlug,
+			Route:             &route.Routes[0],
+		}
+
+		fareList[i] = &fare
+
+	}
+
+	if err := t.Repo.SaveRIdeFareList(ctx, fareList); err != nil {
+		return nil, fmt.Errorf("failed_to_save_trip_fare:%v", err)
+	}
+
+	return fareList, nil
+}
+
+// GetFareById implements domain.TripService.
+func (t *tripService) GetFareById(ctx context.Context, fareId string) (*triptype.RideFareModel, error) {
+	// return  t.Repo.ge
+	panic("unimplemented")
+}
+
+// GetTripByID implements domain.TripService.
+func (t *tripService) GetTripByID(ctx context.Context, id string) (*triptype.TripModel, error) {
+	panic("unimplemented")
+}
+
+// UpdateTrip implements domain.TripService.
+func (t *tripService) UpdateTrip(ctx context.Context, tripID string, status string, driver *drivergrpc.Driver) error {
+	panic("unimplemented")
 }
 
 // GetUserRideFare implements domain.TripService.

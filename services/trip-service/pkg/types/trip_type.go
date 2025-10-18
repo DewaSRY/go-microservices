@@ -12,6 +12,7 @@ type TripModel struct {
 	UserID   string
 	Status   string
 	RideFare RideFareModel
+	Driver   *TripDriver
 }
 
 func (t *TripModel) ToTripProto() *tripgrpc.Trip {

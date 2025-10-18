@@ -50,7 +50,11 @@ func main() {
 	tripRepo := repository.NewInMemoryTripRepository()
 	tripService := service.NewTripService(tripRepo)
 	tripFareService := service.NewTripFareService(tripRepo)
+	tripDriverEventHandler := handlers.NewTripDriverEventHandler(conn, tripService, tripFareService)
+
 	tripEventPublisher := events.NewTripEventPublisher(conn)
+	tripDriverEventConsumer := events.NewDriverConsumer(conn, tripDriverEventHandler)
+
 	// tripHandler := handlers.NewHttpHandler(tripService)
 	handlers.NewGRPCHandler(grpcService, tripService, tripFareService, tripEventPublisher)
 
@@ -58,6 +62,12 @@ func main() {
 		log.Printf("success_run_service:%s on port %s\n", serverName, fmt.Sprintf(":%s", PORT))
 		if err := grpcService.Serve(lis); err != nil {
 			log.Fatalf("Listen : %s\n", err)
+		}
+	}()
+
+	go func() {
+		if err := tripDriverEventConsumer.Listen(); err != nil {
+			log.Fatalf("failed_to_make_listener_to_driven_event:%v", err)
 		}
 	}()
 

@@ -37,6 +37,13 @@ func (t *tripConsume) Listen() error {
 				return fmt.Errorf("failed_to_parse_trip_create_data:%v", err)
 			}
 			t.handler.FindSuitableDriver(ctx, tripData)
+		case contracts.TripEventDriverNotInterested:
+			var tripData messaging.TripEventData
+
+			if err := json.NewDecoder(bytes.NewBuffer(eventData.Data)).Decode(&tripData); err != nil {
+				return fmt.Errorf("failed_to_parse_trip_create_data:%v", err)
+			}
+			t.handler.FindSuitableDriver(ctx, tripData)
 		}
 
 		return nil

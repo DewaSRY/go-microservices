@@ -20,7 +20,12 @@ type Driver struct {
 	PackageSlug    string `json:"packageSlug"`
 }
 
-type driverMessage struct {
+type Coordinate struct {
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
+}
+
+type wsMessageData struct {
 	Type string          `json:"type"`
 	Data json.RawMessage `json:"data"`
 }
@@ -70,7 +75,23 @@ func (t *WsHandler) WsHandleRider(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
-		log.Printf("trip_received_messages: %v", p)
+		var tripMessage wsMessageData
+		if err := json.Unmarshal(p, &tripMessage); err != nil {
+			log.Printf("error_unmarshaling_rider_message: %v", err)
+			continue
+		}
+
+		switch tripMessage.Type {
+		case contracts.DriverCmdLocation:
+			var coordinateData Coordinate
+			if err := json.Unmarshal(p, &coordinateData); err != nil {
+				log.Printf("error_unmarshaling_rider_message: %v", err)
+				continue
+			}
+			log.Printf("trip_received_coordinate_data: %v", coordinateData)
+		default:
+			log.Printf("trip_received_unknown_messages: %v", tripMessage)
+		}
 
 	}
 }
@@ -161,7 +182,7 @@ func (t *WsHandler) WsHandleDriver(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		var driverMsg driverMessage
+		var driverMsg wsMessageData
 		if err := json.Unmarshal(p, &driverMsg); err != nil {
 			log.Printf("error_unmarshaling_driver_message: %v", err)
 			continue

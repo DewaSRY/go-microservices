@@ -15,6 +15,18 @@ type tripFareService struct {
 	repo domain.TripRepository
 }
 
+// EstimatePackagesPriceWithRoute implements domain.TripFareService.
+func (t *tripFareService) EstimatePackagesPriceWithRoute(route *types.OsrmApiResponse) []*triptype.RideFareModel {
+	baseFares := getBaseFares()
+	fareList := make([]*triptype.RideFareModel, len(baseFares))
+
+	for i, f := range baseFares {
+		fareList[i] = estimationFareRoute(f, route)
+	}
+
+	return baseFares
+}
+
 func (t *tripFareService) EstimatePackagesPrice(distanceInKm float64, duration float64) []*triptype.RideFareModel {
 	baseFareList := getBaseFares()
 	priceConfig := domain.DefaultPricingConfig()
@@ -61,6 +73,24 @@ func (t *tripFareService) estimatePackagePice(fare *triptype.RideFareModel, pric
 	return &triptype.RideFareModel{
 		PackageSlug:       fare.PackageSlug,
 		TotalPriceInCents: totalPrice,
+	}
+}
+
+func estimationFareRoute(f *triptype.RideFareModel, route *types.OsrmApiResponse) *triptype.RideFareModel {
+	pricingCfg := domain.DefaultPricingConfig()
+
+	carPackagePrice := f.TotalPriceInCents
+
+	distanceKM := route.Routes[0].Distance
+	durationInMinutes := route.Routes[0].Duration
+
+	distanceFare := distanceKM * pricingCfg.PricePerUnitOfDistance
+	timeFare := durationInMinutes * pricingCfg.PricingPerMinute
+	totalPrice := carPackagePrice + distanceFare + timeFare
+
+	return &triptype.RideFareModel{
+		TotalPriceInCents: totalPrice,
+		PackageSlug:       f.PackageSlug,
 	}
 }
 
