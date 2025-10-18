@@ -10,29 +10,39 @@ import (
 	"syscall"
 	"time"
 
-	httpHandler "DewaSRY/go-microservices/services/api-gateway/internal/http_handler"
-	"DewaSRY/go-microservices/services/api-gateway/internal/ws"
+	"DewaSRY/go-microservices/services/api-gateway/internal/handler"
 	"DewaSRY/go-microservices/shared/env"
+	"DewaSRY/go-microservices/shared/lib"
+	"DewaSRY/go-microservices/shared/messaging"
 	"DewaSRY/go-microservices/shared/middleware"
 )
 
 var (
 	serviceName = "API_GATEWAY"
 	PORT        = env.GetString("PORT", "8081")
+	rabbitMqURI = env.GetString("AMQP_URL", "amqp://guest:guest@rabbitmq:5672/")
 )
 
 func main() {
+	rabbitmq, err := messaging.NewRabbitMQManager(rabbitMqURI)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rabbitmq.Close()
+
 	// INIT
 	mux := http.NewServeMux()
-	handler := httpHandler.NewHttpHandler()
+	con_manager := lib.NewConnectionManager()
+	httpHandler := handler.NewHttpHandler()
+	wsHandler := handler.NewWsHandler(con_manager, rabbitmq)
 
 	//REGISTER HANDLER
-	mux.HandleFunc("GET /health", handler.GetHealthCheck)
-	mux.HandleFunc("POST /trip/preview", handler.PostTripPreview)
-	mux.HandleFunc("POST /trip/start", handler.PostTripPreview)
+	mux.HandleFunc("GET /health", httpHandler.GetHealthCheck)
+	mux.HandleFunc("POST /trip/preview", httpHandler.PostTripPreview)
+	mux.HandleFunc("POST /trip/start", httpHandler.PostStartTrip)
 
-	mux.HandleFunc("/ws/riders", ws.WsHandleRider)
-	mux.HandleFunc("/ws/drivers", ws.WsHandleDriver)
+	mux.HandleFunc("/ws/riders", wsHandler.WsHandleRider)
+	mux.HandleFunc("/ws/drivers", wsHandler.WsHandleDriver)
 
 	// wrap the handler
 	warpHandler := middleware.WithCORS(mux)

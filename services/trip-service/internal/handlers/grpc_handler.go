@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"DewaSRY/go-microservices/services/trip-service/internal/domain"
+	"DewaSRY/go-microservices/services/trip-service/internal/events"
 	tripgrpc "DewaSRY/go-microservices/shared/proto/trip_proto"
 	"DewaSRY/go-microservices/shared/types"
 	"context"
@@ -14,12 +15,13 @@ import (
 
 type grpcHandler struct {
 	tripgrpc.UnimplementedTripServiceServer
-	service         domain.TripService
-	tripFareService domain.TripFareService
+	service            domain.TripService
+	tripFareService    domain.TripFareService
+	tripEventPublisher *events.TripEventPublisher
 }
 
-func NewGRPCHandler(server *grpc.Server, service domain.TripService, tripFareService domain.TripFareService) *grpcHandler {
-	handler := &grpcHandler{service: service, tripFareService: tripFareService}
+func NewGRPCHandler(server *grpc.Server, service domain.TripService, tripFareService domain.TripFareService, tripEventPublisher *events.TripEventPublisher) *grpcHandler {
+	handler := &grpcHandler{service: service, tripFareService: tripFareService, tripEventPublisher: tripEventPublisher}
 
 	tripgrpc.RegisterTripServiceServer(server, handler)
 	return handler
@@ -36,6 +38,7 @@ func (t *grpcHandler) CreateTrip(ctx context.Context, request *tripgrpc.CreateTr
 	}
 
 	createdTrip, err := t.service.CreateTrip(ctx, userRideFare)
+
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed_to_create_user_error: %v", err)
 	}
@@ -43,6 +46,8 @@ func (t *grpcHandler) CreateTrip(ctx context.Context, request *tripgrpc.CreateTr
 	response := &tripgrpc.CreateTripResponse{
 		TripID: createdTrip.ID.Hex(),
 	}
+
+	t.tripEventPublisher.PublishTripCreated(ctx, createdTrip)
 	return response, nil
 }
 

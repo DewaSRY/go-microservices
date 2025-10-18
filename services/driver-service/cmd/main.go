@@ -1,8 +1,11 @@
 package main
 
 import (
+	"DewaSRY/go-microservices/services/driver-service/internal/events"
 	"DewaSRY/go-microservices/services/driver-service/internal/handler"
 	"DewaSRY/go-microservices/services/driver-service/internal/service"
+	"DewaSRY/go-microservices/shared/env"
+	"DewaSRY/go-microservices/shared/messaging"
 	"context"
 	"log"
 	"net"
@@ -16,6 +19,7 @@ import (
 var GrpcAddr = ":9092"
 
 func main() {
+	amqpUrlString := env.GetString("AMQP_URL", "amqp://guess:guess@rabbitmq:5672/")
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -30,12 +34,28 @@ func main() {
 
 	if err != nil {
 		log.Fatalf("failed_to_listen: %v", err)
+		return
 	}
 
-	svc := service.NewDriverService()
+	message_manager, err := messaging.NewRabbitMQManager(amqpUrlString)
+	if err != nil {
+		log.Fatalf("failed_to_listen: %v", err)
+		return
+	}
+	defer message_manager.Close()
 
+	driver_service := service.NewDriverService()
 	grpcServer := grpc.NewServer()
-	handler.NewGrpcHandler(grpcServer, svc)
+	handler.NewGrpcHandler(grpcServer, driver_service)
+
+	event_handler := handler.NewTripEventHandler(driver_service, message_manager)
+
+	tripListener := events.NewTripConsumer(message_manager, event_handler)
+	go func() {
+		if err := tripListener.Listen(); err != nil {
+			log.Fatalf("failed_to_make_listener_to_trip_event:%v", err)
+		}
+	}()
 
 	log.Printf("starting_grpc_server_driver_service_on_port:%s", lis.Addr().String())
 

@@ -1,10 +1,12 @@
 package main
 
 import (
+	"DewaSRY/go-microservices/services/trip-service/internal/events"
 	"DewaSRY/go-microservices/services/trip-service/internal/handlers"
 	"DewaSRY/go-microservices/services/trip-service/internal/repository"
 	"DewaSRY/go-microservices/services/trip-service/internal/service"
 	"DewaSRY/go-microservices/shared/env"
+	"DewaSRY/go-microservices/shared/messaging"
 	"context"
 	"fmt"
 	"log"
@@ -16,33 +18,56 @@ import (
 	grpcserver "google.golang.org/grpc"
 )
 
-// TODO clean up
 var (
 	serverName = "trip_service"
 	PORT       = env.GetString("PORT", "9093")
 )
 
 func main() {
+	//Config
+	amqp_url_string := env.GetString("AMQP_URL", "amqp://guess:guess@rabbitmq:5672/")
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-
-	tripRepo := repository.NewInMemoryTripRepository()
-	tripService := service.NewTripService(tripRepo)
-	tripFareService := service.NewTripFareService(tripRepo)
-	// tripHandler := handlers.NewHttpHandler(tripService)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", PORT))
 	if err != nil {
 		log.Fatalf("failed_to_listen:%v", err)
 	}
 
+	conn, err := messaging.NewRabbitMQManager(amqp_url_string)
+	log.Print("start connect to rabbitmq ")
+	if err != nil {
+		log.Printf("failed_to_make_connection:%v", err)
+		cancel()
+		return
+	}
+
+	defer conn.Close()
+
 	grpcService := grpcserver.NewServer()
-	handlers.NewGRPCHandler(grpcService, tripService, tripFareService)
+
+	tripRepo := repository.NewInMemoryTripRepository()
+	tripService := service.NewTripService(tripRepo)
+	tripFareService := service.NewTripFareService(tripRepo)
+	tripDriverEventHandler := handlers.NewTripDriverEventHandler(conn, tripService, tripFareService)
+
+	tripEventPublisher := events.NewTripEventPublisher(conn)
+	tripDriverEventConsumer := events.NewDriverConsumer(conn, tripDriverEventHandler)
+
+	// tripHandler := handlers.NewHttpHandler(tripService)
+	handlers.NewGRPCHandler(grpcService, tripService, tripFareService, tripEventPublisher)
 
 	go func() {
 		log.Printf("success_run_service:%s on port %s\n", serverName, fmt.Sprintf(":%s", PORT))
 		if err := grpcService.Serve(lis); err != nil {
 			log.Fatalf("Listen : %s\n", err)
+		}
+	}()
+
+	go func() {
+		if err := tripDriverEventConsumer.Listen(); err != nil {
+			log.Fatalf("failed_to_make_listener_to_driven_event:%v", err)
 		}
 	}()
 

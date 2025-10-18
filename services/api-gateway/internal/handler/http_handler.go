@@ -1,4 +1,4 @@
-package http
+package handler
 
 import (
 	"DewaSRY/go-microservices/services/api-gateway/internal/domain"

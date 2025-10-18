@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"DewaSRY/go-microservices/services/trip-service/internal/domain"
+	triptype "DewaSRY/go-microservices/services/trip-service/pkg/types"
 	"DewaSRY/go-microservices/shared/dto"
 	"DewaSRY/go-microservices/shared/util"
 	"encoding/json"
@@ -60,7 +61,7 @@ func (h *httpHandler) GetPreview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	createdTrip, err := h.service.CreateTrip(ctx, &domain.RideFareModel{
+	createdTrip, err := h.service.CreateTrip(ctx, &triptype.RideFareModel{
 		ID:                primitive.NewObjectID(),
 		UserID:            UserID,
 		PackageSlug:       PackageSlug,
