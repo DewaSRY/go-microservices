@@ -1,6 +1,5 @@
 import { Coordinate, Driver, Route, RouteFare, Trip } from "./types";
 
-
 // These are the endpoints the API Gateway must have for the frontend to work correctly
 export enum BackendEndpoints {
   PREVIEW_TRIP = "/trip/preview",
@@ -21,6 +20,8 @@ export enum TripEvents {
   DriverTripDecline = "driver.cmd.trip_decline",
   DriverRegister = "driver.cmd.register",
   PaymentSessionCreated = "payment.event.session_created",
+  PaymentEventSuccess = "payment.event.success",
+  PaymentEventComplete = "payment.event.complete",
 }
 
 // Messages sent from the server to the client via the websocket
@@ -31,10 +32,13 @@ export type ServerWsMessage =
   | DriverTripRequest
   | DriverRegisterRequest
   | TripCreatedRequest
-  | NoDriversFoundRequest;
+  | NoDriversFoundRequest
+  | TripCompleteRequest;
 
 // Messages sent from the client to the server via the websocket
-export type ClientWsMessage = DriverResponseToTripResponse
+export type ClientWsMessage =
+  | DriverResponseToTripResponse
+  | RiderAcceptedPaymentResponse;
 
 interface TripCreatedRequest {
   type: TripEvents.Created;
@@ -71,6 +75,14 @@ interface DriverAssignedRequest {
   data: Trip;
 }
 
+interface TripCompleteRequest {
+  type: TripEvents.PaymentEventComplete;
+  data: {
+    tripID: string;
+    riderID: string;
+  };
+}
+
 interface DriverLocationRequest {
   type: TripEvents.DriverLocation;
   data: Driver[];
@@ -82,6 +94,14 @@ interface DriverResponseToTripResponse {
     tripID: string;
     riderID: string;
     driver: Driver;
+  };
+}
+
+interface RiderAcceptedPaymentResponse {
+  type: TripEvents.PaymentEventSuccess;
+  data: {
+    tripID: string;
+    riderID: string;
   };
 }
 
@@ -105,6 +125,8 @@ export function isValidTripEvent(event: string): event is TripEvents {
   return Object.values(TripEvents).includes(event as TripEvents);
 }
 
-export function isValidWsMessage(message: ServerWsMessage): message is ServerWsMessage {
+export function isValidWsMessage(
+  message: ServerWsMessage
+): message is ServerWsMessage {
   return isValidTripEvent(message.type);
 }

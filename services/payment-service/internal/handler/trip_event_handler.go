@@ -43,7 +43,8 @@ func (t *tripEventHandler) HandleCreateSession(ctx context.Context, payload mess
 	}
 
 	if err := t.rabbitmq.PublishingMessage(
-		ctx, contracts.PaymentEventSessionCreated,
+		ctx,
+		contracts.PaymentEventSessionCreated,
 		contracts.AmqpMessage{
 			OwnerID: payload.UserID,
 			Data:    payloadBytes,

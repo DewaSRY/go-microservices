@@ -38,6 +38,9 @@ type TripDriverEventHandler interface {
 	HandleTripDeclined(ctx context.Context, tripID string, riderId string) error
 }
 
+type TripPaymentEventHandler interface {
+	HandleAcceptedPayment(ctx context.Context, TripID, RiderID string) error
+}
 type PricingConfig struct {
 	PricePerUnitOfDistance float64
 	PricingPerMinute       float64

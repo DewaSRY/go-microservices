@@ -1,4 +1,4 @@
-package triptype
+package types
 
 import tripgrpc "DewaSRY/go-microservices/shared/proto/trip_proto"
 

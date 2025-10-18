@@ -26,6 +26,7 @@ const (
 	PaymentEventSuccess        = "payment.event.success"
 	PaymentEventFailed         = "payment.event.failed"
 	PaymentEventCancelled      = "payment.event.cancelled"
+	PaymentEventComplete       = "payment.event.complete"
 
 	// Payment commands (payment.cmd.*)
 	PaymentCmdCreateSession = "payment.cmd.create_session"

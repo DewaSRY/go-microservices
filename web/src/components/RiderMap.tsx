@@ -28,7 +28,10 @@ import {
   HTTPTripPreviewRequestPayload,
   HTTPTripPreviewResponse,
   HTTPTripStartRequestPayload,
+  TripEvents,
 } from "../contracts";
+
+import { useRouter } from "next/navigation";
 
 const userMarker = new L.Icon({
   iconUrl:
@@ -54,6 +57,7 @@ export default function RiderMap({ onRouteSelected }: RiderMapProps) {
   const mapRef = useRef<L.Map>(null);
   const userID = useMemo(() => crypto.randomUUID(), []);
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // const router = useRouter();
 
   const location = {
     latitude: 37.7749,
@@ -67,6 +71,7 @@ export default function RiderMap({ onRouteSelected }: RiderMapProps) {
     assignedDriver,
     paymentSession,
     resetTripStatus,
+    sendMessage,
   } = useRiderStreamConnection(location, userID);
 
   console.log(tripStatus);
@@ -147,16 +152,17 @@ export default function RiderMap({ onRouteSelected }: RiderMapProps) {
       method: "POST",
       body: JSON.stringify(payload),
     });
-    const data = (await response.json()) as HTTPTripStartResponse;
+    const data = (await response.json()) as {
+      data: HTTPTripStartResponse;
+    };
 
-    if (response.ok && trip) {
-      setTrip(
-        (prev) =>
-          ({
-            ...prev,
-            tripID: data.tripID,
-          } as TripPreview)
-      );
+    if (response.ok) {
+      setTrip((prev) => {
+        return {
+          ...prev,
+          tripID: data.data.tripID,
+        } as TripPreview;
+      });
     }
 
     return data;
@@ -167,6 +173,23 @@ export default function RiderMap({ onRouteSelected }: RiderMapProps) {
     setDestination(null);
     resetTripStatus();
   };
+
+  function handleAcceptPayment() {
+    console.log("handle accepted payment", {
+      tripID: trip,
+      riderID: userID ?? "",
+    });
+
+    sendMessage({
+      type: TripEvents.PaymentEventSuccess,
+      data: {
+        tripID: trip?.tripID ?? "",
+        riderID: userID ?? "",
+      },
+    });
+
+    // router.push("?payment=success");
+  }
 
   if (error) {
     return <div>Error: {error}</div>;
@@ -261,6 +284,7 @@ export default function RiderMap({ onRouteSelected }: RiderMapProps) {
           paymentSession={paymentSession}
           onPackageSelect={handleStartTrip}
           onCancel={handleCancelTrip}
+          handleAcceptPayment={handleAcceptPayment}
         />
       </div>
     </div>

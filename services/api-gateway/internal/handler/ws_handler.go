@@ -35,6 +35,14 @@ type WsHandler struct {
 	rabbitMq    *messaging.RabbitMQ
 }
 
+type AcceptedPayment struct {
+	TripID  string `json:"tripID"`
+	RiderID string `json:"riderID"`
+}
+
+//   tripID: trip?.tripID ?? "",
+//         riderID: userID ?? "",
+
 func NewWsHandler(connManager lib.ConnectionManager, rabbitMq *messaging.RabbitMQ) *WsHandler {
 	return &WsHandler{connManager: connManager, rabbitMq: rabbitMq}
 }
@@ -46,7 +54,7 @@ func (t *WsHandler) WsHandleRider(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer conn.Close()
-
+	ctx := r.Context()
 	urQuery := r.URL.Query()
 	userID := urQuery.Get("userID")
 
@@ -62,7 +70,8 @@ func (t *WsHandler) WsHandleRider(w http.ResponseWriter, r *http.Request) {
 		[]string{
 			messaging.NotifyDriverNoDriversFoundQueue,
 			messaging.NotifyDriverAssignQueue,
-			messaging.NotifyPaymentSessionCreatedQueue,
+			messaging.NotifyPaymentSessionCreatedQueue, // temp
+			messaging.NotifyPaymentSuccessQueue,
 		},
 	)
 	// Call the connection's writeMessage and read message method to send
@@ -89,6 +98,25 @@ func (t *WsHandler) WsHandleRider(w http.ResponseWriter, r *http.Request) {
 				continue
 			}
 			log.Printf("trip_received_coordinate_data: %v", coordinateData)
+		case contracts.PaymentEventSuccess:
+
+			var payload messaging.AcceptedPayment
+			if err := json.Unmarshal(tripMessage.Data, &payload); err != nil {
+				log.Printf("Failed to unmarshal message: %v", err)
+				continue
+			}
+
+			log.Print("this is the data of PaymentEventSuccess", payload)
+
+			if err := t.rabbitMq.PublishingMessage(
+				ctx,
+				contracts.PaymentEventSuccess,
+				contracts.AmqpMessage{
+					OwnerID: userID,
+					Data:    tripMessage.Data,
+				}); err != nil {
+				log.Printf("Error_publishing_message_to_rabbitMQ: %v", err)
+			}
 		default:
 			log.Printf("trip_received_unknown_messages: %v", tripMessage)
 		}
@@ -171,6 +199,8 @@ func (t *WsHandler) WsHandleDriver(w http.ResponseWriter, r *http.Request) {
 	t.makeQueueConsumer(
 		[]string{
 			messaging.DriverCmdTripRequestQueue,
+			messaging.NotifyPaymentSessionCreatedQueue, // temp
+			messaging.NotifyPaymentSuccessQueue,
 		},
 	)
 
@@ -191,13 +221,27 @@ func (t *WsHandler) WsHandleDriver(w http.ResponseWriter, r *http.Request) {
 		switch driverMsg.Type {
 		case contracts.DriverCmdLocation:
 			continue
-		case contracts.DriverCmdTripAccept, contracts.DriverCmdTripDecline:
-			if err := t.rabbitMq.PublishingMessage(ctx, driverMsg.Type, contracts.AmqpMessage{
-				OwnerID: userID,
-				Data:    driverMsg.Data,
-			}); err != nil {
+		case contracts.DriverCmdTripAccept:
+			if err := t.rabbitMq.PublishingMessage(
+				ctx,
+				contracts.DriverCmdTripAccept,
+				contracts.AmqpMessage{
+					OwnerID: userID,
+					Data:    driverMsg.Data,
+				}); err != nil {
 				log.Printf("Error_publishing_message_to_rabbitMQ: %v", err)
 			}
+		case contracts.DriverCmdTripDecline:
+			if err := t.rabbitMq.PublishingMessage(
+				ctx,
+				contracts.DriverCmdTripDecline,
+				contracts.AmqpMessage{
+					OwnerID: userID,
+					Data:    driverMsg.Data,
+				}); err != nil {
+				log.Printf("Error_publishing_message_to_rabbitMQ: %v", err)
+			}
+
 		default:
 			log.Printf("Unknown_message_type: %s", driverMsg.Type)
 		}
