@@ -6,6 +6,7 @@ import (
 	"DewaSRY/go-microservices/services/driver-service/internal/service"
 	"DewaSRY/go-microservices/shared/env"
 	"DewaSRY/go-microservices/shared/messaging"
+	"DewaSRY/go-microservices/shared/tracing"
 	"context"
 	"log"
 	"net"
@@ -20,8 +21,20 @@ var GrpcAddr = ":9092"
 
 func main() {
 	amqpUrlString := env.GetString("AMQP_URL", "amqp://guess:guess@rabbitmq:5672/")
+	// Initialize Tracing
+	tracerCfg := tracing.Config{
+		ServiceName:    "payment-service",
+		Environment:    env.GetString("ENVIRONMENT", "development"),
+		JaegerEndpoint: env.GetString("JAEGER_ENDPOINT", "http://jaeger:14268/api/traces"),
+	}
+
+	sh, err := tracing.InitTracer(tracerCfg)
+	if err != nil {
+		log.Fatalf("Failed to initialize the tracer: %v", err)
+	}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+	defer sh(ctx)
 
 	go func() {
 		sigCn := make(chan os.Signal, 1)

@@ -7,6 +7,7 @@ import (
 	"DewaSRY/go-microservices/services/trip-service/internal/service"
 	"DewaSRY/go-microservices/shared/env"
 	"DewaSRY/go-microservices/shared/messaging"
+	"DewaSRY/go-microservices/shared/tracing"
 	"context"
 	"fmt"
 	"log"
@@ -19,16 +20,26 @@ import (
 )
 
 var (
-	serverName = "trip_service"
-	PORT       = env.GetString("PORT", "9093")
+	serverName      = "trip_service"
+	PORT            = env.GetString("PORT", "9093")
+	amqp_url_string = env.GetString("AMQP_URL", "amqp://guess:guess@rabbitmq:5672/")
 )
 
 func main() {
-	//Config
-	amqp_url_string := env.GetString("AMQP_URL", "amqp://guess:guess@rabbitmq:5672/")
+	tracerCfg := tracing.Config{
+		ServiceName:    "trip-service",
+		Environment:    env.GetString("ENVIRONMENT", "development"),
+		JaegerEndpoint: env.GetString("JAEGER_ENDPOINT", "http://jaeger:14268/api/traces"),
+	}
+
+	sh, err := tracing.InitTracer(tracerCfg)
+	if err != nil {
+		log.Fatalf("Failed to initialize the tracer: %v", err)
+	}
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+	defer sh(ctx)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", PORT))
 	if err != nil {

@@ -2,6 +2,7 @@ package grpcclient
 
 import (
 	drivergrpc "DewaSRY/go-microservices/shared/proto/driver_proto"
+	"DewaSRY/go-microservices/shared/tracing"
 	"fmt"
 	"os"
 
@@ -20,12 +21,13 @@ func NewDriverServiceClient() (*DriverServiceClient, error) {
 		driverServiceURL = "driver-service:9092"
 	}
 
-	// dialOptions := append(
-	// 	tracing.DialOptionsWithTracing(),
-	// 	grpc.WithTransportCredentials(insecure.NewCredentials()),
-	// )
+	dialOptions := append(
+		tracing.DialOptionsWithTracing(),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
 
-	conn, err := grpc.NewClient(driverServiceURL, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(driverServiceURL, dialOptions...)
+
 	if err != nil {
 		return nil, fmt.Errorf("failed_create_new_client :%v", err)
 	}

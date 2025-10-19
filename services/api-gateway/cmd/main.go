@@ -15,6 +15,7 @@ import (
 	"DewaSRY/go-microservices/shared/lib"
 	"DewaSRY/go-microservices/shared/messaging"
 	"DewaSRY/go-microservices/shared/middleware"
+	"DewaSRY/go-microservices/shared/tracing"
 )
 
 var (
@@ -24,6 +25,21 @@ var (
 )
 
 func main() {
+
+	tracerCfg := tracing.Config{
+		ServiceName:    "api-gateway",
+		Environment:    env.GetString("ENVIRONMENT", "development"),
+		JaegerEndpoint: env.GetString("JAEGER_ENDPOINT", "http://jaeger:14268/api/traces"),
+	}
+
+	sh, err := tracing.InitTracer(tracerCfg)
+	if err != nil {
+		log.Fatalf("Failed to initialize the tracer: %v", err)
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	defer sh(ctx)
+
 	rabbitmq, err := messaging.NewRabbitMQManager(rabbitMqURI)
 	if err != nil {
 		log.Fatal(err)
@@ -37,9 +53,9 @@ func main() {
 	wsHandler := handler.NewWsHandler(con_manager, rabbitmq)
 
 	//REGISTER HANDLER
-	mux.HandleFunc("GET /health", httpHandler.GetHealthCheck)
-	mux.HandleFunc("POST /trip/preview", httpHandler.PostTripPreview)
-	mux.HandleFunc("POST /trip/start", httpHandler.PostStartTrip)
+	mux.Handle("GET /health", tracing.WrapHandlerFunc(httpHandler.GetHealthCheck, "/health"))
+	mux.Handle("POST /trip/preview", tracing.WrapHandlerFunc(httpHandler.PostTripPreview, "/trip/preview"))
+	mux.Handle("POST /trip/start", tracing.WrapHandlerFunc(httpHandler.PostStartTrip, "/trip/start"))
 
 	mux.HandleFunc("/ws/riders", wsHandler.WsHandleRider)
 	mux.HandleFunc("/ws/drivers", wsHandler.WsHandleDriver)
@@ -63,7 +79,7 @@ func main() {
 	signal.Notify(quite, syscall.SIGINT, syscall.SIGALRM)
 	<-quite
 	log.Println("shout down the server")
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel = context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
 	if err := server.Shutdown(ctx); err != nil {

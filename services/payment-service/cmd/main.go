@@ -7,6 +7,7 @@ import (
 	"DewaSRY/go-microservices/services/payment-service/pkg/types"
 	"DewaSRY/go-microservices/shared/env"
 	"DewaSRY/go-microservices/shared/messaging"
+	"DewaSRY/go-microservices/shared/tracing"
 	"context"
 	"log"
 	"os"
@@ -21,8 +22,19 @@ var (
 )
 
 func main() {
+	tracerCfg := tracing.Config{
+		ServiceName:    "payment-service",
+		Environment:    env.GetString("ENVIRONMENT", "development"),
+		JaegerEndpoint: env.GetString("JAEGER_ENDPOINT", "http://jaeger:14268/api/traces"),
+	}
+
+	sh, err := tracing.InitTracer(tracerCfg)
+	if err != nil {
+		log.Fatalf("Failed to initialize the tracer: %v", err)
+	}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+	defer sh(ctx)
 
 	go func() {
 		sigCh := make(chan os.Signal, 1)

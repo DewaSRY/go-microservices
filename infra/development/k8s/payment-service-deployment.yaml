@@ -43,14 +43,22 @@ spec:
                 secretKeyRef:
                   name: stripe-config
                   key: STRIPE_SECRET_KEY
-
             # RabbitMQ credentials
             - name: AMQP_URL
               valueFrom:
                 configMapKeyRef:
                   key: AMQP_URL
                   name: app-config
-
+            - name: JAEGER_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  key: JAEGER_ENDPOINT
+                  name: app-config
+            - name: ENVIRONMENT
+              valueFrom:
+                configMapKeyRef:
+                  key: ENVIRONMENT
+                  name: app-config
 ---
 apiVersion: v1
 kind: Service

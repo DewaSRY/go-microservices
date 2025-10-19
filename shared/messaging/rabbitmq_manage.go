@@ -2,6 +2,7 @@ package messaging
 
 import (
 	"DewaSRY/go-microservices/shared/contracts"
+	"DewaSRY/go-microservices/shared/tracing"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -165,16 +166,14 @@ func (t *RabbitMQ) PublishingMessage(ctx context.Context, routingKeys string, me
 		return err
 	}
 
-	return t.Channel.PublishWithContext(ctx,
-		TRIP_EXCHANGE, //Exchange name
-		routingKeys,   // routing key //hallo
-		false,         // mandatory,
-		false,         // immediate
-		amqp.Publishing{
-			ContentType: "application/json",
-			Body:        dataToSent,
-		},
-	)
+	msg := amqp.Publishing{
+		DeliveryMode: amqp.Persistent,
+		ContentType:  "application/json",
+		Body:         dataToSent,
+	}
+
+	return tracing.TracedPublisher(ctx, TRIP_EXCHANGE, routingKeys, msg, t.publish)
+
 }
 
 func (t *RabbitMQ) ConsumeMessage(queueName string, handler MessageHandler) error {
@@ -192,29 +191,45 @@ func (t *RabbitMQ) ConsumeMessage(queueName string, handler MessageHandler) erro
 		return fmt.Errorf("failed_to_consume_queue_%s_with_err:%v", queueName, err)
 	}
 
-	ctx := context.Background()
+	// ctx := context.Background()
 	go func() {
 		for m := range msgs {
-			if err := handler(ctx, m); err != nil {
-				log.Printf("get_error_while_listen_to_queue_%s:%v", queueName, err)
+			if err := tracing.TracedConsumer(m, func(ctx context.Context, d amqp.Delivery) error {
+				if err := handler(ctx, m); err != nil {
+					log.Printf("get_error_while_listen_to_queue_%s:%v", queueName, err)
+					// Nack the message set requeue to false to avoid immediate redelivery loops.
+					// Consider a dead-letter exchange (DQl) or a more sophisticated retry mechanism for production
+					if neckErr := m.Nack(false, false); neckErr != nil {
+						return fmt.Errorf("error_failed_to_nack_message:%v", err)
+					}
 
-				// Nack the message set requeue to false to avoid immediate redelivery loops.
-				// Consider a dead-letter exchange (DQl) or a more sophisticated retry mechanism for production
-
-				if neckErr := m.Nack(false, false); neckErr != nil {
-					log.Printf("error_failed_to_nack_message:%v", err)
 				}
-				continue
-			}
 
-			// Only ack if the handler success
-			if ackErr := m.Ack(false); ackErr != nil {
-				log.Printf("failed_to_ack_the_message:%v", err)
+				// Only ack if the handler success
+				if ackErr := m.Ack(false); ackErr != nil {
+					return fmt.Errorf("failed_to_ack_the_message:%v", err)
+				}
+				return nil
+			}); err != nil {
+				// return err
+				log.Printf("get_error:%v", err)
+				continue
 			}
 		}
 	}()
 
 	return nil
+
+}
+
+func (r *RabbitMQ) publish(ctx context.Context, exchange, routingKey string, msg amqp.Publishing) error {
+	return r.Channel.PublishWithContext(ctx,
+		exchange,   // exchange
+		routingKey, // routing key
+		false,      // mandatory
+		false,      // immediate
+		msg,
+	)
 
 }
 

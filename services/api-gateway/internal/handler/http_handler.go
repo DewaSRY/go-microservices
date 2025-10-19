@@ -6,18 +6,22 @@ import (
 	grpcclient "DewaSRY/go-microservices/services/api-gateway/internal/grpc_client"
 	"DewaSRY/go-microservices/shared/contracts"
 	tripgrpc "DewaSRY/go-microservices/shared/proto/trip_proto"
+	"DewaSRY/go-microservices/shared/tracing"
 	"DewaSRY/go-microservices/shared/util"
 	"encoding/json"
 	"net/http"
 )
+
+var tracer = tracing.GetTracer("api-gateway")
 
 type httpHandler struct {
 }
 
 // PostStartTrip implements domain.HttpHandler.
 func (h *httpHandler) PostStartTrip(w http.ResponseWriter, r *http.Request) {
+	ctx, span := tracer.Start(r.Context(), "handleTripStart")
+	defer span.End()
 	var reqBody dto.StartTripRequest
-	ctx := r.Context()
 
 	if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
 		errorResponse := make(map[string]any)
@@ -66,8 +70,11 @@ func (h *httpHandler) PostStartTrip(w http.ResponseWriter, r *http.Request) {
 
 // PostTripPreview implements domain.HttpHandler.
 func (h *httpHandler) PostTripPreview(w http.ResponseWriter, r *http.Request) {
+
+	ctx, span := tracer.Start(r.Context(), "handleTripStart")
+	defer span.End()
+
 	var reqBody dto.PreviewTripRequest
-	ctx := r.Context()
 
 	if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
 		errorResponse := make(map[string]any)
@@ -122,6 +129,9 @@ func (h *httpHandler) PostTripPreview(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *httpHandler) GetHealthCheck(w http.ResponseWriter, r *http.Request) {
+	_, span := tracer.Start(r.Context(), "handleTripStart")
+	defer span.End()
+
 	response := make(map[string]any)
 	response["message"] = "server_healthy"
 	util.WriteJSONResponse(w, http.StatusOK, response)
