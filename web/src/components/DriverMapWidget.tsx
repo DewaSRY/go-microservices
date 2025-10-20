@@ -70,47 +70,6 @@ export const DriverMap = ({ packageSlug }: { packageSlug: CarPackageSlug }) => {
     });
   };
 
-  const handleAcceptTrip = () => {
-    const { trip, driver, sendMessage, setTripStatus } = driverStore;
-    if (!trip || !trip.id || !driver) {
-      alert("No trip ID found or driver is not set");
-      return;
-    }
-
-    sendMessage({
-      type: TripEvents.DriverTripAccept,
-      data: {
-        tripID: trip.id,
-        riderID: trip.userID,
-        driver: driver,
-      },
-    });
-
-    setTripStatus(TripEvents.DriverTripAccept);
-  };
-
-  const handleDeclineTrip = () => {
-    const { trip, driver, sendMessage, setTripStatus, resetTripStatus } =
-      driverStore;
-
-    if (!trip || !trip.id || !driver) {
-      alert("No trip ID found or driver is not set");
-      return;
-    }
-
-    sendMessage({
-      type: TripEvents.DriverTripDecline,
-      data: {
-        tripID: trip.id,
-        riderID: trip.userID,
-        driver: driver,
-      },
-    });
-
-    setTripStatus(TripEvents.DriverTripDecline);
-    resetTripStatus();
-  };
-
   const parsedRoute = useMemo(
     () =>
       requestedTrip?.route?.geometry?.coordinates.map(
@@ -192,12 +151,7 @@ export const DriverMap = ({ packageSlug }: { packageSlug: CarPackageSlug }) => {
           <DriverCard driver={driver} packageSlug={packageSlug} />
         </div>
         <div className="flex-1 overflow-y-auto">
-          <DriverTripOverview
-            trip={requestedTrip}
-            status={tripStatus}
-            onAcceptTrip={handleAcceptTrip}
-            onDeclineTrip={handleDeclineTrip}
-          />
+          <DriverTripOverview />
         </div>
       </div>
     </div>
