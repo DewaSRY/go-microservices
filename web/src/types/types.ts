@@ -8,10 +8,10 @@ export interface Trip {
   trip: Trip;
 }
 
-export interface RequestRideProps {
-  pickup: [number, number];
-  destination: [number, number];
-}
+// export interface RequestRideProps {
+//   pickup: [number, number];
+//   destination: [number, number];
+// }
 
 export interface Coordinate {
   latitude: number;
@@ -42,17 +42,17 @@ export interface RouteFare {
   route: Route;
 }
 
-export interface HTTPTripStartResponse {
-  tripID: string;
-}
+// export interface HTTPTripStartResponse {
+//   tripID: string;
+// }
 
-export interface TripPreview {
-  tripID: string;
-  route: [number, number][];
-  rideFares: RouteFare[];
-  duration: number;
-  distance: number;
-}
+// export interface TripPreview {
+//   tripID: string;
+//   route: [number, number][];
+//   rideFares: RouteFare[];
+//   duration: number;
+//   distance: number;
+// }
 
 export interface Driver {
   id: string;

@@ -1,4 +1,4 @@
-import { Coordinate, Driver, Route, RouteFare, Trip } from "./types";
+import { Coordinate, Driver, Route, RouteFare, Trip } from "./types/types";
 
 // These are the endpoints the API Gateway must have for the frontend to work correctly
 export enum BackendEndpoints {

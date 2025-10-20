@@ -14,12 +14,12 @@ import { getGeohashBounds } from "../utils/geohash";
 import { useMemo, useRef, useState } from "react";
 import { MapClickHandler } from "./MapClickHandler";
 import { Button } from "./ui/button";
+import { RouteFare } from "../types/types";
 import {
-  RouteFare,
   RequestRideProps,
   TripPreview,
   HTTPTripStartResponse,
-} from "../types";
+} from "@/types/dto";
 import { RoutingControl } from "./RoutingControl";
 import { API_URL } from "../constants";
 import { RiderTripOverview } from "./RiderTripOverview";
@@ -31,7 +31,7 @@ import {
   TripEvents,
 } from "../contracts";
 
-import { useRouter } from "next/navigation";
+import useRiderStore from "@/hooks/useRiderStore";
 
 const userMarker = new L.Icon({
   iconUrl:
@@ -57,24 +57,16 @@ export default function RiderMap({ onRouteSelected }: RiderMapProps) {
   const mapRef = useRef<L.Map>(null);
   const userID = useMemo(() => crypto.randomUUID(), []);
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  // const router = useRouter();
 
+  const riderStore = useRiderStore();
+  const error = useRiderStore((x) => x.error);
+  const drivers = useRiderStore((x) => x.drivers);
   const location = {
     latitude: 37.7749,
     longitude: -122.4194,
   };
 
-  const {
-    drivers,
-    error,
-    tripStatus,
-    assignedDriver,
-    paymentSession,
-    resetTripStatus,
-    sendMessage,
-  } = useRiderStreamConnection(location, userID);
-
-  console.log(tripStatus);
+  useRiderStreamConnection(location, userID);
 
   const handleMapClick = async (e: L.LeafletMouseEvent) => {
     if (trip?.tripID) {
@@ -92,7 +84,6 @@ export default function RiderMap({ onRouteSelected }: RiderMapProps) {
         pickup: [location.latitude, location.longitude],
         destination: [e.latlng.lat, e.latlng.lng],
       });
-      console.log(data);
 
       const parsedRoute = data.route.geometry.coordinates.map(
         (coord) => [coord.longitude, coord.latitude] as [number, number]
@@ -171,24 +162,17 @@ export default function RiderMap({ onRouteSelected }: RiderMapProps) {
   const handleCancelTrip = () => {
     setTrip(null);
     setDestination(null);
-    resetTripStatus();
+    riderStore.resetTripStatus();
   };
 
   function handleAcceptPayment() {
-    console.log("handle accepted payment", {
-      tripID: trip,
-      riderID: userID ?? "",
-    });
-
-    sendMessage({
+    riderStore.sendMessage({
       type: TripEvents.PaymentEventSuccess,
       data: {
         tripID: trip?.tripID ?? "",
         riderID: userID ?? "",
       },
     });
-
-    // router.push("?payment=success");
   }
 
   if (error) {
@@ -279,9 +263,6 @@ export default function RiderMap({ onRouteSelected }: RiderMapProps) {
       <div className="flex-[0.4]">
         <RiderTripOverview
           trip={trip}
-          assignedDriver={assignedDriver}
-          status={tripStatus}
-          paymentSession={paymentSession}
           onPackageSelect={handleStartTrip}
           onCancel={handleCancelTrip}
           handleAcceptPayment={handleAcceptPayment}
