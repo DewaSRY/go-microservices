@@ -1,27 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { WEBSOCKET_URL } from "../constants";
-import { Trip } from "../types";
-import { Driver, Coordinate } from "../types";
+import { Coordinate } from "../types/types";
 import {
-  PaymentEventSessionCreatedData,
   TripEvents,
   ServerWsMessage,
   isValidWsMessage,
   BackendEndpoints,
-  ClientWsMessage,
 } from "../contracts";
 import { useRouter } from "next/navigation";
+import useRiderStore from "./useRiderStore";
 
 export function useRiderStreamConnection(location: Coordinate, userID: string) {
-  const [drivers, setDrivers] = useState<Driver[]>([]);
-  const [tripStatus, setTripStatus] = useState<TripEvents | null>(null);
-  const [paymentSession, setPaymentSession] =
-    useState<PaymentEventSessionCreatedData | null>(null);
-  const [assignedDriver, setAssignedDriver] = useState<Trip["driver"] | null>(
-    null
-  );
-  const [error, setError] = useState<string | null>(null);
-  const [ws, setWs] = useState<WebSocket | null>(null);
+  const riderStore = useRiderStore();
   const router = useRouter();
 
   useEffect(() => {
@@ -30,7 +20,7 @@ export function useRiderStreamConnection(location: Coordinate, userID: string) {
     const ws = new WebSocket(
       `${WEBSOCKET_URL}${BackendEndpoints.WS_RIDERS}?userID=${userID}`
     );
-    setWs(ws);
+    riderStore.setWs(ws);
 
     ws.onopen = () => {
       // Send initial location
@@ -50,7 +40,7 @@ export function useRiderStreamConnection(location: Coordinate, userID: string) {
       const message = JSON.parse(event.data) as ServerWsMessage;
 
       if (!message || !isValidWsMessage(message)) {
-        setError(
+        riderStore.setError(
           `Unknown message type "${message}", allowed types are: ${Object.values(
             TripEvents
           ).join(", ")}`
@@ -60,25 +50,23 @@ export function useRiderStreamConnection(location: Coordinate, userID: string) {
 
       switch (message.type) {
         case TripEvents.DriverLocation:
-          setDrivers(message.data);
+          riderStore.setDrivers(message.data);
           break;
         case TripEvents.PaymentSessionCreated:
-          setPaymentSession(message.data);
-          setTripStatus(message.type);
+          riderStore.setPaymentSession(message.data);
+          riderStore.setTripStatus(message.type);
           break;
         case TripEvents.DriverAssigned:
-          setAssignedDriver(message.data.driver);
-          setTripStatus(message.type);
+          riderStore.setAssignedDriver(message.data.driver ?? null);
+          riderStore.setTripStatus(message.type);
           break;
         case TripEvents.Created:
-          setTripStatus(message.type);
-          console.log("this is trep", message.data);
+          riderStore.setTripStatus(message.type);
           break;
         case TripEvents.NoDriversFound:
-          setTripStatus(message.type);
+          riderStore.setTripStatus(message.type);
           break;
         case TripEvents.PaymentEventComplete:
-          console.log("success");
           router.push("?payment=success");
           break;
       }
@@ -89,7 +77,7 @@ export function useRiderStreamConnection(location: Coordinate, userID: string) {
     };
 
     ws.onerror = (event) => {
-      setError("WebSocket error occurred");
+      riderStore.setError("WebSocket error occurred");
       console.error("WebSocket error:", event);
     };
 
@@ -101,27 +89,4 @@ export function useRiderStreamConnection(location: Coordinate, userID: string) {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userID]);
-
-  const resetTripStatus = () => {
-    setTripStatus(null);
-    setPaymentSession(null);
-  };
-
-  const sendMessage = (message: ClientWsMessage) => {
-    if (ws?.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify(message));
-    } else {
-      setError("WebSocket is not connected");
-    }
-  };
-
-  return {
-    drivers,
-    assignedDriver,
-    error,
-    tripStatus,
-    paymentSession,
-    resetTripStatus,
-    sendMessage,
-  };
 }

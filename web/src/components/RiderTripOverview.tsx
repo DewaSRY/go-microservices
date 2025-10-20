@@ -1,4 +1,5 @@
-import { RouteFare, TripPreview, Driver } from "../types";
+import { RouteFare, Driver } from "../types/types";
+import { TripPreview } from "@/types/dto";
 import { DriverList } from "./DriversList";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
@@ -11,12 +12,10 @@ import { TripOverviewCard } from "./TripOverviewCard";
 import { StripePaymentButton } from "./StripePaymentButton";
 import { DriverCard } from "./DriverCard";
 import { TripEvents, PaymentEventSessionCreatedData } from "../contracts";
+import useRiderStore from "@/hooks/useRiderStore";
 
 interface TripOverviewProps {
   trip: TripPreview | null;
-  status: TripEvents | null;
-  assignedDriver?: Driver | null;
-  paymentSession?: PaymentEventSessionCreatedData | null;
   onPackageSelect: (carPackage: RouteFare) => void;
   handleAcceptPayment: () => void;
   onCancel: () => void;
@@ -24,13 +23,15 @@ interface TripOverviewProps {
 
 export const RiderTripOverview = ({
   trip,
-  status,
-  assignedDriver,
-  paymentSession,
+
   onPackageSelect,
   onCancel,
   handleAcceptPayment,
 }: TripOverviewProps) => {
+  const assignedDriver = useRiderStore((x) => x.assignedDriver);
+  const paymentSession = useRiderStore((x) => x.paymentSession);
+  const status = useRiderStore((x) => x.tripStatus);
+
   if (!trip) {
     return (
       <TripOverviewCard
@@ -161,7 +162,6 @@ export const RiderTripOverview = ({
   //   );
   // }
 
-  console.log(trip);
   if (trip.rideFares && trip.rideFares.length >= 0) {
     return (
       <DriverList

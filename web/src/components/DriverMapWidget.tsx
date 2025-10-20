@@ -6,12 +6,13 @@ import L from "leaflet";
 import { MapClickHandler } from "./MapClickHandler";
 import { useMemo, useState } from "react";
 import { useRef } from "react";
-import { CarPackageSlug, Coordinate } from "../types";
+import { CarPackageSlug, Coordinate } from "../types/types";
 import { DriverTripOverview } from "./DriverTripOverview";
 import * as Geohash from "ngeohash";
 import { RoutingControl } from "./RoutingControl";
 import { DriverCard } from "./DriverCard";
 import { TripEvents } from "../contracts";
+import useDriverStore from "@/hooks/useDriverStore";
 
 const START_LOCATION: Coordinate = {
   latitude: 37.7749,
@@ -40,6 +41,13 @@ const destinationMarker = new L.Icon({
 export const DriverMap = ({ packageSlug }: { packageSlug: CarPackageSlug }) => {
   const mapRef = useRef<L.Map>(null);
   const userID = useMemo(() => crypto.randomUUID(), []);
+  const driverStore = useDriverStore();
+
+  const requestedTrip = useDriverStore((s) => s.trip);
+  const error = useDriverStore((s) => s.error);
+  const driver = useDriverStore((s) => s.driver);
+  const tripStatus = useDriverStore((s) => s.tripEvent);
+
   const [riderLocation, setRiderLocation] =
     useState<Coordinate>(START_LOCATION);
 
@@ -48,15 +56,7 @@ export const DriverMap = ({ packageSlug }: { packageSlug: CarPackageSlug }) => {
     [riderLocation?.latitude, riderLocation?.longitude]
   );
 
-  const {
-    error,
-    driver,
-    tripStatus,
-    requestedTrip,
-    sendMessage,
-    setTripStatus,
-    resetTripStatus,
-  } = useDriverStreamConnection({
+  useDriverStreamConnection({
     location: riderLocation,
     geohash: driverGeohash,
     userID,
@@ -71,7 +71,8 @@ export const DriverMap = ({ packageSlug }: { packageSlug: CarPackageSlug }) => {
   };
 
   const handleAcceptTrip = () => {
-    if (!requestedTrip || !requestedTrip.id || !driver) {
+    const { trip, driver, sendMessage, setTripStatus } = driverStore;
+    if (!trip || !trip.id || !driver) {
       alert("No trip ID found or driver is not set");
       return;
     }
@@ -79,8 +80,8 @@ export const DriverMap = ({ packageSlug }: { packageSlug: CarPackageSlug }) => {
     sendMessage({
       type: TripEvents.DriverTripAccept,
       data: {
-        tripID: requestedTrip.id,
-        riderID: requestedTrip.userID,
+        tripID: trip.id,
+        riderID: trip.userID,
         driver: driver,
       },
     });
@@ -89,7 +90,10 @@ export const DriverMap = ({ packageSlug }: { packageSlug: CarPackageSlug }) => {
   };
 
   const handleDeclineTrip = () => {
-    if (!requestedTrip || !requestedTrip.id || !driver) {
+    const { trip, driver, sendMessage, setTripStatus, resetTripStatus } =
+      driverStore;
+
+    if (!trip || !trip.id || !driver) {
       alert("No trip ID found or driver is not set");
       return;
     }
@@ -97,8 +101,8 @@ export const DriverMap = ({ packageSlug }: { packageSlug: CarPackageSlug }) => {
     sendMessage({
       type: TripEvents.DriverTripDecline,
       data: {
-        tripID: requestedTrip.id,
-        riderID: requestedTrip.userID,
+        tripID: trip.id,
+        riderID: trip.userID,
         driver: driver,
       },
     });
