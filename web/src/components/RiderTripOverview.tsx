@@ -23,7 +23,6 @@ interface TripOverviewProps {
 
 export const RiderTripOverview = ({
   trip,
-
   onPackageSelect,
   onCancel,
   handleAcceptPayment,

@@ -84,7 +84,7 @@ const useRiderStore = create<typeof initState & Action>((set, get) => {
     set((state) => ({
       ...state,
       tripEvent: null,
-      trip: null,
+      tripStatus: null,
     }));
   };
 

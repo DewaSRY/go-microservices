@@ -84,7 +84,6 @@ export default function RiderMap({ onRouteSelected }: RiderMapProps) {
         pickup: [location.latitude, location.longitude],
         destination: [e.latlng.lat, e.latlng.lng],
       });
-      console.log(data);
 
       const parsedRoute = data.route.geometry.coordinates.map(
         (coord) => [coord.longitude, coord.latitude] as [number, number]

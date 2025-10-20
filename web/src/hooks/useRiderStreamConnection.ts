@@ -20,6 +20,7 @@ export function useRiderStreamConnection(location: Coordinate, userID: string) {
     const ws = new WebSocket(
       `${WEBSOCKET_URL}${BackendEndpoints.WS_RIDERS}?userID=${userID}`
     );
+
     riderStore.setWs(ws);
 
     ws.onopen = () => {
@@ -37,6 +38,7 @@ export function useRiderStreamConnection(location: Coordinate, userID: string) {
     };
 
     ws.onmessage = (event) => {
+      console.log("this is get data");
       const message = JSON.parse(event.data) as ServerWsMessage;
 
       if (!message || !isValidWsMessage(message)) {
@@ -54,17 +56,18 @@ export function useRiderStreamConnection(location: Coordinate, userID: string) {
           break;
         case TripEvents.PaymentSessionCreated:
           riderStore.setPaymentSession(message.data);
-          riderStore.setTripStatus(message.type);
+          riderStore.setTripStatus(TripEvents.PaymentSessionCreated);
           break;
         case TripEvents.DriverAssigned:
           riderStore.setAssignedDriver(message.data.driver ?? null);
-          riderStore.setTripStatus(message.type);
+          riderStore.setTripStatus(TripEvents.DriverAssigned);
           break;
         case TripEvents.Created:
-          riderStore.setTripStatus(message.type);
+          riderStore.setTripStatus(TripEvents.Created);
           break;
         case TripEvents.NoDriversFound:
-          riderStore.setTripStatus(message.type);
+          riderStore.setTripStatus(TripEvents.NoDriversFound);
+          console.log("this is no driver", TripEvents.NoDriversFound);
           break;
         case TripEvents.PaymentEventComplete:
           router.push("?payment=success");
