@@ -160,9 +160,7 @@ export default function RiderMap({ onRouteSelected }: RiderMapProps) {
   };
 
   const handleCancelTrip = () => {
-    setTrip(null);
-    setDestination(null);
-    riderStore.resetTripStatus();
+    riderStore.setTripStatus(null);
   };
 
   function handleAcceptPayment() {

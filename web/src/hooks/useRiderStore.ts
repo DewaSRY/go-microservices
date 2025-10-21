@@ -85,6 +85,9 @@ const useRiderStore = create<typeof initState & Action>((set, get) => {
       ...state,
       tripEvent: null,
       tripStatus: null,
+      driver: null,
+      error: null,
+      drivers: [],
     }));
   };
 

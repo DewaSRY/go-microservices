@@ -70,6 +70,8 @@ const useDriverStore = create<typeof initState & Action>((set, get) => {
       ...state,
       tripEvent: null,
       trip: null,
+      driver: null,
+      error: null,
     }));
   };
 

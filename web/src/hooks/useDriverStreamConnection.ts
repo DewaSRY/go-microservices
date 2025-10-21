@@ -75,6 +75,7 @@ export const useDriverStreamConnection = ({
           driverStore.setDriver(message.data);
           break;
         case TripEvents.PaymentEventComplete:
+          driverStore.resetTripStatus();
           router.push("?payment=success");
           break;
       }
