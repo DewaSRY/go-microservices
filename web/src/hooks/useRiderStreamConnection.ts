@@ -67,9 +67,9 @@ export function useRiderStreamConnection(location: Coordinate, userID: string) {
           break;
         case TripEvents.NoDriversFound:
           riderStore.setTripStatus(TripEvents.NoDriversFound);
-          console.log("this is no driver", TripEvents.NoDriversFound);
           break;
         case TripEvents.PaymentEventComplete:
+          riderStore.resetTripStatus();
           router.push("?payment=success");
           break;
       }
