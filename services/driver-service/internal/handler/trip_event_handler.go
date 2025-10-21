@@ -19,8 +19,6 @@ func (t *tripEventHandler) FindSuitableDriver(ctx context.Context, data messagin
 	selectedSlug := data.Trip.SelectedFare.PackageSlug
 	matchDriver := t.service.FindAvailableDrivers(selectedSlug)
 
-	log.Print(matchDriver)
-
 	if len(matchDriver) == 0 {
 		if err := t.messageManager.PublishingMessage(ctx, contracts.TripEventNoDriversFound, contracts.AmqpMessage{
 			OwnerID: data.Trip.UserID,
@@ -31,16 +29,32 @@ func (t *tripEventHandler) FindSuitableDriver(ctx context.Context, data messagin
 
 		return nil
 	}
-	// temp
 
+	tripDriverFindData, err := json.Marshal(
+		messaging.TripDriverFindData{
+			AmountDriver: len(matchDriver),
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	if err := t.messageManager.PublishingMessage(ctx, contracts.TripEventDriversFound,
+		contracts.AmqpMessage{
+			OwnerID: data.Trip.UserID,
+			Data:    tripDriverFindData,
+		},
+	); err != nil {
+		return err
+	}
+
+	// notify random driver
 	randomIndex := rand.Intn(len(matchDriver))
 	suitableDriverID := matchDriver[randomIndex]
 	marshalledEvent, err := json.Marshal(data)
 	if err != nil {
 		return err
 	}
-
-	// Notify the driver about a potential trip
 	if err := t.messageManager.PublishingMessage(ctx, contracts.DriverCmdTripRequest, contracts.AmqpMessage{
 		OwnerID: suitableDriverID,
 		Data:    marshalledEvent,

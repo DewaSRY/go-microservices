@@ -21,6 +21,7 @@ export enum TripEvents {
   DriverRegister = "driver.cmd.register",
   PaymentSessionCreated = "payment.event.session_created",
   PaymentEventSuccess = "payment.event.success",
+  TripEventDriversFound = "trip.event.drivers_found",
   PaymentEventComplete = "payment.event.complete",
 }
 
@@ -33,6 +34,7 @@ export type ServerWsMessage =
   | DriverRegisterRequest
   | TripCreatedRequest
   | NoDriversFoundRequest
+  | TripDriverFindResponse
   | TripCompleteRequest;
 
 // Messages sent from the client to the server via the websocket
@@ -102,6 +104,13 @@ interface RiderAcceptedPaymentResponse {
   data: {
     tripID: string;
     riderID: string;
+  };
+}
+
+interface TripDriverFindResponse {
+  type: TripEvents.TripEventDriversFound;
+  data: {
+    amountDriver: number;
   };
 }
 

@@ -9,6 +9,7 @@ import { create } from "zustand";
 //  const [tripStatus, setTripStatus] = useState<TripEvents | null>(null);
 const initState = {
   drivers: [] as Driver[],
+  amountMatchDriver: 0,
   tripStatus: null as TripEvents | null,
   paymentSession: null as PaymentEventSessionCreatedData | null,
   assignedDriver: null as Driver | null,
@@ -25,6 +26,7 @@ type Action = {
   setDrivers: (data: Driver[]) => void;
   setTripStatus: (data: TripEvents | null) => void;
   sendMessage: (message: ClientWsMessage) => void;
+  setAmountOfMatchDriver: (amount: number) => void;
   resetTripStatus: () => void;
 };
 
@@ -80,6 +82,13 @@ const useRiderStore = create<typeof initState & Action>((set, get) => {
     }
   };
 
+  const setAmountOfMatchDriver = (amount: number) => {
+    set((state) => ({
+      ...state,
+      amountMatchDriver: amount,
+    }));
+  };
+
   const resetTripStatus = () => {
     set((state) => ({
       ...state,
@@ -88,6 +97,7 @@ const useRiderStore = create<typeof initState & Action>((set, get) => {
       driver: null,
       error: null,
       drivers: [],
+      amountMatchDriver: 0,
     }));
   };
 
@@ -100,6 +110,7 @@ const useRiderStore = create<typeof initState & Action>((set, get) => {
     setDrivers,
     setTripStatus,
     sendMessage,
+    setAmountOfMatchDriver,
     resetTripStatus,
   };
 });

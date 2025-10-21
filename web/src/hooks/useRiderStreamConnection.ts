@@ -68,6 +68,10 @@ export function useRiderStreamConnection(location: Coordinate, userID: string) {
         case TripEvents.NoDriversFound:
           riderStore.setTripStatus(TripEvents.NoDriversFound);
           break;
+        case TripEvents.TripEventDriversFound:
+          riderStore.setTripStatus(TripEvents.TripEventDriversFound);
+          riderStore.setAmountOfMatchDriver(message.data.amountDriver);
+          break;
         case TripEvents.PaymentEventComplete:
           riderStore.resetTripStatus();
           router.push("?payment=success");
