@@ -97,7 +97,6 @@ export default function RiderMap({ onRouteSelected }: RiderMapProps) {
         duration: data.route.duration,
       });
 
-      // Call onRouteSelected with the route distance
       onRouteSelected?.(data.route.distance);
     }, 500);
   };

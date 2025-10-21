@@ -29,6 +29,7 @@ export const RiderTripOverview = ({
 }: TripOverviewProps) => {
   const assignedDriver = useRiderStore((x) => x.assignedDriver);
   const paymentSession = useRiderStore((x) => x.paymentSession);
+  const amountMatchDriver = useRiderStore((x) => x.amountMatchDriver);
   const status = useRiderStore((x) => x.tripStatus);
 
   if (!trip) {
@@ -148,18 +149,19 @@ export const RiderTripOverview = ({
       </TripOverviewCard>
     );
   }
-  // if (
-  //   (trip.rideFares && trip.rideFares.length >= 0 && !trip.tripID) ||
-  //   trip.tripID.length === 0
-  // ) {
-  //   return (
-  //     <DriverList
-  //       trip={trip}
-  //       onPackageSelect={onPackageSelect}
-  //       onCancel={onCancel}
-  //     />
-  //   );
-  // }
+
+  if (status === TripEvents.TripEventDriversFound) {
+    return (
+      <TripOverviewCard
+        title="Match Driver Found"
+        description={`We have ${amountMatchDriver} driver Match Your Needs`}
+      >
+        <Button variant="outline" className="w-full" onClick={onCancel}>
+          Go back
+        </Button>
+      </TripOverviewCard>
+    );
+  }
 
   if (trip.rideFares && trip.rideFares.length >= 0) {
     return (

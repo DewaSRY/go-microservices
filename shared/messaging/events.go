@@ -9,6 +9,7 @@ const (
 	FindAvailableDriversQueue        = "find_available_drivers"
 	DriverCmdTripRequestQueue        = "driver_cmd_trip_request"
 	DriverTripResponseQueue          = "driver_trip_response"
+	NotifyMatchingTripQueue          = "notify_match_trip"
 	NotifyDriverNoDriversFoundQueue  = "notify_driver_no_drivers_found"
 	NotifyDriverAssignQueue          = "notify_driver_assign"
 	PaymentTripResponseQueue         = "payment_trip_response"
@@ -54,4 +55,9 @@ type PaymentStatusUpdateData struct {
 	TripID   string `json:"tripID"`
 	UserID   string `json:"userID"`
 	DriverID string `json:"driverID"`
+}
+
+// FindAvailableDriversQueue
+type TripDriverFindData struct {
+	AmountDriver int `json:"amountDriver"`
 }

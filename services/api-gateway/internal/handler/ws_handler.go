@@ -72,6 +72,7 @@ func (t *WsHandler) WsHandleRider(w http.ResponseWriter, r *http.Request) {
 			messaging.NotifyDriverAssignQueue,
 			messaging.NotifyPaymentSessionCreatedQueue, // temp
 			messaging.NotifyPaymentSuccessQueue,
+			messaging.NotifyMatchingTripQueue,
 		},
 	)
 	// Call the connection's writeMessage and read message method to send
