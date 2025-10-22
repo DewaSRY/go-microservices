@@ -80,9 +80,9 @@ func (cm *connectionManagerImpl) Get(id string) (*websocket.Conn, bool) {
 }
 
 func (cm *connectionManagerImpl) Emit(id string, message contracts.WSMessage) error {
-	cm.mutex.RLock()
+	cm.mutex.Lock()
+	defer cm.mutex.Unlock()
 	wrapper, exists := cm.connectionsMap[id]
-	defer cm.mutex.RUnlock()
 
 	if !exists {
 		return fmt.Errorf("connection_with_user_id_%s_not_found", id)
