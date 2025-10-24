@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { PaymentEventSessionCreatedData } from "../contracts";
 import { Button } from "./ui/button";
 import { loadStripe } from "@stripe/stripe-js";
@@ -18,6 +19,8 @@ export const StripePaymentButton = ({
   handleAcceptPayment,
   isLoading = false,
 }: StripePaymentButtonProps) => {
+  const paymentT = useTranslations("payment");
+
   const handlePayment = async () => {
     const stripe = await stripePromise;
 
@@ -27,18 +30,12 @@ export const StripePaymentButton = ({
     }
 
     handleAcceptPayment();
-    // Redirect to Stripe Checkout
-    // const { error } = await stripe.redirectToCheckout({ sessionId: paymentSession.sessionID })
-
-    // if (error) {
-    //   console.error("Payment error:", error)
-    // }
   };
 
   if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
     return (
       <Button disabled className="w-full bg-red-500 text-white">
-        Stripe API KEY is not set on the NEXTJS app
+        {paymentT("warning.noStripApiKey")}
       </Button>
     );
   }

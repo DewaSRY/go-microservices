@@ -11,6 +11,7 @@ import { useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { CarPackageSlug } from "../types/types";
 import { DriverPackageSelector } from "../components/DriverPackageSelector";
+import { useTranslations } from "next-intl";
 
 // Dynamically import components that use Leaflet
 const DriverMapWidget = dynamic(
@@ -36,6 +37,8 @@ if (typeof window !== "undefined") {
 }
 
 function HomeContent() {
+  const t = useTranslations("HomePage");
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const payment = searchParams.get("payment");
@@ -73,18 +76,16 @@ function HomeContent() {
                 </svg>
               </div>
               <h1 className="text-2xl font-bold text-gray-900">
-                Payment Successful!
+                {t("successWidget.title")}
               </h1>
-              <p className="text-gray-600 mt-2">
-                Your ride has been confirmed.
-              </p>
+              <p className="text-gray-600 mt-2">{t("successWidget.desc")}</p>
             </div>
             <Button
               className="w-full text-lg py-6"
               variant="outline"
               onClick={handleBackToHome}
             >
-              Return Home
+              {t("successWidget.returnHome")}
             </Button>
           </div>
         </div>
@@ -98,24 +99,22 @@ function HomeContent() {
         <div className="flex flex-col items-center justify-center h-screen gap-6 px-4">
           <div className="bg-white p-8 rounded-2xl shadow-lg text-center max-w-md w-full">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              Welcome to RideShare
+              {t("hero.title")}
             </h2>
-            <p className="text-gray-600 mb-8">
-              Choose how you&apos;d like to use our service today
-            </p>
+            <p className="text-gray-600 mb-8">{t("hero.desc")}</p>
             <div className="space-y-4">
               <Button
                 className="w-full text-lg py-6 bg-primary hover:bg-primary/90"
                 onClick={handleClick.bind(null, "rider")}
               >
-                I Need a Ride
+                {t("hero.wantToRide")}
               </Button>
               <Button
                 className="w-full text-lg py-6"
                 variant="outline"
                 onClick={handleClick.bind(null, "driver")}
               >
-                I Want to Drive
+                {t("hero.wantToDrive")}
               </Button>
             </div>
           </div>

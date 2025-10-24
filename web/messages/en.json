@@ -1,0 +1,97 @@
+{
+  "HomePage": {
+    "title": "Hello world!",
+    "successWidget": {
+      "title": "Payment Successful",
+      "desc": "Your ride has been confirm",
+      "returnHome": "Return Home"
+    },
+    "hero": {
+      "title": "Welcome to RideShare ",
+      "desc": "Choose how you'd like to use our service today",
+      "wantToRide": "I need a ride",
+      "wantToDrive": "I want to drive"
+    }
+  },
+  "common": {
+    "driver": "driver",
+    "backToMak": "Back To Map",
+    "error": {
+      "title": "Error"
+    },
+    "driverId": "Driver ID",
+    "geohash": "Geohash",
+    "name": "Name",
+    "carPlate": "Car Plate",
+    "destination": "Destination",
+    "requestRider": "Request ride with",
+    "amount": "Amount",
+    "tripId": "Trip ID",
+    "goBack": "Go Back",
+    "cancelCurrentTrip": "Cancel current trip",
+    "cancel": "Cancel"
+  },
+  "driverMap": {
+    "driverId": "Driver ID",
+    "geohash": "Geohash",
+    "startLocation": "Start Location",
+    "destination": "Destination"
+  },
+  "packageSelector": {
+    "title": "Select your car type",
+    "desc": "Choose the type of car you'll be driving"
+  },
+  "driverListOption": {
+    "routingFor": "Routing For",
+    "youArriveIn": "You'll arrive in"
+  },
+  "alert": {
+    "tripIdNotSet": "No trip ID found or driver is nit set",
+    "noFareId": "No Fare ID in the payload"
+  },
+  "driverTripOverView": {
+    "waitingRider": {
+      "title": "Waiting for a rider",
+      "desc": "Waiting for a rider to request a trip"
+    },
+    "tripRequest": {
+      "title": "Trip request received!",
+      "desc": "A trip has been requested, check the route and accept the trip if you can take it.",
+      "acceptTrip": "Accept Trip",
+      "declineTrip": "Decline Trip"
+    },
+    "tripAccepted": {
+      "title": "Trip request received!",
+      "desc": "A trip has been requested, check the route and accept the trip if you can take it.",
+      "tripDetail": "Trip Details",
+      "tripId": "Trip ID",
+      "riderId": "Rider ID"
+    }
+  },
+  "riderTrip": {
+    "createTrip": {
+      "title": "Start a trip",
+      "desc": "Click on the map to set a destination"
+    },
+    "tripAccepted": {
+      "title": "Payment Required",
+      "desc": "Please complete the payment to confirm your trip"
+    },
+    "driverNotFound": {
+      "title": "No driver found",
+      "desc": "No driver found for your trip, please try again later"
+    },
+    "driverAssigned": {
+      "title": "Driver assigned",
+      "desc": "Your driver is on  the way, waiting for payment confirmation to show"
+    },
+    "noTrip": {
+      "desc": "No Trip ride fares, please refresh the page"
+    }
+  },
+  "payment": {
+    "warning": {
+      "noStripApiKey": "Strip API KEY is not set on the next js APP"
+    }
+  }
+}

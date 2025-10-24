@@ -32,6 +32,7 @@ import {
 } from "../contracts";
 
 import useRiderStore from "@/hooks/useRiderStore";
+import { useTranslations } from "next-intl";
 
 const userMarker = new L.Icon({
   iconUrl:
@@ -51,6 +52,9 @@ interface RiderMapProps {
 }
 
 export default function RiderMap({ onRouteSelected }: RiderMapProps) {
+  const alertT = useTranslations("alert");
+  const commonT = useTranslations("common");
+
   const [trip, setTrip] = useState<TripPreview | null>(null);
   const [selectedCarPackage] = useState<RouteFare | null>(null);
   const [destination, setDestination] = useState<[number, number] | null>(null);
@@ -134,7 +138,7 @@ export default function RiderMap({ onRouteSelected }: RiderMapProps) {
     } as HTTPTripStartRequestPayload;
 
     if (!fare.id) {
-      alert("No Fare ID in the payload");
+      alert(alertT("noFareId"));
       return;
     }
 
@@ -173,7 +177,13 @@ export default function RiderMap({ onRouteSelected }: RiderMapProps) {
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return (
+      <div>
+        <span>{commonT("error.title")}</span>
+        <span>:</span>
+        <span>{error}</span>
+      </div>
+    );
   }
 
   return (
@@ -207,7 +217,11 @@ export default function RiderMap({ onRouteSelected }: RiderMapProps) {
                 fillOpacity: 0.1,
               }}
             >
-              <Popup>Geohash: {driver?.geohash}</Popup>
+              <Popup>
+                <span>{commonT("geohash")}</span>
+                <span>:</span>
+                <span>{driver?.geohash}</span>
+              </Popup>
             </Rectangle>
           ))}
 
@@ -222,13 +236,29 @@ export default function RiderMap({ onRouteSelected }: RiderMapProps) {
               icon={driverMarker}
             >
               <Popup>
-                Driver ID: {driver?.id}
+                <p>
+                  <span>{commonT("driverId")}</span>
+                  <span>:</span>
+                  <span>{driver?.id}</span>
+                </p>
                 <br />
-                Geohash: {driver?.geohash}
+                <p>
+                  <span>{commonT("geohash")}</span>
+                  <span>:</span>
+                  <span>{driver?.geohash}</span>
+                </p>
                 <br />
-                Name: {driver?.name}
+                <p>
+                  <span>{commonT("name")}</span>
+                  <span>:</span>
+                  <span>{driver?.name}</span>
+                </p>
                 <br />
-                Car Plate: {driver?.carPlate}
+                <p>
+                  <span>{commonT("carPlate")}</span>
+                  <span>:</span>
+                  <span>{driver?.carPlate}</span>
+                </p>
                 <br />
                 <Image
                   src={driver?.profilePicture}
@@ -241,14 +271,15 @@ export default function RiderMap({ onRouteSelected }: RiderMapProps) {
           ))}
           {destination && (
             <Marker position={destination} icon={userMarker}>
-              <Popup>Destination</Popup>
+              <Popup>{commonT("destination")}</Popup>
             </Marker>
           )}
 
           {selectedCarPackage && (
             <div className="mt-4 z-[9999] absolute bottom-0 right-0">
               <Button className="w-full">
-                Request Ride with {selectedCarPackage.packageSlug}
+                <span>{commonT("requestRider")}</span>
+                <span>{selectedCarPackage.packageSlug}</span>
               </Button>
             </div>
           )}
