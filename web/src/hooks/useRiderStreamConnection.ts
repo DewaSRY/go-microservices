@@ -38,7 +38,6 @@ export function useRiderStreamConnection(location: Coordinate, userID: string) {
     };
 
     ws.onmessage = (event) => {
-      console.log("this is get data");
       const message = JSON.parse(event.data) as ServerWsMessage;
 
       if (!message || !isValidWsMessage(message)) {

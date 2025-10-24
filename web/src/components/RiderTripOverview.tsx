@@ -13,6 +13,7 @@ import { StripePaymentButton } from "./StripePaymentButton";
 import { DriverCard } from "./DriverCard";
 import { TripEvents, PaymentEventSessionCreatedData } from "../contracts";
 import useRiderStore from "@/hooks/useRiderStore";
+import { useTranslations } from "next-intl";
 
 interface TripOverviewProps {
   trip: TripPreview | null;
@@ -27,6 +28,9 @@ export const RiderTripOverview = ({
   onCancel,
   handleAcceptPayment,
 }: TripOverviewProps) => {
+  const riderTripT = useTranslations("riderTrip");
+  const commonT = useTranslations("common");
+
   const assignedDriver = useRiderStore((x) => x.assignedDriver);
   const paymentSession = useRiderStore((x) => x.paymentSession);
   const amountMatchDriver = useRiderStore((x) => x.amountMatchDriver);
@@ -35,8 +39,8 @@ export const RiderTripOverview = ({
   if (!trip) {
     return (
       <TripOverviewCard
-        title="Start a trip"
-        description="Click on the map to set a destination"
+        title={riderTripT("createTrip.title")}
+        description={riderTripT("createTrip.desc")}
       />
     );
   }
@@ -44,17 +48,25 @@ export const RiderTripOverview = ({
   if (status === TripEvents.PaymentSessionCreated && paymentSession) {
     return (
       <TripOverviewCard
-        title="Payment Required"
-        description="Please complete the payment to confirm your trip"
+        title={riderTripT("tripAccepted.title")}
+        description={riderTripT("tripAccepted.desc")}
       >
         <div className="flex flex-col gap-4">
           <DriverCard driver={assignedDriver} />
 
           <div className="text-sm text-gray-500">
             <p>
-              Amount: {paymentSession.amount} {paymentSession.currency}
+              <span>{commonT("amount")}</span>
+              <span>:</span>
+              <span>
+                {paymentSession.amount} {paymentSession.currency}
+              </span>
             </p>
-            <p>Trip ID: {paymentSession.tripID}</p>
+            <p>
+              <span>{commonT("tripId")}</span>
+              <span>:</span>
+              <span>{paymentSession.tripID}</span>
+            </p>
           </div>
           <StripePaymentButton
             paymentSession={paymentSession}
@@ -68,11 +80,11 @@ export const RiderTripOverview = ({
   if (status === TripEvents.NoDriversFound) {
     return (
       <TripOverviewCard
-        title="No drivers found"
-        description="No drivers found for your trip, please try again later"
+        title={riderTripT("driverNotFound.title")}
+        description={riderTripT("driverNotFound.desc")}
       >
         <Button variant="outline" className="w-full" onClick={onCancel}>
-          Go back
+          {commonT("goBack")}
         </Button>
       </TripOverviewCard>
     );
@@ -81,14 +93,14 @@ export const RiderTripOverview = ({
   if (status === TripEvents.DriverAssigned) {
     return (
       <TripOverviewCard
-        title="Driver assigned!"
-        description="Your driver is on the way, waiting for payment confirmation to show..."
+        title={riderTripT("driverAssigned.title")}
+        description={riderTripT("driverAssigned.desc")}
       >
         <div className="flex flex-col space-y-3 justify-center items-center mb-4">
           {/* <p>Driver: {trip.id}</p> */}
         </div>
         <Button variant="destructive" className="w-full" onClick={onCancel}>
-          Cancel current trip
+          {commonT("cancelCurrentTrip")}
         </Button>
       </TripOverviewCard>
     );
@@ -101,7 +113,7 @@ export const RiderTripOverview = ({
         description="Your trip is completed, thank you for using our service!"
       >
         <Button variant="outline" className="w-full" onClick={onCancel}>
-          Go back
+          {commonT("goBack")}
         </Button>
       </TripOverviewCard>
     );
@@ -114,7 +126,7 @@ export const RiderTripOverview = ({
         description="Your trip is cancelled, please try again later"
       >
         <Button variant="outline" className="w-full" onClick={onCancel}>
-          Go back
+          {commonT("goBack")}
         </Button>
       </TripOverviewCard>
     );
@@ -143,7 +155,7 @@ export const RiderTripOverview = ({
           )}
 
           <Button variant="destructive" className="w-full" onClick={onCancel}>
-            Cancel
+            {commonT("cancel")}
           </Button>
         </div>
       </TripOverviewCard>
@@ -157,7 +169,7 @@ export const RiderTripOverview = ({
         description={`We have ${amountMatchDriver} driver Match Your Needs`}
       >
         <Button variant="outline" className="w-full" onClick={onCancel}>
-          Go back
+          {commonT("goBack")}
         </Button>
       </TripOverviewCard>
     );
@@ -175,7 +187,7 @@ export const RiderTripOverview = ({
 
   return (
     <Card className="w-full md:max-w-[500px] z-[9999] flex-[0.3]">
-      No trip ride fares, please refresh the page
+      {riderTripT("noTrip.desc")}
     </Card>
   );
 };

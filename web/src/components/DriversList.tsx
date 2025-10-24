@@ -8,6 +8,7 @@ import {
 } from "../utils/math";
 import { cn } from "../lib/utils";
 import { PackagesMeta } from "./PackagesMeta";
+import { useTranslations } from "next-intl";
 
 interface DriverListProps {
   trip: TripPreview | null;
@@ -20,18 +21,23 @@ export function DriverList({
   onPackageSelect,
   onCancel,
 }: DriverListProps) {
+  const t = useTranslations("driverListOption");
+  const commonT = useTranslations("common");
+
   return (
     <div className="flex items-center justify-center p-4 min-h-screen bg-black/20">
       <div className="bg-white rounded-2xl shadow-lg p-6 max-w-md w-full">
         <h2 className="text-xl font-semibold mb-2">Select your desired ride</h2>
         <p className="text-sm text-gray-500 mb-6">
-          Routing for {convertMetersToKilometers(trip?.distance ?? 0)}
+          <span>{t("routingFor")}</span>
+          <span>{convertMetersToKilometers(trip?.distance ?? 0)}</span>
         </p>
         <div className="flex items-center gap-1 text-sm text-gray-500 mb-2">
           <Clock className="w-4 h-4" />
           <span>
-            You&apos;ll arrive in:{" "}
-            {convertSecondsToMinutes(trip?.duration ?? 0)}
+            <span>{t("youArriveIn")}</span>
+            <span className="mx-1">:</span>
+            <span>{convertSecondsToMinutes(trip?.duration ?? 0)}</span>
           </span>
         </div>
         <div className="space-y-4">
@@ -70,7 +76,7 @@ export function DriverList({
         </div>
         <div className="mt-6 space-y-4">
           <Button variant="outline" className="w-full" onClick={onCancel}>
-            Back to Map
+            {commonT("backToMak")}
           </Button>
         </div>
       </div>

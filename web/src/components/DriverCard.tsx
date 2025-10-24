@@ -1,6 +1,7 @@
 import { Driver, CarPackageSlug } from "../types/types";
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { useTranslations } from "next-intl";
 
 export const DriverCard = ({
   driver,
@@ -10,6 +11,7 @@ export const DriverCard = ({
   packageSlug?: CarPackageSlug;
 }) => {
   if (!driver) return null;
+  const t = useTranslations("common");
 
   const CarPlate = ({ plate }: { plate: string }) => (
     <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-gray-100 text-gray-800 font-mono tracking-wider">
@@ -41,7 +43,7 @@ export const DriverCard = ({
 
         {packageSlug && (
           <p className="text-sm">
-            <span className="font-mono">{packageSlug}</span> driver
+            <span className="font-mono">{packageSlug}</span> {t("driver")}
           </p>
         )}
       </CardContent>

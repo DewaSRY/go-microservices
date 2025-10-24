@@ -13,6 +13,7 @@ import { RoutingControl } from "./RoutingControl";
 import { DriverCard } from "./DriverCard";
 import { TripEvents } from "../contracts";
 import useDriverStore from "@/hooks/useDriverStore";
+import { useTranslations } from "next-intl";
 
 const START_LOCATION: Coordinate = {
   latitude: 37.7749,
@@ -39,14 +40,14 @@ const destinationMarker = new L.Icon({
 });
 
 export const DriverMap = ({ packageSlug }: { packageSlug: CarPackageSlug }) => {
+  const t = useTranslations("driverMap");
+
   const mapRef = useRef<L.Map>(null);
   const userID = useMemo(() => crypto.randomUUID(), []);
-  const driverStore = useDriverStore();
 
   const requestedTrip = useDriverStore((s) => s.trip);
   const error = useDriverStore((s) => s.error);
   const driver = useDriverStore((s) => s.driver);
-  const tripStatus = useDriverStore((s) => s.tripEvent);
 
   const [riderLocation, setRiderLocation] =
     useState<Coordinate>(START_LOCATION);
@@ -116,9 +117,17 @@ export const DriverMap = ({ packageSlug }: { packageSlug: CarPackageSlug }) => {
             icon={driverMarker}
           >
             <Popup>
-              Driver ID: {userID}
+              <p>
+                <span>{t("driverId")}</span>
+                <span>:</span>
+                <span>{userID}</span>
+              </p>
               <br />
-              Geohash: {driverGeohash}
+              <p>
+                <span>{t("geohash")}</span>
+                <span>:</span>
+                <span>{driverGeohash}</span>
+              </p>
             </Popup>
           </Marker>
 
@@ -127,7 +136,7 @@ export const DriverMap = ({ packageSlug }: { packageSlug: CarPackageSlug }) => {
               position={[startLocation.longitude, startLocation.latitude]}
               icon={startLocationMarker}
             >
-              <Popup>Start Location</Popup>
+              <Popup>{t("startLocation")}</Popup>
             </Marker>
           )}
 
@@ -136,7 +145,7 @@ export const DriverMap = ({ packageSlug }: { packageSlug: CarPackageSlug }) => {
               position={[destination.longitude, destination.latitude]}
               icon={destinationMarker}
             >
-              <Popup>Destination</Popup>
+              <Popup>{t("destination")}</Popup>
             </Marker>
           )}
 

@@ -2,8 +2,12 @@ import { TripOverviewCard } from "./TripOverviewCard";
 import { Button } from "./ui/button";
 import { TripEvents } from "../contracts";
 import useDriverStore from "@/hooks/useDriverStore";
+import { useTranslations } from "next-intl";
 
 export const DriverTripOverview = () => {
+  const alertT = useTranslations("alert");
+  const driverTripOverViewT = useTranslations("driverTripOverView");
+
   const driverStore = useDriverStore();
   const trip = useDriverStore((s) => s.trip);
   const tripStatus = useDriverStore((s) => s.tripEvent);
@@ -11,7 +15,7 @@ export const DriverTripOverview = () => {
   const handleAcceptTrip = () => {
     const { trip, driver, sendMessage, setTripStatus } = driverStore;
     if (!trip || !trip.id || !driver) {
-      alert("No trip ID found or driver is not set");
+      alert(alertT("tripIdNotSet"));
       return;
     }
 
@@ -32,7 +36,7 @@ export const DriverTripOverview = () => {
       driverStore;
 
     if (!trip || !trip.id || !driver) {
-      alert("No trip ID found or driver is not set");
+      alert(alertT("tripIdNotSet"));
       return;
     }
 
@@ -51,8 +55,8 @@ export const DriverTripOverview = () => {
   if (!trip) {
     return (
       <TripOverviewCard
-        title="Waiting for a rider..."
-        description="Waiting for a rider to request a trip..."
+        title={driverTripOverViewT("waitingRider.title")}
+        description={driverTripOverViewT("waitingRider.desc")}
       />
     );
   }
@@ -60,13 +64,15 @@ export const DriverTripOverview = () => {
   if (tripStatus === TripEvents.DriverTripRequest) {
     return (
       <TripOverviewCard
-        title="Trip request received!"
-        description="A trip has been requested, check the route and accept the trip if you can take it."
+        title={driverTripOverViewT("tripRequest.title")}
+        description={driverTripOverViewT("tripRequest.desc")}
       >
         <div className="flex flex-col gap-2">
-          <Button onClick={handleAcceptTrip}>Accept trip</Button>
+          <Button onClick={handleAcceptTrip}>
+            {driverTripOverViewT("tripRequest.acceptTrip")}
+          </Button>
           <Button variant="outline" onClick={handleDeclineTrip}>
-            Decline trip
+            {driverTripOverViewT("tripRequest.declineTrip")}
           </Button>
         </div>
       </TripOverviewCard>
@@ -76,16 +82,26 @@ export const DriverTripOverview = () => {
   if (tripStatus === TripEvents.DriverTripAccept) {
     return (
       <TripOverviewCard
-        title="All set!"
-        description="You can now start the trip"
+        title={driverTripOverViewT("tripAccepted.title")}
+        description={driverTripOverViewT("tripAccepted.desc")}
       >
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
-            <h3 className="text-lg font-bold">Trip details</h3>
+            <h3 className="text-lg font-bold">
+              {driverTripOverViewT("tripAccepted.tripDetail")}
+            </h3>
             <p className="text-sm text-gray-500">
-              Trip ID: {trip.id}
+              <span>
+                <span>{driverTripOverViewT("tripAccepted.tripId")}</span>
+                <span>:</span>
+                <span>{trip.id}</span>
+              </span>
               <br />
-              Rider ID: {trip.userID}
+              <span>
+                <span>{driverTripOverViewT("tripAccepted.riderId")}</span>
+                <span>:</span>
+                <span>{trip.userID}</span>
+              </span>
             </p>
           </div>
         </div>
