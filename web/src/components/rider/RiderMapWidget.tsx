@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useRiderStreamConnection } from "../hooks/useRiderStreamConnection";
+import { useRiderStreamConnection } from "@/hooks/useRiderStreamConnection";
 import {
   MapContainer,
   Marker,
@@ -10,18 +10,18 @@ import {
   TileLayer,
 } from "react-leaflet";
 import L from "leaflet";
-import { getGeohashBounds } from "../utils/geohash";
+import { getGeohashBounds } from "@/utils/geohash";
 import { useMemo, useRef, useState } from "react";
-import { MapClickHandler } from "./MapClickHandler";
-import { Button } from "./ui/button";
-import { RouteFare } from "../types/types";
+import { MapClickHandler } from "@/lib/react-leaflet";
+import { Button } from "../ui/button";
+import { RouteFare } from "@/types/types";
 import {
   RequestRideProps,
   TripPreview,
   HTTPTripStartResponse,
 } from "@/types/dto";
-import { RoutingControl } from "./RoutingControl";
-import { API_URL } from "../constants";
+import { RoutingControl } from "../common/RoutingControl";
+import { API_URL } from "@/constants";
 import { RiderTripOverview } from "./RiderTripOverview";
 import {
   BackendEndpoints,
@@ -29,7 +29,7 @@ import {
   HTTPTripPreviewResponse,
   HTTPTripStartRequestPayload,
   TripEvents,
-} from "../contracts";
+} from "@/contracts";
 
 import useRiderStore from "@/hooks/useRiderStore";
 import { useTranslations } from "next-intl";
@@ -59,7 +59,9 @@ export default function RiderMap({ onRouteSelected }: RiderMapProps) {
   const [selectedCarPackage] = useState<RouteFare | null>(null);
   const [destination, setDestination] = useState<[number, number] | null>(null);
   const mapRef = useRef<L.Map>(null);
+
   const userID = useMemo(() => crypto.randomUUID(), []);
+
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const riderStore = useRiderStore();

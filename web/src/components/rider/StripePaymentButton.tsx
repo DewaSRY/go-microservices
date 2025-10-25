@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
-import { PaymentEventSessionCreatedData } from "../contracts";
-import { Button } from "./ui/button";
+import { PaymentEventSessionCreatedData } from "@/contracts";
+import { Button } from "@/components/ui/button";
 import { loadStripe } from "@stripe/stripe-js";
 
 interface StripePaymentButtonProps {

@@ -1,6 +1,6 @@
-import { Driver, CarPackageSlug } from "../types/types";
+import { Driver, CarPackageSlug } from "@/types/types";
 import Image from "next/image";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { useTranslations } from "next-intl";
 
 export const DriverCard = ({

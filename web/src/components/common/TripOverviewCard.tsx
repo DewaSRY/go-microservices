@@ -4,8 +4,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "./ui/card";
-import { ScrollArea } from "./ui/scroll-area";
+} from "../ui/card";
+import { ScrollArea } from "../ui/scroll-area";
 
 interface TripOverviewCardProps {
   title: string;
