@@ -1,17 +1,17 @@
-import { RouteFare, Driver } from "../types/types";
+import { RouteFare, Driver } from "@/types/types";
 import { TripPreview } from "@/types/dto";
-import { DriverList } from "./DriversList";
-import { Card } from "./ui/card";
-import { Button } from "./ui/button";
+import { DriverList } from "@/components/driver/DriversList";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   convertMetersToKilometers,
   convertSecondsToMinutes,
-} from "../utils/math";
-import { Skeleton } from "./ui/skeleton";
-import { TripOverviewCard } from "./TripOverviewCard";
-import { StripePaymentButton } from "./StripePaymentButton";
-import { DriverCard } from "./DriverCard";
-import { TripEvents, PaymentEventSessionCreatedData } from "../contracts";
+} from "@/utils/math";
+import { Skeleton } from "@/components/ui/skeleton";
+import { TripOverviewCard } from "@/components/common/TripOverviewCard";
+import { StripePaymentButton } from "@/components/rider/StripePaymentButton";
+import { DriverCard } from "@/components/driver/DriverCard";
+import { TripEvents } from "@/contracts";
 import useRiderStore from "@/hooks/useRiderStore";
 import { useTranslations } from "next-intl";
 

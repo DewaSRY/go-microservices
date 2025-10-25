@@ -1,17 +1,19 @@
 "use client";
 
-import { useDriverStreamConnection } from "../hooks/useDriverStreamConnection";
+import * as Geohash from "ngeohash";
+
+import { useDriverStreamConnection } from "@/hooks/useDriverStreamConnection";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import L from "leaflet";
-import { MapClickHandler } from "./MapClickHandler";
+import { MapClickHandler } from "@/lib/react-leaflet";
 import { useMemo, useState } from "react";
 import { useRef } from "react";
-import { CarPackageSlug, Coordinate } from "../types/types";
-import { DriverTripOverview } from "./DriverTripOverview";
-import * as Geohash from "ngeohash";
-import { RoutingControl } from "./RoutingControl";
-import { DriverCard } from "./DriverCard";
-import { TripEvents } from "../contracts";
+import { CarPackageSlug, Coordinate } from "@/types/types";
+import { DriverTripOverview } from "@/components/driver/DriverTripOverview";
+
+import { RoutingControl } from "@/components/common/RoutingControl";
+import { DriverCard } from "@/components/driver/DriverCard";
+
 import useDriverStore from "@/hooks/useDriverStore";
 import { useTranslations } from "next-intl";
 
@@ -57,13 +59,6 @@ export const DriverMap = ({ packageSlug }: { packageSlug: CarPackageSlug }) => {
     [riderLocation?.latitude, riderLocation?.longitude]
   );
 
-  useDriverStreamConnection({
-    location: riderLocation,
-    geohash: driverGeohash,
-    userID,
-    packageSlug,
-  });
-
   const handleMapClick = (e: L.LeafletMouseEvent) => {
     setRiderLocation({
       latitude: e.latlng.lat,
@@ -92,6 +87,13 @@ export const DriverMap = ({ packageSlug }: { packageSlug: CarPackageSlug }) => {
     () => requestedTrip?.route?.geometry?.coordinates[0],
     [requestedTrip]
   );
+
+  useDriverStreamConnection({
+    location: riderLocation,
+    geohash: driverGeohash,
+    userID,
+    packageSlug,
+  });
 
   if (error) {
     return <div>Error: {error}</div>;

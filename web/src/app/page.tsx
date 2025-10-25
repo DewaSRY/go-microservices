@@ -19,9 +19,12 @@ const DriverMapWidget = dynamic(
   { ssr: false }
 );
 
-const RiderMapWidget = dynamic(() => import("../components/RiderMapWidget"), {
-  ssr: false,
-});
+const RiderMapWidget = dynamic(
+  () => import("../components/rider/RiderMapWidget"),
+  {
+    ssr: false,
+  }
+);
 
 // Initialize Leaflet icon only on client side
 if (typeof window !== "undefined") {

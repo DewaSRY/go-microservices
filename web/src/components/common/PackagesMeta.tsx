@@ -1,6 +1,6 @@
 import { Bus, Truck, Crown } from "lucide-react";
 import { Car } from "lucide-react";
-import { CarPackageSlug } from "../types/types";
+import { CarPackageSlug } from "@/types/types";
 
 export const PackagesMeta: Record<
   CarPackageSlug,
