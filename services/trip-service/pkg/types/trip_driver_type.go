@@ -1,17 +1,20 @@
 package types
 
-import tripgrpc "DewaSRY/go-microservices/shared/proto/trip_proto"
+import (
+	tripgrpc "DewaSRY/go-microservices/shared/proto/trip_proto"
+	"fmt"
+)
 
-type TripDriver struct {
-	ID             string
+type TripDriverType struct {
+	ID             uint64
 	Name           string
 	ProfilePicture string
 	CarPlate       string
 }
 
-func (t *TripDriver) ToTripProto() *tripgrpc.TripDriver {
+func (t *TripDriverType) ToTripProto() *tripgrpc.TripDriver {
 	return &tripgrpc.TripDriver{
-		Id:             t.ID,
+		Id:             fmt.Sprintf("{%d}", t.ID),
 		Name:           t.Name,
 		ProfilePicture: t.ProfilePicture,
 	}

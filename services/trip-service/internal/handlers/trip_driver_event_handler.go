@@ -18,7 +18,6 @@ type tripDriverEventHandler struct {
 
 // HandleTripAccepted implements domain.TripDriverEventHandler.
 func (t *tripDriverEventHandler) HandleTripAccepted(ctx context.Context, tripID string, driver *drivergrpc.Driver) error {
-	// trip, err := t.service.GenerateTripFares()
 	trip, err := t.tripService.GetTripByID(ctx, tripID)
 	if err != nil {
 		return fmt.Errorf("failed_to_get_trip_with_id_%s:%v", tripID, err)
@@ -33,6 +32,12 @@ func (t *tripDriverEventHandler) HandleTripAccepted(ctx context.Context, tripID 
 	}
 
 	trip, err = t.tripService.GetTripByID(ctx, tripID)
+
+	if err != nil {
+		return fmt.Errorf("failed_to_get_trip_with_id_%s:%v", tripID, err)
+	}
+
+	fare, err := t.tripService.GetFareById(ctx, trip.RideFareID)
 	if err != nil {
 		return fmt.Errorf("failed_to_get_trip_with_id_%s:%v", tripID, err)
 	}
@@ -52,12 +57,13 @@ func (t *tripDriverEventHandler) HandleTripAccepted(ctx context.Context, tripID 
 		}); err != nil {
 		return err
 	}
+
 	marshalledPayload, err := json.Marshal(
 		messaging.PaymentTripResponseData{
 			TripID:   tripID,
 			UserID:   trip.UserID,
 			DriverID: driver.Id,
-			Amount:   trip.RideFare.TotalPriceInCents,
+			Amount:   fare.TotalPriceInCents,
 			Currency: "USD",
 		},
 	)
@@ -81,14 +87,14 @@ func (t *tripDriverEventHandler) HandleTripAccepted(ctx context.Context, tripID 
 
 // HandleTripDeclined implements domain.TripDriverEventHandler.
 func (t *tripDriverEventHandler) HandleTripDeclined(ctx context.Context, tripID string, riderId string) error {
-	trip, err := t.tripService.GetTripByID(ctx, tripID)
+	trip, err := t.tripService.GetTripProto(ctx, tripID)
 
 	if err != nil {
 		return fmt.Errorf("failed_to_get_trip_with_id_%s:%v", tripID, err)
 	}
 
 	newPayload := messaging.TripEventData{
-		Trip: trip.ToTripProto(),
+		Trip: trip,
 	}
 
 	marshalledPayload, err := json.Marshal(newPayload)

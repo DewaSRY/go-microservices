@@ -2,83 +2,57 @@ package service
 
 import (
 	"DewaSRY/go-microservices/services/trip-service/internal/domain"
+	"DewaSRY/go-microservices/shared/models"
 	drivergrpc "DewaSRY/go-microservices/shared/proto/driver_proto"
+	tripgrpc "DewaSRY/go-microservices/shared/proto/trip_proto"
 	"DewaSRY/go-microservices/shared/types"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
-
-	triptype "DewaSRY/go-microservices/services/trip-service/pkg/types"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
-)
-
-var (
-	ErrFailedToGetRoute = errors.New("failed_to_get_route")
-	ErrFailedToRead     = errors.New("failed_to_read")
-	ErrFailedToParse    = errors.New("failed_to_parse")
 )
 
 type tripService struct {
 	Repo domain.TripRepository
 }
 
-// GenerateTripFares implements domain.TripService.
-func (t *tripService) GenerateTripFares(ctx context.Context, fares []*triptype.RideFareModel, userId string, route *types.OsrmApiResponse) ([]*triptype.RideFareModel, error) {
-	fareList := make([]*triptype.RideFareModel, len(fares))
+// GetTripProto implements domain.TripService.
+func (t *tripService) GetTripProto(ctx context.Context, tripId string) (*tripgrpc.Trip, error) {
+	currentTripModel, err := t.GetTripByID(ctx, tripId)
 
-	for i, f := range fares {
-		Id := primitive.NewObjectID()
-		fare := triptype.RideFareModel{
-			UserID:            userId,
-			ID:                Id,
-			TotalPriceInCents: f.TotalPriceInCents,
-			PackageSlug:       f.PackageSlug,
-			Route:             &route.Routes[0],
-		}
-
-		fareList[i] = &fare
-
+	trip := &tripgrpc.Trip{
+		Id:     currentTripModel.ID,
+		UserID: currentTripModel.UserID,
+		Status: currentTripModel.Status,
 	}
 
-	if err := t.Repo.SaveRIdeFareList(ctx, fareList); err != nil {
-		return nil, fmt.Errorf("failed_to_save_trip_fare:%v", err)
-	}
-
-	return fareList, nil
-}
-
-// GetFareById implements domain.TripService.
-func (t *tripService) GetFareById(ctx context.Context, fareId string) (*triptype.RideFareModel, error) {
-	return t.Repo.GetFareById(ctx, fareId)
-}
-
-// GetTripByID implements domain.TripService.
-func (t *tripService) GetTripByID(ctx context.Context, id string) (*triptype.TripModel, error) {
-	return t.Repo.GetTripByID(ctx, id)
-}
-
-// UpdateTrip implements domain.TripService.
-func (t *tripService) UpdateTrip(ctx context.Context, tripID string, status string, driver *drivergrpc.Driver) error {
-	return t.Repo.UpdateTrip(ctx, tripID, status, driver)
-}
-
-// GetUserRideFare implements domain.TripService.
-func (t *tripService) GetUserRideFare(ctx context.Context, userID string, fareId string) (*triptype.RideFareModel, error) {
-	fare, err := t.Repo.GetRideFareById(ctx, fareId)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("model_not_found:%v", err)
 	}
 
-	if fare.UserID != userID {
-		return nil, errors.New("ride_fare_not_found")
+	tripFareModel, _ := t.GetFareById(ctx, currentTripModel.RideFareID)
+
+	if tripFareModel != nil {
+		trip.SelectedFare = &tripgrpc.RideFare{
+			Id:                tripFareModel.ID,
+			PackageSlug:       tripFareModel.PackageSlug,
+			UserID:            trip.UserID,
+			TotalPriceInCents: tripFareModel.TotalPriceInCents,
+		}
 	}
 
-	return fare, nil
+	if tripFareModel != nil && tripFareModel.Routes != nil {
+		var route types.Routes
+
+		if err := json.Unmarshal(tripFareModel.Routes, &route); err != nil {
+			return nil, err
+		}
+		trip.Route = route.ToRouteProto()
+	}
+
+	return trip, nil
 }
 
 // GetRoute implements domain.TripService.
@@ -89,32 +63,72 @@ func (t *tripService) GetRoute(ctx context.Context, pickup *types.Coordinate, de
 	res, err := http.Get(url)
 	if err != nil {
 		log.Print(err)
-		return nil, ErrFailedToGetRoute
+		return nil, fmt.Errorf("failed_to_parse:%v", err)
 	}
 	defer res.Body.Close()
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		log.Print(err)
-		return nil, ErrFailedToRead
+		return nil, fmt.Errorf("failed_to_read:%v", err)
 	}
 
 	var routeResponse types.OsrmApiResponse
 	if err := json.Unmarshal(body, &routeResponse); err != nil {
 		log.Print(err)
-		return nil, ErrFailedToParse
+		return nil, fmt.Errorf("failed_to_unmarshal:%v", err)
 	}
 
 	return &routeResponse, nil
 }
 
-func (t *tripService) CreateTrip(ctx context.Context, fare *triptype.RideFareModel) (*triptype.TripModel, error) {
-	newTrip := &triptype.TripModel{
-		ID:       primitive.NewObjectID(),
-		UserID:   fare.UserID,
-		Status:   "pending",
-		RideFare: *fare,
+// GetTripByID implements domain.TripService.
+func (t *tripService) GetTripByID(ctx context.Context, id string) (*models.TripModel, error) {
+	return t.Repo.GetTripByID(ctx, id)
+}
+
+// GetUserRideFare implements domain.TripService.
+func (t *tripService) GetUserRideFare(ctx context.Context, userID string, rideFareId string) (*models.FareModel, error) {
+	currentFare, err := t.Repo.GetFareById(ctx, rideFareId)
+
+	if err != nil {
+		return nil, fmt.Errorf("fare_with_%s_not_found", rideFareId)
 	}
-	return t.Repo.CreateTrip(ctx, newTrip)
+
+	if currentFare.UserID != userID {
+		return nil, fmt.Errorf("fare_and_user_id_not_match")
+	}
+
+	return currentFare, nil
+}
+
+// GetFareById implements domain.TripService.
+func (t *tripService) GetFareById(ctx context.Context, fareId string) (*models.FareModel, error) {
+	return t.Repo.GetFareById(ctx, fareId)
+}
+
+// CreateTrip implements domain.TripService.
+func (t *tripService) CreateTrip(ctx context.Context, fare *models.FareModel) (*models.TripModel, error) {
+
+	if err := t.Repo.CreateFare(ctx, fare); err != nil {
+		return nil, fmt.Errorf("failed_to_create_fare_%v", err)
+	}
+
+	newTrip := &models.TripModel{
+		UserID:     fare.UserID,
+		Status:     "pending",
+		RideFareID: fare.ID,
+	}
+
+	if err := t.Repo.CreateTrip(ctx, newTrip); err != nil {
+		return nil, fmt.Errorf("failed_to_create_ride_fare")
+	}
+
+	return newTrip, nil
+}
+
+// UpdateTrip implements domain.TripService.
+func (t *tripService) UpdateTrip(ctx context.Context, tripID string, status string, driver *drivergrpc.Driver) error {
+	return t.Repo.UpdateTrip(ctx, tripID, status, driver)
 }
 
 func NewTripService(repo domain.TripRepository) domain.TripService {

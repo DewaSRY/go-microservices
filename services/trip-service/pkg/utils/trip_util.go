@@ -2,8 +2,8 @@ package utils
 
 import triptype "DewaSRY/go-microservices/services/trip-service/pkg/types"
 
-func getBaseFares() []*triptype.RideFareModel {
-	return []*triptype.RideFareModel{
+func getBaseFares() []*triptype.FareType {
+	return []*triptype.FareType{
 		{
 			PackageSlug:       "suv",
 			TotalPriceInCents: 200.0,

@@ -44,10 +44,11 @@ func (t *grpcHandler) CreateTrip(ctx context.Context, request *tripgrpc.CreateTr
 	}
 
 	response := &tripgrpc.CreateTripResponse{
-		TripID: createdTrip.ID.Hex(),
+		TripID: createdTrip.ID,
 	}
 
-	t.tripEventPublisher.PublishTripCreated(ctx, createdTrip)
+	tripProto, _ := t.service.GetTripProto(ctx, createdTrip.ID)
+	t.tripEventPublisher.PublishTripCreated(ctx, tripProto)
 	return response, nil
 }
 
@@ -77,7 +78,7 @@ func (t *grpcHandler) PreviewTrip(ctx context.Context, request *tripgrpc.Preview
 	rideFareList := make([]*tripgrpc.RideFare, len(generatedTripFareList))
 	for i, fare := range generatedTripFareList {
 		rideFareList[i] = &tripgrpc.RideFare{
-			Id:                fare.ID.Hex(),
+			Id:                fare.ID,
 			UserID:            fare.UserID,
 			PackageSlug:       fare.PackageSlug,
 			TotalPriceInCents: fare.TotalPriceInCents,

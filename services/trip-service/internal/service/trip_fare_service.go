@@ -2,13 +2,11 @@ package service
 
 import (
 	"DewaSRY/go-microservices/services/trip-service/internal/domain"
+	"DewaSRY/go-microservices/shared/models"
 	"DewaSRY/go-microservices/shared/types"
 	"context"
-	"time"
-
-	triptype "DewaSRY/go-microservices/services/trip-service/pkg/types"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"encoding/json"
+	"fmt"
 )
 
 type tripFareService struct {
@@ -16,9 +14,9 @@ type tripFareService struct {
 }
 
 // EstimatePackagesPriceWithRoute implements domain.TripFareService.
-func (t *tripFareService) EstimatePackagesPriceWithRoute(route *types.OsrmApiResponse) []*triptype.RideFareModel {
+func (t *tripFareService) EstimatePackagesPriceWithRoute(route *types.OsrmApiResponse) []*models.FareModel {
 	baseFares := getBaseFares()
-	fareList := make([]*triptype.RideFareModel, len(baseFares))
+	fareList := make([]*models.FareModel, len(baseFares))
 
 	for i, f := range baseFares {
 		fareList[i] = estimationFareRoute(f, route)
@@ -27,10 +25,11 @@ func (t *tripFareService) EstimatePackagesPriceWithRoute(route *types.OsrmApiRes
 	return baseFares
 }
 
-func (t *tripFareService) EstimatePackagesPrice(distanceInKm float64, duration float64) []*triptype.RideFareModel {
+// EstimatePackagesPrice implements domain.TripFareService.
+func (t *tripFareService) EstimatePackagesPrice(distanceInKm float64, duration float64) []*models.FareModel {
 	baseFareList := getBaseFares()
 	priceConfig := domain.DefaultPricingConfig()
-	estimateFareList := make([]*triptype.RideFareModel, len(baseFareList))
+	estimateFareList := make([]*models.FareModel, len(baseFareList))
 
 	for idx, fare := range baseFareList {
 		estimateFareList[idx] = t.estimatePackagePice(fare, priceConfig, distanceInKm, duration)
@@ -39,44 +38,46 @@ func (t *tripFareService) EstimatePackagesPrice(distanceInKm float64, duration f
 	return estimateFareList
 }
 
-func (t *tripFareService) GenerateTripFares(ctx context.Context, fares []*triptype.RideFareModel, userId string, route *types.OsrmApiResponse) ([]*triptype.RideFareModel, error) {
-	fareList := make([]*triptype.RideFareModel, len(fares))
+// GenerateTripFares implements domain.TripFareService.
+func (t *tripFareService) GenerateTripFares(ctx context.Context, fares []*models.FareModel, userId string, route *types.OsrmApiResponse) ([]*models.FareModel, error) {
+	fareList := make([]*models.FareModel, len(fares))
+
+	routesJSON, err := json.Marshal(&route.Routes[0])
+	if err != nil {
+		return nil, fmt.Errorf("failed_to_parse_route:%v", err)
+	}
 
 	for i, fare := range fares {
-		id := primitive.NewObjectID()
-
-		createFare := &triptype.RideFareModel{
+		createFare := &models.FareModel{
 			UserID:            userId,
-			ID:                id,
 			PackageSlug:       fare.PackageSlug,
-			Route:             &route.Routes[0],
 			TotalPriceInCents: fare.TotalPriceInCents,
-			ExpiresAt:         time.Now(),
+			Routes:            routesJSON,
 		}
 		fareList[i] = createFare
 	}
 
-	if err := t.repo.SaveRIdeFareList(ctx, fareList); err != nil {
+	if err := t.repo.CreateFareList(ctx, fareList); err != nil {
 		return nil, err
 	}
 
 	return fareList, nil
 }
 
-func (t *tripFareService) estimatePackagePice(fare *triptype.RideFareModel, priceConfig *domain.PricingConfig, distanceInKm float64, duration float64) *triptype.RideFareModel {
+func (t *tripFareService) estimatePackagePice(fare *models.FareModel, priceConfig *domain.PricingConfig, distanceInKm float64, duration float64) *models.FareModel {
 	carPackagePrice := fare.TotalPriceInCents
 
 	distanceFare := distanceInKm * priceConfig.PricePerUnitOfDistance
 	timeFare := duration * priceConfig.PricingPerMinute
 	totalPrice := carPackagePrice + distanceFare*timeFare
 
-	return &triptype.RideFareModel{
+	return &models.FareModel{
 		PackageSlug:       fare.PackageSlug,
 		TotalPriceInCents: totalPrice,
 	}
 }
 
-func estimationFareRoute(f *triptype.RideFareModel, route *types.OsrmApiResponse) *triptype.RideFareModel {
+func estimationFareRoute(f *models.FareModel, route *types.OsrmApiResponse) *models.FareModel {
 	pricingCfg := domain.DefaultPricingConfig()
 
 	carPackagePrice := f.TotalPriceInCents
@@ -88,14 +89,14 @@ func estimationFareRoute(f *triptype.RideFareModel, route *types.OsrmApiResponse
 	timeFare := durationInMinutes * pricingCfg.PricingPerMinute
 	totalPrice := carPackagePrice + distanceFare + timeFare
 
-	return &triptype.RideFareModel{
+	return &models.FareModel{
 		TotalPriceInCents: totalPrice,
 		PackageSlug:       f.PackageSlug,
 	}
 }
 
-func getBaseFares() []*triptype.RideFareModel {
-	return []*triptype.RideFareModel{
+func getBaseFares() []*models.FareModel {
+	return []*models.FareModel{
 		{
 			PackageSlug:       "suv",
 			TotalPriceInCents: 200,

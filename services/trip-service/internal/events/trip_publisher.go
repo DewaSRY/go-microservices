@@ -1,9 +1,9 @@
 package events
 
 import (
-	triptype "DewaSRY/go-microservices/services/trip-service/pkg/types"
 	"DewaSRY/go-microservices/shared/contracts"
 	"DewaSRY/go-microservices/shared/messaging"
+	tripgrpc "DewaSRY/go-microservices/shared/proto/trip_proto"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -17,10 +17,10 @@ func NewTripEventPublisher(messageManager *messaging.RabbitMQ) *TripEventPublish
 	return &TripEventPublisher{messageManager: messageManager}
 }
 
-func (p *TripEventPublisher) PublishTripCreated(ctx context.Context, tripModel *triptype.TripModel) error {
+func (p *TripEventPublisher) PublishTripCreated(ctx context.Context, Trip *tripgrpc.Trip) error {
 	payload, err := json.Marshal(
 		messaging.TripEventData{
-			Trip: tripModel.ToTripProto(),
+			Trip: Trip,
 		},
 	)
 	if err != nil {
@@ -28,7 +28,7 @@ func (p *TripEventPublisher) PublishTripCreated(ctx context.Context, tripModel *
 	}
 	return p.messageManager.PublishingMessage(ctx, contracts.TripEventCreated,
 		contracts.AmqpMessage{
-			OwnerID: tripModel.UserID,
+			OwnerID: Trip.UserID,
 			Data:    payload,
 		},
 	)

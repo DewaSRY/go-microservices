@@ -1,98 +1,101 @@
 package repository
 
-import (
-	"DewaSRY/go-microservices/services/trip-service/internal/domain"
-	triptype "DewaSRY/go-microservices/services/trip-service/pkg/types"
-	drivergrpc "DewaSRY/go-microservices/shared/proto/driver_proto"
-	"context"
-	"errors"
-	"fmt"
-)
+// import (
+// 	"DewaSRY/go-microservices/services/trip-service/internal/domain"
+// 	drivergrpc "DewaSRY/go-microservices/shared/proto/driver_proto"
 
-var ErrTripIdAlreadyUser = errors.New("trip_with_id_already_use")
+// 	"DewaSRY/go-microservices/shared/models"
+// 	"context"
+// 	"errors"
+// 	"fmt"
+// )
 
-type inMemoryTripRepository struct {
-	tripsMap  map[string]*triptype.TripModel
-	rideFares map[string]*triptype.RideFareModel
-}
+// var ErrTripIdAlreadyUser = errors.New("trip_with_id_already_use")
 
-// GetFareById implements domain.TripRepository.
-func (i *inMemoryTripRepository) GetFareById(ctx context.Context, fareId string) (*triptype.RideFareModel, error) {
-	fare, exits := i.rideFares[fareId]
-	if !exits {
-		return nil, fmt.Errorf("fare_with_id_%s_not_found", fareId)
-	}
+// type inMemoryTripRepository struct {
+// 	tripsMap  map[string]*models.TripModel
+// 	rideFares map[string]*models.FareModel
+// }
 
-	return fare, nil
-}
+// // GetFareById implements domain.TripRepository.
+// func (i *inMemoryTripRepository) GetFareById(ctx context.Context, fareId uint64) (*models.FareModel, error) {
+// 	fare, exits := i.rideFares[fmt.Sprintf("{%d}", fareId)]
+// 	if !exits {
+// 		return nil, fmt.Errorf("fare_with_id_%s_not_found", fareId)
+// 	}
 
-// GetTripByID implements domain.TripRepository.
-func (i *inMemoryTripRepository) GetTripByID(ctx context.Context, id string) (*triptype.TripModel, error) {
-	trip, exits := i.tripsMap[id]
-	if !exits {
-		return nil, fmt.Errorf("fare_with_id_%s_not_found", id)
-	}
+// 	return fare, nil
+// }
 
-	return trip, nil
-}
+// // GetTripByID implements domain.TripRepository.
+// func (i *inMemoryTripRepository) GetTripByID(ctx context.Context, id uint64) (*models.TripModel, error) {
+// 	trip, exits := i.tripsMap[fmt.Sprintf("{%d}", id)]
+// 	if !exits {
+// 		return nil, fmt.Errorf("fare_with_id_%s_not_found", id)
+// 	}
 
-// UpdateTrip implements domain.TripRepository.
-func (i *inMemoryTripRepository) UpdateTrip(ctx context.Context, tripID string, status string, driver *drivergrpc.Driver) error {
-	trip, exits := i.tripsMap[tripID]
-	if !exits {
-		return fmt.Errorf("trip_with_id_%s_not_found", tripID)
-	}
-	trip.Status = status
+// 	return trip, nil
+// }
 
-	if driver != nil {
-		trip.Driver = &triptype.TripDriver{
-			ID:             driver.Id,
-			Name:           driver.Name,
-			ProfilePicture: driver.ProfilePicture,
-			CarPlate:       driver.CarPlate,
-		}
-	}
+// // UpdateTrip implements domain.TripRepository.
+// func (i *inMemoryTripRepository) UpdateTrip(ctx context.Context, tripID uint64, status string, driver *drivergrpc.Driver) error {
+// 	trip, exits := i.tripsMap[fmt.Sprintf("{%d}", tripID)]
+// 	if !exits {
+// 		return fmt.Errorf("trip_with_id_%s_not_found", tripID)
+// 	}
+// 	trip.Status = status
 
-	i.tripsMap[tripID] = trip
-	return nil
-}
+// 	// if driver != nil {
+// 	// 	trip.Driver = &models.DriverModel{
+// 	// 		ID:             0,
+// 	// 		Name:           driver.Name,
+// 	// 		ProfilePicture: driver.ProfilePicture,
+// 	// 		CarPlate:       driver.CarPlate,
+// 	// 	}
+// 	// }
 
-// GetRideFareById implements domain.TripRepository.
-func (i *inMemoryTripRepository) GetRideFareById(ctx context.Context, rideFareID string) (*triptype.RideFareModel, error) {
-	fare, exist := i.rideFares[rideFareID]
-	if exist {
-		return fare, nil
-	}
+// 	i.tripsMap[fmt.Sprintf("{%d}", fareId)] = trip
+// 	return nil
+// }
 
-	return nil, errors.New("fare_not_found")
-}
+// // GetRideFareById implements domain.TripRepository.
+// func (i *inMemoryTripRepository) GetRideFareById(ctx context.Context, rideFareID uint64) (*models.FareModel, error) {
+// 	fare, exist := i.rideFares[fmt.Sprintf("{%d}", fareId)]
+// 	if exist {
+// 		return fare, nil
+// 	}
 
-// SaveRIdeFareList implements domain.TripRepository.
-func (i *inMemoryTripRepository) SaveRIdeFareList(ctx context.Context, fares []*triptype.RideFareModel) error {
+// 	return nil, errors.New("fare_not_found")
+// }
 
-	for _, fare := range fares {
-		i.rideFares[fare.ID.Hex()] = fare
-	}
+// // SaveRIdeFareList implements domain.TripRepository.
+// func (i *inMemoryTripRepository) SaveRIdeFareList(ctx context.Context, fares []*models.FareModel) error {
 
-	return nil
-}
+// 	for _, fare := range fares {
+// 		hashId := fmt.Sprintf("{%d}", fare.ID)
+// 		i.rideFares[hashId] = fare
+// 	}
 
-// CreateTrip implements domain.TripRepository.
-func (i *inMemoryTripRepository) CreateTrip(ctx context.Context, trip *triptype.TripModel) (*triptype.TripModel, error) {
-	_, exist := i.tripsMap[trip.ID.Hex()]
+// 	return nil
+// }
 
-	if !exist {
-		i.tripsMap[trip.ID.Hex()] = trip
-		return trip, nil
-	} else {
-		return nil, ErrTripIdAlreadyUser
-	}
+// // CreateTrip implements domain.TripRepository.
+// func (i *inMemoryTripRepository) CreateTrip(ctx context.Context, trip *models.TripModel) (*models.TripModel, error) {
+// 	hashTripID := fmt.Sprintf("{%d}", trip.ID)
+// 	_, exist := i.tripsMap[hashTripID]
 
-}
+// 	if !exist {
+// 		i.tripsMap[hashTripID] = trip
+// 		return trip, nil
+// 	} else {
+// 		return nil, ErrTripIdAlreadyUser
+// 	}
 
-func NewInMemoryTripRepository() domain.TripRepository {
-	return &inMemoryTripRepository{
-		tripsMap:  make(map[string]*triptype.TripModel),
-		rideFares: make(map[string]*triptype.RideFareModel),
-	}
-}
+// }
+
+// func NewInMemoryTripRepository() domain.TripRepository {
+// 	return &inMemoryTripRepository{
+// 		tripsMap:  make(map[string]*models.TripModel),
+// 		rideFares: make(map[string]*models.TripModel),
+// 	}
+// }

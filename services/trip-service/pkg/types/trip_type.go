@@ -2,23 +2,21 @@ package types
 
 import (
 	tripgrpc "DewaSRY/go-microservices/shared/proto/trip_proto"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"fmt"
 )
 
-// TODO: Update this letter
-type TripModel struct {
-	ID       primitive.ObjectID
-	UserID   string
+type TripType struct {
+	ID       uint64
+	UserID   uint64
 	Status   string
-	RideFare RideFareModel
-	Driver   *TripDriver
+	RideFare FareType
+	Driver   *TripDriverType
 }
 
-func (t *TripModel) ToTripProto() *tripgrpc.Trip {
+func (t *TripType) ToTripProto() *tripgrpc.Trip {
 	return &tripgrpc.Trip{
-		Id:           t.ID.Hex(),
-		UserID:       t.UserID,
+		Id:           fmt.Sprintf("{%d}", t.ID),
+		UserID:       fmt.Sprintf("{%d}", t.UserID),
 		SelectedFare: t.RideFare.ToTripProto(),
 		Status:       t.Status,
 		Route:        t.RideFare.Route.ToRouteProto(),
