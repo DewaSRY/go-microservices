@@ -23,7 +23,7 @@ var (
 	serverName   = "trip_service"
 	PORT         = env.GetString("PORT", "9093")
 	amqp_uri     = env.GetString("AMQP_URL", "amqp://guess:guess@rabbitmq:5672/")
-	postgres_uri = env.GetString("POSTGRES_URI", "postgres://postgres:postgres@postgres:5433/appdb?sslmode=disable")
+	postgres_uri = env.GetString("POSTGRES_URI", "postgres://postgres:postgres@postgres:5433/riderdb?sslmode=disable")
 )
 
 func main() {
@@ -45,6 +45,7 @@ func main() {
 	}
 
 	db, err := db.NewPostgresManager(ctx, postgres_uri)
+	log.Print(postgres_uri)
 	if err != nil {
 		log.Printf("failed_to_make_db_connection:%v", err)
 		cancel()
@@ -60,7 +61,7 @@ func main() {
 
 	tripService := service.NewTripService(tripRepo)
 	tripFareService := service.NewTripFareService(tripRepo)
-	
+
 	tripDriverEventHandler := handlers.NewTripDriverEventHandler(conn, tripService, tripFareService)
 	tripPaymentEventHandler := handlers.NewTripPaymentEventHandler(conn, tripService)
 

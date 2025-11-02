@@ -7,6 +7,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
+	"github.com/google/uuid"
 )
 
 type tripFareService struct {
@@ -49,6 +51,7 @@ func (t *tripFareService) GenerateTripFares(ctx context.Context, fares []*models
 
 	for i, fare := range fares {
 		createFare := &models.FareModel{
+			ID:                uuid.New().String(),
 			UserID:            userId,
 			PackageSlug:       fare.PackageSlug,
 			TotalPriceInCents: fare.TotalPriceInCents,

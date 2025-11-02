@@ -2,7 +2,6 @@ package repository
 
 import (
 	"DewaSRY/go-microservices/services/trip-service/internal/domain"
-	"DewaSRY/go-microservices/services/trip-service/pkg/types"
 	"DewaSRY/go-microservices/shared/db"
 	drivergrpc "DewaSRY/go-microservices/shared/proto/driver_proto"
 	"context"
@@ -16,6 +15,19 @@ import (
 
 type tripRepository struct {
 	db *db.PostgresManager
+}
+
+// FindTripWithFilter implements domain.TripRepository.
+func (t *tripRepository) FindTripWithFilter(dbFilter domain.DbFilter) (*models.TripModel, error) {
+	var trip models.TripModel
+	if result := dbFilter(t.db.DB).Find(&trip); result.Error != nil {
+		return nil, result.Error
+	}
+	if len(trip.ID) == 0 {
+		return nil, fmt.Errorf("trip_not_found")
+	}
+
+	return &trip, nil
 }
 
 // GetFareById implements domain.TripRepository.
@@ -69,12 +81,10 @@ func (t *tripRepository) CreateFareList(ctx context.Context, fares []*models.Far
 			result := tx.Clauses(clause.OnConflict{
 				Columns: []clause.Column{{Name: "id"}},
 				DoUpdates: clause.AssignmentColumns([]string{
-					"ride_type",
-					"base_fare",
-					"per_km_rate",
-					"per_minute_rate",
-					"minimum_fare",
-					"updated_at",
+					"user_id",
+					"package_slug",
+					"total_price_in_cents",
+					"routes",
 				}),
 			}).Create(fare)
 
@@ -104,7 +114,7 @@ func (t *tripRepository) UpdateTrip(ctx context.Context, tripID string, status s
 	}
 
 	result := t.db.DB.WithContext(ctx).
-		Model(&types.TripType{}).
+		Model(&models.TripModel{}).
 		Where("id = ?", tripID).
 		Updates(updates)
 
@@ -113,7 +123,7 @@ func (t *tripRepository) UpdateTrip(ctx context.Context, tripID string, status s
 	}
 
 	if result.RowsAffected == 0 {
-		return fmt.Errorf("trip_not_found_with_id: %d", tripID)
+		return fmt.Errorf("trip_not_found_with_id: %s", tripID)
 	}
 
 	return nil

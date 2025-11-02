@@ -6,9 +6,14 @@ import (
 	tripgrpc "DewaSRY/go-microservices/shared/proto/trip_proto"
 	"DewaSRY/go-microservices/shared/types"
 	"context"
+
+	"gorm.io/gorm"
 )
 
+type DbFilter func(*gorm.DB) *gorm.DB
+
 type TripRepository interface {
+	FindTripWithFilter(dbFilter DbFilter) (*models.TripModel, error)
 	GetFareById(ctx context.Context, fareId string) (*models.FareModel, error)
 	GetTripByID(ctx context.Context, id string) (*models.TripModel, error)
 
@@ -23,6 +28,7 @@ type TripService interface {
 	CreateTrip(ctx context.Context, fare *models.FareModel) (*models.TripModel, error)
 	GetRoute(ctx context.Context, pickup, destination *types.Coordinate) (*types.OsrmApiResponse, error)
 	GetUserRideFare(ctx context.Context, userID string, rideFareId string) (*models.FareModel, error)
+	GetUserTrip(ctx context.Context, userId string, fareId string) (*models.TripModel, error)
 
 	GetFareById(ctx context.Context, fareId string) (*models.FareModel, error)
 	GetTripByID(ctx context.Context, id string) (*models.TripModel, error)

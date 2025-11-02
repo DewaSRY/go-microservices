@@ -12,10 +12,22 @@ import (
 	"io"
 	"log"
 	"net/http"
+
+	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type tripService struct {
 	Repo domain.TripRepository
+}
+
+func (t *tripService) GetUserTrip(ctx context.Context, userId string, fareId string) (*models.TripModel, error) {
+	return t.Repo.FindTripWithFilter(func(d *gorm.DB) *gorm.DB {
+		return d.Where(map[string]interface{}{
+			"user_id":      userId,
+			"ride_fare_id": fareId,
+		})
+	})
 }
 
 // GetTripProto implements domain.TripService.
@@ -108,12 +120,8 @@ func (t *tripService) GetFareById(ctx context.Context, fareId string) (*models.F
 
 // CreateTrip implements domain.TripService.
 func (t *tripService) CreateTrip(ctx context.Context, fare *models.FareModel) (*models.TripModel, error) {
-
-	if err := t.Repo.CreateFare(ctx, fare); err != nil {
-		return nil, fmt.Errorf("failed_to_create_fare_%v", err)
-	}
-
 	newTrip := &models.TripModel{
+		ID:         uuid.New().String(),
 		UserID:     fare.UserID,
 		Status:     "pending",
 		RideFareID: fare.ID,

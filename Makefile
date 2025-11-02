@@ -2,8 +2,8 @@ PROTO_DIR := proto
 PROTO_SRC := $(wildcard $(PROTO_DIR)/*.proto)
 GO_OUT := .
 
-# POSTGRES_URI := postgres://postgres:postgres@localhost:5434/mydb?sslmode=disable
-POSTGRES_URI := postgres://postgres:postgres@localhost:5433/riderdb?sslmode=disable
+POSTGRES_URI := postgres://postgres:postgres@localhost:5434/mydb?sslmode=disable
+# POSTGRES_URI := postgres://postgres:postgres@localhost:5433/riderdb?sslmode=disable
 
 .PHONY: generate-proto
 generate-proto:

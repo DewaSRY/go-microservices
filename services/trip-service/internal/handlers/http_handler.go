@@ -59,9 +59,8 @@ func (h *httpHandler) GetPreview(w http.ResponseWriter, r *http.Request) {
 	}
 
 	createdTrip, err := h.service.CreateTrip(ctx, &models.FareModel{
-		UserID:            UserID,
-		PackageSlug:       PackageSlug,
-		TotalPriceInCents: 18,
+		UserID:      UserID,
+		PackageSlug: PackageSlug,
 	})
 
 	if err != nil {

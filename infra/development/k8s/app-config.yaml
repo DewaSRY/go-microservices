@@ -14,5 +14,5 @@ data:
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: "pk_test_51S4MQ1KNu9shlLQmNPUDJAHvV3BtacCEkBXZO3UYTmZfTDE9BL5s8I1rCAA4rygYA6lZFAgB4IBIFQW5SFUetNsM00Nxnx6Gvj"
   POSTGRES_USER: "postgres"
   POSTGRES_PASSWORD: "postgres"
-  POSTGRES_DB: "mydb"
-  POSTGRES_URI: "postgres://postgres:postgres@postgres:5433/riderdb?sslmode=disable"
+  POSTGRES_DB: "riderdb"
+  POSTGRES_URI: "postgres://postgres:postgres@postgres:5432/riderdb?sslmode=disable"

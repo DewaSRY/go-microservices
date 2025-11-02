@@ -15,13 +15,14 @@ func createService() domain.TripService {
 	if err != nil {
 		log.Panicf("failed_to_make_db_connection:%v", err)
 		return nil
+
 	}
 	repository := repository.NewTripRepository(db)
 
 	return service.NewTripService(repository)
 }
 
-func TestCRUDTripService(t *testing.T) {
+func TestCreateTrip(t *testing.T) {
 	db, err := makeDb()
 	if err != nil {
 		log.Panicf("failed_to_make_db_connection:%v", err)

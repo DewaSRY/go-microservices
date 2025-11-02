@@ -20,9 +20,11 @@ func (t *tripEventHandler) FindSuitableDriver(ctx context.Context, data messagin
 	matchDriver := t.service.FindAvailableDrivers(selectedSlug)
 
 	if len(matchDriver) == 0 {
-		if err := t.messageManager.PublishingMessage(ctx, contracts.TripEventNoDriversFound, contracts.AmqpMessage{
-			OwnerID: data.Trip.UserID,
-		}); err != nil {
+		if err := t.messageManager.PublishingMessage(ctx,
+			contracts.TripEventNoDriversFound,
+			contracts.AmqpMessage{
+				OwnerID: data.Trip.UserID,
+			}); err != nil {
 			log.Printf("failed_to_publishes_message_to_exchange:%v", err)
 			return err
 		}
@@ -39,7 +41,8 @@ func (t *tripEventHandler) FindSuitableDriver(ctx context.Context, data messagin
 		return err
 	}
 
-	if err := t.messageManager.PublishingMessage(ctx, contracts.TripEventDriversFound,
+	if err := t.messageManager.PublishingMessage(ctx,
+		contracts.TripEventDriversFound,
 		contracts.AmqpMessage{
 			OwnerID: data.Trip.UserID,
 			Data:    tripDriverFindData,
