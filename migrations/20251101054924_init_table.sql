@@ -8,8 +8,11 @@ CREATE TABLE drivers (
     id VARCHAR(64) PRIMARY KEY, 
     name VARCHAR(64) NOT NULL, 
     profile_picture VARCHAR(64) NOT null, 
+    geohash VARCHAR(64), 
     car_plate VARCHAR(24) NOT NULL, 
-    client_id VARCHAR(64)
+    package_slug VARCHAR(64) NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT FALSE,
+    location JSONB
 );
 
 DROP  TABLE IF EXISTS fares;

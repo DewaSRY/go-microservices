@@ -44,8 +44,8 @@ func (t *tripRepository) GetFareById(ctx context.Context, rideFareID string) (*m
 // GetTripByID implements domain.TripRepository.
 func (t *tripRepository) GetTripByID(ctx context.Context, id string) (*models.TripModel, error) {
 	var trip models.TripModel
-	result := t.db.DB.WithContext(ctx).Where("id = ?", id).First(&trip)
-	if result.Error != nil {
+
+	if result := t.db.DB.WithContext(ctx).Where("id = ?", id).First(&trip); result.Error != nil {
 		return nil, fmt.Errorf("failed_to_get_trip_by_id: %w", result.Error)
 	}
 

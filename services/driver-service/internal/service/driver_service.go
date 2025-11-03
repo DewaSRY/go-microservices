@@ -3,80 +3,123 @@ package service
 import (
 	"DewaSRY/go-microservices/services/driver-service/internal/domain"
 	driverUtil "DewaSRY/go-microservices/services/driver-service/internal/util"
-	"DewaSRY/go-microservices/services/driver-service/pkg"
+	"DewaSRY/go-microservices/shared/models"
+	drivergrpc "DewaSRY/go-microservices/shared/proto/driver_proto"
+	"DewaSRY/go-microservices/shared/types"
 	"DewaSRY/go-microservices/shared/util"
+	"context"
+	"encoding/json"
+	"fmt"
 	"math/rand/v2"
 	"sync"
 
+	"github.com/google/uuid"
 	"github.com/mmcloughlin/geohash"
+	"gorm.io/gorm"
 )
 
 type driverService struct {
-	driverList []*pkg.ActiveDriver
+	driverRepo domain.DriverRepository
 	mu         sync.RWMutex
 }
 
-func NewDriverService() domain.DriverService {
-	return &driverService{
-		driverList: make([]*pkg.ActiveDriver, 0),
+// GetDriverProto implements domain.DriverService.
+func (t *driverService) GetDriverProto(ctx context.Context, driverId string) (*drivergrpc.Driver, error) {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+
+	currentModel, err := t.driverRepo.GetDriverById(ctx, driverId)
+
+	if err != nil {
+		return nil, fmt.Errorf("driver_service_failed_to_get_driver:%w", err)
 	}
+
+	var driverLocation drivergrpc.Location
+
+	if err := json.Unmarshal(currentModel.Location, &driverLocation); err != nil {
+		return nil, fmt.Errorf("driver_service_failed_to_get_driver:%w", err)
+	}
+
+	driverProto := &drivergrpc.Driver{
+		Id:             currentModel.ID,
+		Name:           currentModel.Name,
+		ProfilePicture: currentModel.ProfilePicture,
+		CarPlate:       currentModel.CarPlate,
+		Geohash:        currentModel.Geohash,
+		PackageSlug:    currentModel.PackageSlug,
+		Location:       &driverLocation,
+	}
+	return driverProto, nil
 }
 
-func (s *driverService) FindAvailableDrivers(packageTypes string) []string {
-	var matchDrivers []string
+// FindAvailableDrivers implements domain.DriverService.
+func (t *driverService) FindAvailableDrivers(ctx context.Context, packageTypes string) []string {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
 
-	for _, driver := range s.driverList {
-		if driver.Driver.PackageSlug == packageTypes {
-			matchDrivers = append(matchDrivers, driver.Driver.ID)
-		}
+	list, err := t.driverRepo.GetActiveDriverIdList(ctx, func(d *gorm.DB) *gorm.DB {
+		return d.Where("package_slug = ?", packageTypes).
+			Where("is_active", true)
+	})
+
+	if err != nil {
+		return make([]string, 0)
 	}
 
-	if len(matchDrivers) == 0 {
-		return []string{}
-	}
-
-	return matchDrivers
+	return list
 }
 
-func (s *driverService) RegisterDriver(driverId string, packageSlug string) (pkg.Driver, error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+// RegisterDriver implements domain.DriverService.
+func (t *driverService) RegisterDriver(ctx context.Context, driverId string, packageSlug string) (*models.DriverModel, error) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
 
 	randomIndex := rand.IntN(len(driverUtil.PredefinedRoutes))
 	randomRoute := driverUtil.PredefinedRoutes[randomIndex]
 
 	randomPlat := driverUtil.GenerateRandomPlate()
 	randomAvatar := util.GetRandomAvatar(randomIndex)
-
 	geoHash := geohash.Encode(randomRoute[0][0], randomRoute[0][1])
 
-	driver := pkg.Driver{
-		ID:             driverId,
-		Geohash:        geoHash,
-		Name:           "Land Nories",
-		PackageSlug:    packageSlug,
-		ProfilePicture: randomAvatar,
-		CarPlage:       randomPlat,
-		Location: &pkg.Location{
-			Latitude:  randomRoute[0][0],
-			Longitude: randomRoute[0][1],
-		},
-	}
-
-	s.driverList = append(s.driverList, &pkg.ActiveDriver{
-		Driver: driver,
+	jsonCoordinate, err := json.Marshal(types.Coordinate{
+		Latitude:  randomRoute[0][0],
+		Longitude: randomRoute[0][1],
 	})
 
-	return driver, nil
+	if err != nil {
+		return nil, fmt.Errorf("failed_to_create_driver:%w", err)
+	}
+
+	currentDriver := models.DriverModel{
+		ID:             uuid.New().String(),
+		Name:           "temp",
+		PackageSlug:    packageSlug,
+		ProfilePicture: randomAvatar,
+		CarPlate:       randomPlat,
+		Geohash:        geoHash,
+		IsActive:       true,
+		Location:       jsonCoordinate,
+	}
+
+	if err := t.driverRepo.CreateDriver(ctx, &currentDriver); err != nil {
+		return nil, fmt.Errorf("failed_to_create_driver:%w", err)
+	}
+
+	return &currentDriver, nil
 }
 
-func (s *driverService) UnregisterDriver(driverId string) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+// UnregisterDriver implements domain.DriverService.
+func (t *driverService) UnregisterDriver(ctx context.Context, driverId string) error {
 
-	for i, driver := range s.driverList {
-		if driver.Driver.ID == driverId {
-			s.driverList = append(s.driverList[:i], s.driverList[i+1:]...)
-		}
+	return t.driverRepo.UpdateDriverData(ctx, driverId,
+		map[string]interface{}{
+			"is_active": false,
+		},
+	)
+}
+
+func NewDriverService(driverRepo domain.DriverRepository) domain.DriverService {
+	return &driverService{
+		driverRepo: driverRepo,
 	}
 }

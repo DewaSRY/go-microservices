@@ -1,9 +1,9 @@
-package pkg
+package types
 
 import drivergrpc "DewaSRY/go-microservices/shared/proto/driver_proto"
 
 type ActiveDriver struct {
-	Driver Driver
+	Driver *Driver
 }
 
 type Driver struct {
