@@ -13,7 +13,6 @@ import (
 	"math/rand/v2"
 	"sync"
 
-	"github.com/google/uuid"
 	"github.com/mmcloughlin/geohash"
 	"gorm.io/gorm"
 )
@@ -58,8 +57,7 @@ func (t *driverService) FindAvailableDrivers(ctx context.Context, packageTypes s
 	defer t.mu.RUnlock()
 
 	list, err := t.driverRepo.GetActiveDriverIdList(ctx, func(d *gorm.DB) *gorm.DB {
-		return d.Where("package_slug = ?", packageTypes).
-			Where("is_active", true)
+		return d.Where("package_slug = ?", packageTypes).Where("is_active", true)
 	})
 
 	if err != nil {
@@ -91,7 +89,7 @@ func (t *driverService) RegisterDriver(ctx context.Context, driverId string, pac
 	}
 
 	currentDriver := models.DriverModel{
-		ID:             uuid.New().String(),
+		ID:             driverId,
 		Name:           "temp",
 		PackageSlug:    packageSlug,
 		ProfilePicture: randomAvatar,

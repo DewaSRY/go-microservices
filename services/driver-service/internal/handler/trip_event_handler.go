@@ -18,7 +18,6 @@ type tripEventHandler struct {
 func (t *tripEventHandler) FindSuitableDriver(ctx context.Context, data messaging.TripEventData) error {
 	selectedSlug := data.Trip.SelectedFare.PackageSlug
 	matchDriver := t.service.FindAvailableDrivers(ctx, selectedSlug)
-	log.Print("this is all i have", matchDriver)
 	if len(matchDriver) == 0 {
 		if err := t.messageManager.PublishingMessage(ctx,
 			contracts.TripEventNoDriversFound,
