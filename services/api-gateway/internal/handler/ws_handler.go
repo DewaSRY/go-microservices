@@ -75,7 +75,6 @@ func (t *WsHandler) WsHandleRider(w http.ResponseWriter, r *http.Request) {
 			messaging.NotifyMatchingTripQueue,
 		},
 	)
-	// Call the connection's writeMessage and read message method to send
 
 	for {
 		_, p, err := conn.ReadMessage()

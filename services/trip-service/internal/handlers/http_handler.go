@@ -2,14 +2,11 @@ package handlers
 
 import (
 	"DewaSRY/go-microservices/services/trip-service/internal/domain"
-	triptype "DewaSRY/go-microservices/services/trip-service/pkg/types"
 	"DewaSRY/go-microservices/shared/dto"
+	"DewaSRY/go-microservices/shared/models"
 	"DewaSRY/go-microservices/shared/util"
 	"encoding/json"
 	"net/http"
-	"time"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type HttpHandler interface {
@@ -61,12 +58,9 @@ func (h *httpHandler) GetPreview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	createdTrip, err := h.service.CreateTrip(ctx, &triptype.RideFareModel{
-		ID:                primitive.NewObjectID(),
-		UserID:            UserID,
-		PackageSlug:       PackageSlug,
-		TotalPriceInCents: 18,
-		ExpiresAt:         time.Now(),
+	createdTrip, err := h.service.CreateTrip(ctx, &models.FareModel{
+		UserID:      UserID,
+		PackageSlug: PackageSlug,
 	})
 
 	if err != nil {

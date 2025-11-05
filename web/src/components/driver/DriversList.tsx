@@ -41,15 +41,14 @@ export function DriverList({
           </span>
         </div>
         <div className="space-y-4">
-          {trip?.rideFares.map((fare) => {
+          {trip?.rideFares.map((fare, idx) => {
             const Icon = PackagesMeta[fare.packageSlug].icon;
             const price =
               fare.totalPriceInCents &&
               `$${(fare.totalPriceInCents / 100).toFixed(2)}`;
-
             return (
               <div
-                key={fare.id}
+                key={`${fare.id}${idx}`}
                 className={cn(
                   "flex items-center justify-between p-4 rounded-lg border transition-all cursor-pointer",
                   "hover:border-primary hover:bg-primary/5"

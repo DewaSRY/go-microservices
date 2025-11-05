@@ -37,17 +37,21 @@ func (t *grpcHandler) CreateTrip(ctx context.Context, request *tripgrpc.CreateTr
 		return nil, status.Errorf(codes.Internal, "failed_to_get_user_route:%v", err)
 	}
 
-	createdTrip, err := t.service.CreateTrip(ctx, userRideFare)
+	currentTrip, err := t.service.GetUserTrip(ctx, userID, rideFareID)
 
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed_to_create_user_error: %v", err)
+		currentTrip, err = t.service.CreateTrip(ctx, userRideFare)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "failed_to_create_user_error: %v", err)
+		}
 	}
 
 	response := &tripgrpc.CreateTripResponse{
-		TripID: createdTrip.ID.Hex(),
+		TripID: currentTrip.ID,
 	}
 
-	t.tripEventPublisher.PublishTripCreated(ctx, createdTrip)
+	tripProto, _ := t.service.GetTripProto(ctx, currentTrip.ID)
+	t.tripEventPublisher.PublishTripCreated(ctx, tripProto)
 	return response, nil
 }
 
@@ -56,7 +60,8 @@ func (t *grpcHandler) PreviewTrip(ctx context.Context, request *tripgrpc.Preview
 		&types.Coordinate{
 			Latitude:  request.StartLocation.Latitude,
 			Longitude: request.StartLocation.Longitude,
-		}, &types.Coordinate{
+		},
+		&types.Coordinate{
 			Latitude:  request.EndLocation.Latitude,
 			Longitude: request.EndLocation.Longitude,
 		})
@@ -77,7 +82,7 @@ func (t *grpcHandler) PreviewTrip(ctx context.Context, request *tripgrpc.Preview
 	rideFareList := make([]*tripgrpc.RideFare, len(generatedTripFareList))
 	for i, fare := range generatedTripFareList {
 		rideFareList[i] = &tripgrpc.RideFare{
-			Id:                fare.ID.Hex(),
+			Id:                fare.ID,
 			UserID:            fare.UserID,
 			PackageSlug:       fare.PackageSlug,
 			TotalPriceInCents: fare.TotalPriceInCents,

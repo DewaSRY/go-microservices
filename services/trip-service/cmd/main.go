@@ -5,6 +5,7 @@ import (
 	"DewaSRY/go-microservices/services/trip-service/internal/handlers"
 	"DewaSRY/go-microservices/services/trip-service/internal/repository"
 	"DewaSRY/go-microservices/services/trip-service/internal/service"
+	"DewaSRY/go-microservices/shared/db"
 	"DewaSRY/go-microservices/shared/env"
 	"DewaSRY/go-microservices/shared/messaging"
 	"context"
@@ -19,13 +20,14 @@ import (
 )
 
 var (
-	serverName = "trip_service"
-	PORT       = env.GetString("PORT", "9093")
+	serverName   = "trip_service"
+	PORT         = env.GetString("PORT", "9093")
+	amqp_uri     = env.GetString("AMQP_URL", "amqp://guess:guess@rabbitmq:5672/")
+	postgres_uri = env.GetString("POSTGRES_URI", "postgres://postgres:postgres@postgres:5432/riderdb?sslmode=disable")
 )
 
 func main() {
 	//Config
-	amqp_url_string := env.GetString("AMQP_URL", "amqp://guess:guess@rabbitmq:5672/")
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -35,10 +37,16 @@ func main() {
 		log.Fatalf("failed_to_listen:%v", err)
 	}
 
-	conn, err := messaging.NewRabbitMQManager(amqp_url_string)
-	log.Print("start connect to rabbitmq ")
+	conn, err := messaging.NewRabbitMQManager(amqp_uri)
 	if err != nil {
 		log.Printf("failed_to_make_connection:%v", err)
+		cancel()
+		return
+	}
+
+	db, err := db.NewPostgresManager(ctx, postgres_uri)
+	if err != nil {
+		log.Printf("failed_to_make_db_connection:%v", err)
 		cancel()
 		return
 	}
@@ -47,9 +55,12 @@ func main() {
 
 	grpcService := grpcserver.NewServer()
 
-	tripRepo := repository.NewInMemoryTripRepository()
+	// tripRepo := repository.NewInMemoryTripRepository()
+	tripRepo := repository.NewTripRepository(db)
+
 	tripService := service.NewTripService(tripRepo)
 	tripFareService := service.NewTripFareService(tripRepo)
+
 	tripDriverEventHandler := handlers.NewTripDriverEventHandler(conn, tripService, tripFareService)
 	tripPaymentEventHandler := handlers.NewTripPaymentEventHandler(conn, tripService)
 

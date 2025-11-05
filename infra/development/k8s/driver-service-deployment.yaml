@@ -30,6 +30,11 @@ spec:
                 configMapKeyRef:
                   key: AMQP_URL
                   name: app-config
+            - name: POSTGRES_URI
+              valueFrom:
+                configMapKeyRef:
+                  key: POSTGRES_URI
+                  name: app-config
 ---
 apiVersion: v1
 kind: Service

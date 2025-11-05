@@ -10,12 +10,13 @@ import { Button } from "../components/ui/button";
 import { useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { CarPackageSlug } from "../types/types";
-import { DriverPackageSelector } from "../components/DriverPackageSelector";
+import { DriverPackageSelector } from "@/components/driver/DriverPackageSelector";
 import { useTranslations } from "next-intl";
 
 // Dynamically import components that use Leaflet
 const DriverMapWidget = dynamic(
-  () => import("../components/DriverMapWidget").then((mod) => mod.DriverMap),
+  () =>
+    import("@/components/driver/DriverMapWidget").then((mod) => mod.DriverMap),
   { ssr: false }
 );
 
