@@ -5,6 +5,7 @@ import (
 	tripgrpc "DewaSRY/go-microservices/shared/proto/trip_proto"
 )
 
+// Queue
 const (
 	FindAvailableDriversQueue        = "find_available_drivers"
 	DriverCmdTripRequestQueue        = "driver_cmd_trip_request"
@@ -16,6 +17,8 @@ const (
 	NotifyPaymentSessionCreatedQueue = "notify_payment_session_created"
 	NotifyPaymentSuccessQueue        = "payment_success"
 	DeadLetterQueue                  = "dead_letter_queue"
+
+	UserEstablishConnectionQueue = "users_establish_connection"
 )
 
 type TripEventData struct {
@@ -61,3 +64,5 @@ type PaymentStatusUpdateData struct {
 type TripDriverFindData struct {
 	AmountDriver int `json:"amountDriver"`
 }
+
+//

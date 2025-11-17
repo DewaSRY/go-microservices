@@ -6,6 +6,11 @@ type AmqpMessage struct {
 	Data    []byte `json:"data"`
 }
 
+type MessageData struct {
+	ConnectionId string `json:"ConnectionId"`
+	Data         []byte `json:"data"`
+}
+
 // Routing keys - using consistent event/command patterns
 const (
 	// Trip events (trip.event.*)
@@ -31,4 +36,15 @@ const (
 
 	// Payment commands (payment.cmd.*)
 	PaymentCmdCreateSession = "payment.cmd.create_session"
+
+	// user
+	UserInitEvent                = "user.event.init"
+	UserCloseConnectiondataEvent = "user.event.disconnect"
+
+	//
+	RiderEventCreateTrip = "rider.event.create-trip"
+	RiderUpdateTrip      = "rider.event.update-trip"
+
+	//
+
 )

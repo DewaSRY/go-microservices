@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"DewaSRY/go-microservices/services/api-gateway/internal/handler"
+	"DewaSRY/go-microservices/services/api-gateway/internal/service"
 	"DewaSRY/go-microservices/shared/env"
 	"DewaSRY/go-microservices/shared/lib"
 	"DewaSRY/go-microservices/shared/messaging"
@@ -34,7 +35,8 @@ func main() {
 	mux := http.NewServeMux()
 	con_manager := lib.NewConnectionManager()
 	httpHandler := handler.NewHttpHandler()
-	wsHandler := handler.NewWsHandler(con_manager, rabbitmq)
+	tripService := service.NewRideShareService(rabbitmq)
+	wsHandler := handler.NewWsHandler(con_manager, rabbitmq, tripService)
 
 	//REGISTER HANDLER
 	mux.HandleFunc("GET /health", httpHandler.GetHealthCheck)
@@ -43,6 +45,7 @@ func main() {
 
 	mux.HandleFunc("/ws/riders", wsHandler.WsHandleRider)
 	mux.HandleFunc("/ws/drivers", wsHandler.WsHandleDriver)
+	mux.HandleFunc("/ws/connect", wsHandler.WsHandleStartConnection)
 
 	// wrap the handler
 	warpHandler := middleware.WithCORS(mux)

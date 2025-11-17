@@ -145,6 +145,36 @@ k8s_yaml('./infra/development/k8s/payment-service-deployment.yaml')
 k8s_resource('payment-service', resource_deps=['payment-service-compile', 'rabbitmq', "postgres"], labels="services")
 
 ### End of Payment Service ###
+### api Service ###
+
+api_compile_cmd = 'CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o build/api-service ./services/api-service/cmd/main.go'
+if os.name == 'nt':
+  api_compile_cmd = './infra/development/docker/api-service-build.bat'
+
+local_resource(
+  'api-service-compile',
+  api_compile_cmd,
+  deps=['./services/api-service', './shared'], labels="compiles")
+
+docker_build_with_restart(
+  'ride-sharing/api-service',
+  '.',
+  entrypoint=['/app/build/api-service'],
+  dockerfile='./infra/development/docker/api-service.Dockerfile',
+  only=[
+    './build/api-service',
+    './shared',
+  ],
+  live_update=[
+    sync('./build', '/app/build'),
+    sync('./shared', '/app/shared'),
+  ],
+)
+
+k8s_yaml('./infra/development/k8s/api-service-deployment.yaml')
+k8s_resource('api-service', resource_deps=['api-service-compile', 'rabbitmq', "postgres"], labels="services")
+
+### End of Payment Service ###
 ### Web Frontend ###
 
 #docker_build(

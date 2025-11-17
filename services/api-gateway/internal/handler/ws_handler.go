@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"DewaSRY/go-microservices/services/api-gateway/internal/domain"
 	grpcclient "DewaSRY/go-microservices/services/api-gateway/internal/grpc_client"
 	"DewaSRY/go-microservices/shared/contracts"
 	"DewaSRY/go-microservices/shared/lib"
@@ -10,6 +11,8 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+
+	"github.com/google/uuid"
 )
 
 type Driver struct {
@@ -33,6 +36,7 @@ type wsMessageData struct {
 type WsHandler struct {
 	connManager lib.ConnectionManager
 	rabbitMq    *messaging.RabbitMQ
+	tripService domain.RideShareServices
 }
 
 type AcceptedPayment struct {
@@ -40,11 +44,44 @@ type AcceptedPayment struct {
 	RiderID string `json:"riderID"`
 }
 
-//   tripID: trip?.tripID ?? "",
-//         riderID: userID ?? "",
+func NewWsHandler(connManager lib.ConnectionManager, rabbitMq *messaging.RabbitMQ, tripService domain.RideShareServices) *WsHandler {
+	return &WsHandler{connManager: connManager, rabbitMq: rabbitMq, tripService: tripService}
+}
 
-func NewWsHandler(connManager lib.ConnectionManager, rabbitMq *messaging.RabbitMQ) *WsHandler {
-	return &WsHandler{connManager: connManager, rabbitMq: rabbitMq}
+func (t *WsHandler) WsHandleStartConnection(w http.ResponseWriter, r *http.Request) {
+	conn, err := t.connManager.InitUpgrade(w, r)
+	if err != nil {
+		log.Printf("failed_to_start_connection")
+	}
+	defer conn.Close()
+	ctx := r.Context()
+	connectionId := uuid.New().String()
+
+	t.connManager.Add(connectionId, conn)
+	defer t.connManager.Remove(connectionId)
+
+	for {
+		_, p, err := conn.ReadMessage()
+
+		if err != nil {
+			log.Print("failed_to_read_rider_connection")
+			break
+		}
+
+		var messageData wsMessageData
+		if err := json.Unmarshal(p, &messageData); err != nil {
+			log.Printf("error_unmarshaling_rider_message: %v", err)
+			continue
+		}
+
+		switch messageData.Type {
+		case contracts.UserInitEvent:
+			t.tripService.UserInitEvent(ctx, connectionId, messageData.Data)
+		default:
+			log.Printf("trip_received_unknown_messages: %v", messageData)
+
+		}
+	}
 }
 
 func (t *WsHandler) WsHandleRider(w http.ResponseWriter, r *http.Request) {
