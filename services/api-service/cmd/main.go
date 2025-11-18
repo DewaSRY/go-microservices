@@ -60,7 +60,8 @@ func main() {
 		}
 	}()
 
+	log.Println("start server")
 	<-ctx.Done()
-	log.Println("shutting_down_payment_service")
+	log.Println("shutting_down_api_server")
 
 }

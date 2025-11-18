@@ -2,7 +2,9 @@ package handler
 
 import (
 	"DewaSRY/go-microservices/services/api-service/internal/domain"
+	"DewaSRY/go-microservices/shared/messaging"
 	"context"
+	"encoding/json"
 )
 
 type userEventHandler struct {
@@ -15,8 +17,15 @@ func (u *userEventHandler) HandlerUserDisconnect(ctx context.Context, data []byt
 }
 
 // HandlerUserInitConnection implements domain.UserEventHandler.
-func (u *userEventHandler) HandlerUserInitConnection(ctx context.Context, data []byte) {
-	panic("unimplemented")
+func (t *userEventHandler) HandlerUserInitConnection(ctx context.Context, data []byte) {
+	var payload messaging.InitConnectionRequest
+
+	if err := json.Unmarshal(data, &payload); err != nil {
+		return
+	}
+
+	t.userService.UserInit(ctx, payload)
+
 }
 
 func NewUserEventHandler(userService domain.UserService) domain.UserEventHandler {

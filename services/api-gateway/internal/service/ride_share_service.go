@@ -2,7 +2,6 @@ package service
 
 import (
 	"DewaSRY/go-microservices/services/api-gateway/internal/domain"
-	"DewaSRY/go-microservices/services/api-gateway/internal/dto"
 	"DewaSRY/go-microservices/shared/contracts"
 	"DewaSRY/go-microservices/shared/messaging"
 	"context"
@@ -16,7 +15,7 @@ type rideShareService struct {
 
 // UserInitEvent implements domain.RideShareServices.
 func (t *rideShareService) UserInitEvent(ctx context.Context, connectionId string, data []byte) {
-	var parseData dto.UserInitRequest
+	var parseData messaging.InitConnectionRequest
 
 	if err := json.Unmarshal(data, &parseData); err != nil {
 		log.Printf("error_failed_to_process_user_init_data:%v", err)
@@ -26,8 +25,9 @@ func (t *rideShareService) UserInitEvent(ctx context.Context, connectionId strin
 	resultData, err := json.Marshal(
 		messaging.InitConnectionRequest{
 			ConnectionId: connectionId,
-			Coordinate:   parseData.Location,
+			Coordinate:   parseData.Coordinate,
 			PackageSlug:  parseData.PackageSlug,
+			Entity:       "RIDER",
 		},
 	)
 

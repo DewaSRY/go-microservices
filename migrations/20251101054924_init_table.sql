@@ -15,6 +15,15 @@ CREATE TABLE drivers (
     location JSONB
 );
 
+DROP  TABLE IF EXISTS riders;
+CREATE TABLE riders (
+    id VARCHAR(64) PRIMARY KEY, 
+    package_slug VARCHAR(64) NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT FALSE,
+    user_id VARCHAR(64) ,
+    location JSONB
+);
+
 DROP  TABLE IF EXISTS fares;
 CREATE TABLE fares (
     id VARCHAR(64) PRIMARY KEY,
