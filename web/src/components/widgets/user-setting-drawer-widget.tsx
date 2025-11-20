@@ -1,12 +1,38 @@
 import { Button } from "@components/ui/button";
-import { useState } from "react";
-import { ScrollArea, ScrollBar } from "@components/ui/scroll-area";
+import { ScrollArea } from "@components/ui/scroll-area";
 
 import useSettingDrawerWidget from "@/hooks/state/useUserSettingDrawer";
+import useUserRideProfile from "@/hooks/state/useUserRideProfile";
+
+import UserSettingProfile from "@components/widgets/user-setting-profile";
+import UserSettingMode from "@components/widgets/user-setting-mode";
 import { cn } from "@/libs/utils";
+import { useEffect, useState } from "react";
+import UserSettingSlug from "./user-setting-slug";
+
+type userSettingTab = "mode-setting" | "slug-setting" | undefined;
 
 export default function UserSettingSideSheet() {
   const { open, setIsOpen } = useSettingDrawerWidget();
+  const { initData, mode, packageSlug } = useUserRideProfile();
+
+  const [currentMode, setTabMode] = useState<userSettingTab>(undefined);
+
+  useEffect(() => {
+    initData();
+  }, []);
+
+  useEffect(() => {
+    console.log("hallo");
+    if (mode === undefined) {
+      setTabMode("mode-setting");
+    } else if (mode !== undefined && packageSlug === undefined) {
+      console.log("get hite");
+      setTabMode("slug-setting");
+    } else {
+      setTabMode(undefined);
+    }
+  }, [mode, packageSlug]);
 
   return (
     <>
@@ -22,24 +48,21 @@ export default function UserSettingSideSheet() {
         )}
       >
         <ScrollArea>
-          <header className="p-4 border-b">
-            <h2 className="text-lg font-semibold">User Settings</h2>
-            <p className="text-sm text-muted-foreground">
-              Manage your account preferences.
-            </p>
-          </header>
+          <div className="">
+            <header className="p-4 border-b">
+              <UserSettingProfile />
+            </header>
 
-          <div className="p-4 flex-1 overflow-auto">
-            {/* Your content here */}
-            Settings content...
+            <div className="p-4 flex-1 overflow-auto grow h-[80%] ">
+              {currentMode === "mode-setting" && <UserSettingMode />}
+
+              {currentMode === "slug-setting" && <UserSettingSlug />}
+            </div>
+
+            <footer className="p-4 border-t flex justify-between">
+              <hr />
+            </footer>
           </div>
-
-          <footer className="p-4 border-t flex justify-between">
-            <Button>Save</Button>
-            <Button variant="outline" onClick={() => setIsOpen(false)}>
-              Cancel
-            </Button>
-          </footer>
         </ScrollArea>
       </div>
     </>
