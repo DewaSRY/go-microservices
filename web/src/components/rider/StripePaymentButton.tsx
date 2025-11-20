@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import { PaymentEventSessionCreatedData } from "@/contracts";
+import { PaymentEventSessionCreatedData } from "@/_contracts";
 import { Button } from "@/components/ui/button";
 import { loadStripe } from "@stripe/stripe-js";
 

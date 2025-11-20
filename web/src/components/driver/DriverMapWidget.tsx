@@ -5,7 +5,7 @@ import * as Geohash from "ngeohash";
 import { useDriverStreamConnection } from "@/hooks/useDriverStreamConnection";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import L from "leaflet";
-import { MapClickHandler } from "@/lib/react-leaflet";
+import { MapClickHandler } from "@/libs/react-leaflet";
 import { useMemo, useState } from "react";
 import { useRef } from "react";
 import { CarPackageSlug, Coordinate } from "@/types/types";

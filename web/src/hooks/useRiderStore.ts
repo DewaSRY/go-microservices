@@ -2,7 +2,7 @@ import {
   ClientWsMessage,
   PaymentEventSessionCreatedData,
   TripEvents,
-} from "@/contracts";
+} from "@/_contracts";
 import { Driver, Trip } from "@/types/types";
 import { create } from "zustand";
 

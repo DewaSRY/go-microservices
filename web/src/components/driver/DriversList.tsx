@@ -6,7 +6,7 @@ import {
   convertMetersToKilometers,
   convertSecondsToMinutes,
 } from "@/utils/math";
-import { cn } from "@/lib/utils";
+import { cn } from "@/libs/utils";
 import { PackagesMeta } from "../common/PackagesMeta";
 import { useTranslations } from "next-intl";
 

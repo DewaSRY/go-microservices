@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import dynamic from "next/dynamic";
 
 const HeroPage = dynamic(
-  () => import("@/components/pages/HeroPage").then((mod) => mod.default),
+  () => import("@/components/pages/hero-page").then((mod) => mod.default),
   { ssr: false }
 );
 

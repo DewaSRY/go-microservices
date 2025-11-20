@@ -6,7 +6,7 @@ import {
   ServerWsMessage,
   isValidWsMessage,
   BackendEndpoints,
-} from "../contracts";
+} from "../_contracts";
 import { useRouter } from "next/navigation";
 import useRiderStore from "./useRiderStore";
 

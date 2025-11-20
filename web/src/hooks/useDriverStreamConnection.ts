@@ -7,7 +7,7 @@ import {
   isValidWsMessage,
   isValidTripEvent,
   BackendEndpoints,
-} from "../contracts";
+} from "../_contracts";
 import { useRouter } from "next/navigation";
 import useDriverStore from "./useDriverStore";
 

@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { TripOverviewCard } from "@/components/common/TripOverviewCard";
 import { StripePaymentButton } from "@/components/rider/StripePaymentButton";
 import { DriverCard } from "@/components/driver/DriverCard";
-import { TripEvents } from "@/contracts";
+import { TripEvents } from "@/_contracts";
 import useRiderStore from "@/hooks/useRiderStore";
 import { useTranslations } from "next-intl";
 

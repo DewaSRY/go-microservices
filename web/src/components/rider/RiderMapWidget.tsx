@@ -14,7 +14,7 @@ import {
 import L from "leaflet";
 import { getGeohashBounds } from "@/utils/geohash";
 import { useMemo, useRef, useState } from "react";
-import { MapClickHandler } from "@/lib/react-leaflet";
+import { MapClickHandler } from "@/libs/react-leaflet";
 import { Button } from "../ui/button";
 import { RouteFare } from "@/types/types";
 import {
@@ -23,7 +23,7 @@ import {
   HTTPTripStartResponse,
 } from "@/types/dto";
 import { RoutingControl } from "../common/RoutingControl";
-import { API_URL } from "@/constants";
+import { API_URL } from "@constants/environment";
 import { RiderTripOverview } from "./RiderTripOverview";
 import {
   BackendEndpoints,
@@ -31,7 +31,7 @@ import {
   HTTPTripPreviewResponse,
   HTTPTripStartRequestPayload,
   TripEvents,
-} from "@/contracts";
+} from "@/_contracts";
 
 import useRiderStore from "@/hooks/useRiderStore";
 import { useTranslations } from "next-intl";
