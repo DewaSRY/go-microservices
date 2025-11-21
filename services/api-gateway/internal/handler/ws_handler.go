@@ -64,7 +64,7 @@ func (t *WsHandler) WsHandleStartConnection(w http.ResponseWriter, r *http.Reque
 		_, p, err := conn.ReadMessage()
 
 		if err != nil {
-			log.Print("failed_to_read_rider_connection")
+			log.Printf("failed_to_read_rider_connection: %v", err)
 			break
 		}
 
@@ -78,7 +78,7 @@ func (t *WsHandler) WsHandleStartConnection(w http.ResponseWriter, r *http.Reque
 		case contracts.UserInitEvent:
 			t.tripService.UserInitEvent(ctx, connectionId, messageData.Data)
 		default:
-			log.Printf("trip_received_unknown_messages: %v", messageData)
+			log.Printf("trip_received_unknown_messages: %v", messageData.Type)
 
 		}
 	}

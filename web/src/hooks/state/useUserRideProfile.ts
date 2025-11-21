@@ -1,7 +1,7 @@
 import { create } from "zustand";
-import { PackageSlug } from "@/types/common";
+import { PackageSlug, Entity } from "@/types/common";
 
-type modeType = "DRIVER" | "RIDER" | undefined;
+type modeType = Entity | undefined;
 
 const initState = {
   mode: undefined as modeType,
@@ -15,7 +15,7 @@ type Action = {
 };
 
 const useUserRideProfile = create<typeof initState & Action>((set) => {
-  function setMode(data: "DRIVER" | "RIDER" | undefined) {
+  function setMode(data: Entity | undefined) {
     set((res) => {
       return {
         ...res,
@@ -52,10 +52,13 @@ const useUserRideProfile = create<typeof initState & Action>((set) => {
     let mode: modeType = undefined;
     let packageSlug: PackageSlug;
 
-    if (storedMode === "DRIVER") {
-      mode = "DRIVER";
-    } else if (storedMode === "RIDER") {
-      mode = "RIDER";
+    if (
+      storedMode &&
+      Object.values(Entity)
+        .map((x) => x.toString())
+        .includes(storedMode)
+    ) {
+      mode = storedMode as Entity;
     }
 
     if (

@@ -1,7 +1,7 @@
-import { Coordinate, PackageSlug } from "@/types/common";
+import { Coordinate, PackageSlug, Entity } from "@/types/common";
 
 export enum RiderEvents {
-  InitConnection = "",
+  InitConnection = "user.event.init",
 }
 
 //Messages sent from client to server via web socket
@@ -12,6 +12,6 @@ interface RiderInitConnection {
   data: {
     location: Coordinate;
     packageSlug: PackageSlug;
-    entity: "RIDER";
+    entity: Entity;
   };
 }

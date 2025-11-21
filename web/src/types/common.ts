@@ -9,3 +9,8 @@ export enum PackageSlug {
   VAN = "van",
   LUXURY = "luxury",
 }
+
+export enum Entity {
+  RIDER = "RIDER",
+  DRIVER = "DRIVEr",
+}

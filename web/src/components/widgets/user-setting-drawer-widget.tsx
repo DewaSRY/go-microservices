@@ -9,8 +9,13 @@ import UserSettingMode from "@components/widgets/user-setting-mode";
 import { cn } from "@/libs/utils";
 import { useEffect, useState } from "react";
 import UserSettingSlug from "./user-setting-slug";
+import UserSettingInitData from "./user-setting-init-data";
 
-type userSettingTab = "mode-setting" | "slug-setting" | undefined;
+type userSettingTab =
+  | "mode-setting"
+  | "slug-setting"
+  | "start-connection-setting"
+  | undefined;
 
 export default function UserSettingSideSheet() {
   const { open, setIsOpen } = useSettingDrawerWidget();
@@ -23,13 +28,19 @@ export default function UserSettingSideSheet() {
   }, []);
 
   useEffect(() => {
-    console.log("hallo");
     if (mode === undefined) {
       setTabMode("mode-setting");
-    } else if (mode !== undefined && packageSlug === undefined) {
-      console.log("get hite");
+    }
+
+    if (mode !== undefined && packageSlug === undefined) {
       setTabMode("slug-setting");
-    } else {
+    }
+
+    if (mode && packageSlug) {
+      setTabMode("start-connection-setting");
+    }
+
+    if (mode === undefined && packageSlug === undefined) {
       setTabMode(undefined);
     }
   }, [mode, packageSlug]);
@@ -57,6 +68,10 @@ export default function UserSettingSideSheet() {
               {currentMode === "mode-setting" && <UserSettingMode />}
 
               {currentMode === "slug-setting" && <UserSettingSlug />}
+
+              {currentMode === "start-connection-setting" && (
+                <UserSettingInitData />
+              )}
             </div>
 
             <footer className="p-4 border-t flex justify-between">
