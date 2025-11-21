@@ -2,7 +2,7 @@ import { useSocketContext } from "@components/provider/socket-provider";
 import { Button } from "../ui/button";
 import useUserRideProfile from "@/hooks/state/useUserRideProfile";
 import { Entity } from "@/types/common";
-import { RiderEvents } from "@/contracts/rider-connection";
+import { RiderEvents } from "@/contracts/common";
 export default function UserSettingInitData() {
   const { sendMessage } = useSocketContext();
   const { mode, packageSlug } = useUserRideProfile();
@@ -10,7 +10,7 @@ export default function UserSettingInitData() {
   function handleInitUserData() {
     if (packageSlug && mode) {
       sendMessage({
-        type: RiderEvents.InitConnection,
+        type: RiderEvents.INIT_CONNECTION,
         data: {
           packageSlug: packageSlug,
           entity: mode,

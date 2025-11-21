@@ -85,7 +85,7 @@ func (cm *connectionManagerImpl) Emit(id string, message contracts.WSMessage) er
 	wrapper, exists := cm.connectionsMap[id]
 
 	if !exists {
-		return fmt.Errorf("connection_with_user_id_%s_not_found", id)
+		return fmt.Errorf("connection_with_user_id_%s_not_found_for_message_%s", id, message.Type)
 	}
 
 	return wrapper.conn.WriteJSON(message)

@@ -71,6 +71,15 @@ func (t *RabbitMQ) setupExchangesAndQueues() error {
 
 	if err := t.declareAndBindingQueue(
 		TRIP_EXCHANGE,
+		UserEstablishConnectionNotificationQueue,
+		[]string{
+			contracts.UserInitEventSuccess,
+		},
+	); err != nil {
+		return err
+	}
+	if err := t.declareAndBindingQueue(
+		TRIP_EXCHANGE,
 		FindAvailableDriversQueue,
 		[]string{
 			contracts.TripEventCreated,

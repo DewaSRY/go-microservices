@@ -13,7 +13,7 @@ type userService struct {
 }
 
 // UserInit implements domain.UserService.
-func (t *userService) UserInit(ctx context.Context, request messaging.InitConnectionRequest) {
+func (t *userService) UserInit(ctx context.Context, request messaging.InitConnectionRequest) error {
 	switch request.Entity {
 	case "DRIVER":
 		t.userRepo.CreateDriver(ctx, types.CreateDriverParam{
@@ -26,6 +26,8 @@ func (t *userService) UserInit(ctx context.Context, request messaging.InitConnec
 			Location:    request.Coordinate,
 		})
 	}
+
+	return nil
 }
 
 func NewUserService(

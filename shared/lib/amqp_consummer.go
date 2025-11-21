@@ -48,6 +48,12 @@ func (qc *queueConsumer) Start() error {
 				continue
 			}
 
+			log.Print(msgBody.OwnerID)
+			if len(msgBody.OwnerID) == 0 {
+
+				continue
+			}
+
 			var payload any
 			if msgBody.Data != nil {
 				if err := json.Unmarshal(msgBody.Data, &payload); err != nil {
@@ -62,7 +68,7 @@ func (qc *queueConsumer) Start() error {
 			}
 
 			if err := qc.connMgr.Emit(msgBody.OwnerID, clientMsg); err != nil {
-				log.Printf("Failed_to send_message to_user %s: %v", msgBody.OwnerID, err)
+				log.Printf("Failed_to_send_message_to_user_%s: %v", msgBody.OwnerID, err)
 			}
 		}
 	}()

@@ -1,14 +1,11 @@
 import { Coordinate, PackageSlug, Entity } from "@/types/common";
-
-export enum RiderEvents {
-  InitConnection = "user.event.init",
-}
+import { RiderEvents } from "./common";
 
 //Messages sent from client to server via web socket
-export type RiderWsMessage = RiderInitConnection;
+export type RiderWsRequest = RiderInitConnection;
 
 interface RiderInitConnection {
-  type: RiderEvents.InitConnection;
+  type: RiderEvents.INIT_CONNECTION;
   data: {
     location: Coordinate;
     packageSlug: PackageSlug;

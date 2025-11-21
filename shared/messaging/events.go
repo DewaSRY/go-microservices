@@ -18,7 +18,8 @@ const (
 	NotifyPaymentSuccessQueue        = "payment_success"
 	DeadLetterQueue                  = "dead_letter_queue"
 
-	UserEstablishConnectionQueue = "users_establish_connection"
+	UserEstablishConnectionQueue             = "users_establish_connection"
+	UserEstablishConnectionNotificationQueue = "users_establish_notification_connection"
 )
 
 type TripEventData struct {

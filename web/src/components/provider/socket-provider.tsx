@@ -1,4 +1,5 @@
-import { RiderWsMessage } from "@/contracts/rider-connection";
+import { RiderWsRequest } from "@/contracts/ws-request";
+import { RiderWsResponse } from "@/contracts/ws-response";
 import { useCallback, useRef, useState } from "react";
 import { useEffect } from "react";
 import {
@@ -8,10 +9,17 @@ import {
   createContext,
 } from "react";
 
+import { RiderEvents } from "@/contracts/common";
+
 import { WEBSOCKET_URL } from "@constants/environment";
+
+type ConnectionState = RiderEvents | undefined;
+
 const SocketProviderContext = createContext({
-  sendMessage: (_data: RiderWsMessage) => {},
+  sendMessage: (_data: RiderWsRequest) => {},
   isConnected: false,
+  connectionState: undefined as ConnectionState,
+  isLoading: false,
 });
 
 SocketProviderContext.displayName = "socket-provider";
@@ -28,13 +36,35 @@ export default function Provider({
   reconnect = true,
   reconnectInterval = 3000,
 }: ProviderPops) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentState, setCurrentState] = useState<ConnectionState>(undefined);
   const [isConnected, setIsConnected] = useState(false);
+
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
 
   const connect = useCallback(() => {
     try {
-      const ws = new WebSocket(`${WEBSOCKET_URL}/connection`);
+      const ws = new WebSocket(`${WEBSOCKET_URL}/connect`);
+
+      ws.onmessage = (event) => {
+        const message = JSON.parse(event.data) as RiderWsResponse;
+
+        switch (message.type) {
+          case RiderEvents.CONNECTION_SUCCESS:
+            setCurrentState(message.type);
+            break;
+          default:
+            setCurrentState(undefined);
+        }
+
+        setIsLoading((prev) => {
+          if (prev == true) {
+            return false;
+          }
+          return prev;
+        });
+      };
 
       ws.onclose = () => {
         setIsConnected(false);
@@ -49,15 +79,13 @@ export default function Provider({
     } catch (e) {
       console.log("failed_to_create_websocket:", e);
     }
-  }, [reconnect, reconnectInterval]);
+  }, []);
 
   useEffect(() => {
-    const socket = new WebSocket(`${WEBSOCKET_URL}/connect`);
-
-    socketRef.current = socket;
+    connect();
   });
 
-  const sendMessage = useCallback((data: RiderWsMessage) => {
+  const sendMessage = useCallback((data: RiderWsRequest) => {
     const ws = socketRef.current;
     if (ws && ws.readyState === WebSocket.OPEN) {
       ws.send(JSON.stringify(data));
@@ -71,6 +99,8 @@ export default function Provider({
       value={{
         sendMessage: sendMessage,
         isConnected,
+        connectionState: currentState,
+        isLoading,
       }}
     >
       {children}

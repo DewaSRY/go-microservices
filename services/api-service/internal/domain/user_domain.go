@@ -17,5 +17,5 @@ type UserEventHandler interface {
 }
 
 type UserService interface {
-	UserInit(ctx context.Context, request messaging.InitConnectionRequest)
+	UserInit(ctx context.Context, request messaging.InitConnectionRequest) error
 }

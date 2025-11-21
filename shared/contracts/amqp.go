@@ -38,7 +38,8 @@ const (
 	PaymentCmdCreateSession = "payment.cmd.create_session"
 
 	// user
-	UserInitEvent                = "user.event.init"
+	UserInitEvent                = "user.init.request"
+	UserInitEventSuccess         = "user.init-success.response"
 	UserCloseConnectiondataEvent = "user.event.disconnect"
 
 	//

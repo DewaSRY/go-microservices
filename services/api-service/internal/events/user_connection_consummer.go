@@ -12,7 +12,7 @@ import (
 )
 
 type UserConnectionConsumer struct {
-	rabbitmq    messaging.RabbitMQ
+	rabbitmq    *messaging.RabbitMQ
 	userHandler domain.UserEventHandler
 }
 
@@ -35,6 +35,6 @@ func (t *UserConnectionConsumer) Listen() error {
 	})
 }
 
-func NewUserConsumer(rabbitmq messaging.RabbitMQ, userHandler domain.UserEventHandler) *UserConnectionConsumer {
+func NewUserConsumer(rabbitmq *messaging.RabbitMQ, userHandler domain.UserEventHandler) *UserConnectionConsumer {
 	return &UserConnectionConsumer{rabbitmq: rabbitmq, userHandler: userHandler}
 }

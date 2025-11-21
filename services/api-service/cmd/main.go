@@ -49,9 +49,9 @@ func main() {
 
 	userRepository := repository.NewUserRepository(db)
 	userService := service.NewUserService(rabbitmq, userRepository)
-	userEventHandler := handler.NewUserEventHandler(userService)
+	userEventHandler := handler.NewUserEventHandler(userService, rabbitmq)
 
-	userEventConsumer := events.NewUserConsumer(*rabbitmq, userEventHandler)
+	userEventConsumer := events.NewUserConsumer(rabbitmq, userEventHandler)
 
 	go func() {
 		if err := userEventConsumer.Listen(); err != nil {

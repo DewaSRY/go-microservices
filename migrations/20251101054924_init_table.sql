@@ -6,12 +6,13 @@ SELECT 'up SQL query';
 DROP  TABLE IF EXISTS drivers;
 CREATE TABLE drivers (
     id VARCHAR(64) PRIMARY KEY, 
-    name VARCHAR(64) NOT NULL, 
-    profile_picture VARCHAR(64) NOT null, 
+    name VARCHAR(64), 
+    profile_picture VARCHAR(64), 
     geohash VARCHAR(64), 
-    car_plate VARCHAR(24) NOT NULL, 
-    package_slug VARCHAR(64) NOT NULL,
+    car_plate VARCHAR(24) , 
+    package_slug VARCHAR(64),
     is_active BOOLEAN NOT NULL DEFAULT FALSE,
+    user_id VARCHAR(64),
     location JSONB
 );
 
@@ -20,7 +21,7 @@ CREATE TABLE riders (
     id VARCHAR(64) PRIMARY KEY, 
     package_slug VARCHAR(64) NOT NULL,
     is_active BOOLEAN NOT NULL DEFAULT FALSE,
-    user_id VARCHAR(64) ,
+    user_id VARCHAR(64),
     location JSONB
 );
 

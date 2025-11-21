@@ -2,12 +2,15 @@ package handler
 
 import (
 	"DewaSRY/go-microservices/services/api-service/internal/domain"
+	"DewaSRY/go-microservices/shared/contracts"
 	"DewaSRY/go-microservices/shared/messaging"
 	"context"
 	"encoding/json"
+	"log"
 )
 
 type userEventHandler struct {
+	rabbitmq    *messaging.RabbitMQ
 	userService domain.UserService
 }
 
@@ -26,8 +29,26 @@ func (t *userEventHandler) HandlerUserInitConnection(ctx context.Context, data [
 
 	t.userService.UserInit(ctx, payload)
 
+	successResponse, err := json.Marshal(map[string]any{
+		"message": "success_init_data",
+	})
+
+	if err != nil {
+		return
+	}
+
+	log.Printf("send message to : %v id", payload.ConnectionId)
+
+	if err := t.rabbitmq.PublishingMessage(ctx, contracts.UserInitEventSuccess, contracts.AmqpMessage{
+		OwnerID: payload.ConnectionId,
+		Data:    successResponse,
+	}); err != nil {
+
+		return
+	}
+
 }
 
-func NewUserEventHandler(userService domain.UserService) domain.UserEventHandler {
-	return &userEventHandler{userService: userService}
+func NewUserEventHandler(userService domain.UserService, rabbitmq *messaging.RabbitMQ) domain.UserEventHandler {
+	return &userEventHandler{userService: userService, rabbitmq: rabbitmq}
 }

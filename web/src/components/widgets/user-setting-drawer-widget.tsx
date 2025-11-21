@@ -3,25 +3,28 @@ import { ScrollArea } from "@components/ui/scroll-area";
 
 import useSettingDrawerWidget from "@/hooks/state/useUserSettingDrawer";
 import useUserRideProfile from "@/hooks/state/useUserRideProfile";
-
+import { useSocketContext } from "@components/provider/socket-provider";
 import UserSettingProfile from "@components/widgets/user-setting-profile";
 import UserSettingMode from "@components/widgets/user-setting-mode";
 import { cn } from "@/libs/utils";
 import { useEffect, useState } from "react";
 import UserSettingSlug from "./user-setting-slug";
 import UserSettingInitData from "./user-setting-init-data";
+import { RiderEvents } from "@/contracts/common";
+import RiderSelectDestination from "./rider-select-destination";
 
 type userSettingTab =
   | "mode-setting"
   | "slug-setting"
   | "start-connection-setting"
-  | undefined;
+  | "init-data-success";
 
 export default function UserSettingSideSheet() {
+  const { connectionState } = useSocketContext();
   const { open, setIsOpen } = useSettingDrawerWidget();
   const { initData, mode, packageSlug } = useUserRideProfile();
 
-  const [currentMode, setTabMode] = useState<userSettingTab>(undefined);
+  const [currentMode, setTabMode] = useState<userSettingTab>("mode-setting");
 
   useEffect(() => {
     initData();
@@ -40,10 +43,20 @@ export default function UserSettingSideSheet() {
       setTabMode("start-connection-setting");
     }
 
-    if (mode === undefined && packageSlug === undefined) {
-      setTabMode(undefined);
+    const isModeAndSlugFilled = mode !== undefined && packageSlug !== undefined;
+    if (isModeAndSlugFilled) {
+      setTabMode("start-connection-setting");
     }
-  }, [mode, packageSlug]);
+
+    console.log(connectionState);
+    console.log(connectionState === RiderEvents.CONNECTION_SUCCESS);
+    if (
+      isModeAndSlugFilled &&
+      connectionState === RiderEvents.CONNECTION_SUCCESS
+    ) {
+      setTabMode("init-data-success");
+    }
+  }, [mode, packageSlug, connectionState]);
 
   return (
     <>
@@ -72,6 +85,11 @@ export default function UserSettingSideSheet() {
               {currentMode === "start-connection-setting" && (
                 <UserSettingInitData />
               )}
+
+              {currentMode === "init-data-success" && (
+                <RiderSelectDestination />
+              )}
+              {currentMode === undefined && <p>this is undefine</p>}
             </div>
 
             <footer className="p-4 border-t flex justify-between">

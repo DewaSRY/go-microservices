@@ -27,7 +27,7 @@ func (t *rideShareService) UserInitEvent(ctx context.Context, connectionId strin
 			ConnectionId: connectionId,
 			Coordinate:   parseData.Coordinate,
 			PackageSlug:  parseData.PackageSlug,
-			Entity:       "RIDER",
+			Entity:       parseData.Entity,
 		},
 	)
 

@@ -12,5 +12,5 @@ export enum PackageSlug {
 
 export enum Entity {
   RIDER = "RIDER",
-  DRIVER = "DRIVEr",
+  DRIVER = "DRIVER",
 }
