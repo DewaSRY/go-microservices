@@ -78,6 +78,7 @@ func (t *RabbitMQ) setupExchangesAndQueues() error {
 	); err != nil {
 		return err
 	}
+
 	if err := t.declareAndBindingQueue(
 		TRIP_EXCHANGE,
 		FindAvailableDriversQueue,
