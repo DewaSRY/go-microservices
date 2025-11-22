@@ -277,6 +277,7 @@ export default function RiderMap({ onRouteSelected }: RiderMapProps) {
               </Popup>
             </Marker>
           ))}
+
           {destination && (
             <Marker position={destination} icon={userMarker}>
               <Popup>{commonT("destination")}</Popup>

@@ -1,16 +1,12 @@
 import "leaflet/dist/leaflet.css";
 import icon from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
-import {
-  MapContainer,
-  Marker,
-  Popup,
-  Rectangle,
-  TileLayer,
-} from "react-leaflet";
+import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import L from "leaflet";
-import { useEffect, useRef, useState } from "react";
-// import icon from "leaflet/dist/images/marker-icon.png";
+import { useEffect, useRef } from "react";
+import useRiderStore from "@/hooks/store/use-rider-store";
+import MapClickHandler from "./map-click-handler";
+import { Button } from "../ui/button";
 
 const userMarker = new L.Icon({
   iconUrl:
@@ -18,11 +14,6 @@ const userMarker = new L.Icon({
   iconSize: [40, 40],
   iconAnchor: [20, 40],
 });
-
-type LocationRecord = {
-  latitude: number;
-  longitude: number;
-};
 
 if (typeof window !== "undefined") {
   import("leaflet").then((L) => {
@@ -37,12 +28,18 @@ if (typeof window !== "undefined") {
 }
 
 export default function HomeMapWidget() {
-  const [location, setLocation] = useState<LocationRecord>({
-    latitude: -10.171781,
-    longitude: 123.636975,
-  });
-
   const mapRef = useRef<L.Map>(null);
+
+  const { destination, setDestination, currentLocation, setLocation } =
+    useRiderStore();
+
+  function handleMapClick(e: L.LeafletMouseEvent) {
+    setDestination({
+      latitude: e.latlng.lat,
+      longitude: e.latlng.lng,
+    });
+  }
+
   useEffect(() => {
     const map = mapRef.current;
     if (map) {
@@ -84,7 +81,7 @@ export default function HomeMapWidget() {
   return (
     <div className="flex-1 h-full w-full">
       <MapContainer
-        center={[location.latitude, location.longitude]}
+        center={[currentLocation.latitude, currentLocation.longitude]}
         zoom={13}
         style={{ height: "100%", width: "100%" }}
         ref={mapRef}
@@ -94,9 +91,20 @@ export default function HomeMapWidget() {
           attribution="&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors &copy; <a href='https://carto.com/'>CARTO</a>"
         />
         <Marker
-          position={[location.latitude, location.longitude]}
+          position={[currentLocation.latitude, currentLocation.longitude]}
           icon={userMarker}
         />
+        {destination && (
+          <Marker
+            position={[destination.latitude, destination.longitude]}
+            icon={userMarker}
+          >
+            <Popup>
+              <div>hallo</div>
+            </Popup>
+          </Marker>
+        )}
+        <MapClickHandler onClick={handleMapClick} />
       </MapContainer>
     </div>
   );
