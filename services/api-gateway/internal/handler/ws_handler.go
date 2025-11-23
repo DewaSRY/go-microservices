@@ -63,6 +63,7 @@ func (t *WsHandler) WsHandleStartConnection(w http.ResponseWriter, r *http.Reque
 	t.makeQueueConsumer(
 		[]string{
 			messaging.UserEstablishConnectionNotificationQueue,
+			messaging.TripFlowNotificationQueue,
 		},
 	)
 
@@ -79,13 +80,13 @@ func (t *WsHandler) WsHandleStartConnection(w http.ResponseWriter, r *http.Reque
 			log.Printf("error_unmarshaling_rider_message: %v", err)
 			continue
 		}
-		log.Printf("current connection id create is %s, event is %s ", connectionId, messageData.Type)
 		switch messageData.Type {
 		case contracts.UserInitEvent:
 			t.tripService.UserInitEvent(ctx, connectionId, messageData.Data)
+		case contracts.TripCreateInitEvent:
+			t.tripService.CreateTripEvent(ctx, connectionId, messageData.Data)
 		default:
 			log.Printf("trip_received_unknown_messages: %v", messageData.Type)
-
 		}
 	}
 }

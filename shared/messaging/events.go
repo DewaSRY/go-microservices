@@ -20,6 +20,9 @@ const (
 
 	UserEstablishConnectionQueue             = "users_establish_connection"
 	UserEstablishConnectionNotificationQueue = "users_establish_notification_connection"
+
+	TripFlowQueue             = "trip_flow"
+	TripFlowNotificationQueue = "trip_flow_notification"
 )
 
 type TripEventData struct {

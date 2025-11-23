@@ -11,12 +11,12 @@ import (
 	"github.com/rabbitmq/amqp091-go"
 )
 
-type UserConnectionConsumer struct {
-	rabbitmq    *messaging.RabbitMQ
-	userHandler domain.UserEventHandler
+type TripFlowConsumer struct {
+	rabbitmq        *messaging.RabbitMQ
+	tripFlowHandler domain.TripFlowHandler
 }
 
-func (t *UserConnectionConsumer) Listen() error {
+func (t *TripFlowConsumer) Listen() error {
 	return t.rabbitmq.ConsumeMessage(messaging.UserEstablishConnectionQueue, func(ctx context.Context, msg amqp091.Delivery) error {
 		var message contracts.MessageData
 		if err := json.Unmarshal(msg.Body, &message); err != nil {
@@ -25,14 +25,14 @@ func (t *UserConnectionConsumer) Listen() error {
 		}
 
 		switch msg.RoutingKey {
-		case contracts.TripEventCreated:
-			t.userHandler.HandlerUserInitConnection(ctx, message.Data)
+		case contracts.UserInitEvent:
+			t.tripFlowHandler.HandlerTripCreate(ctx, message.Data)
 		}
 
 		return nil
 	})
 }
 
-func NewUserConsumer(rabbitmq *messaging.RabbitMQ, userHandler domain.UserEventHandler) *UserConnectionConsumer {
-	return &UserConnectionConsumer{rabbitmq: rabbitmq, userHandler: userHandler}
+func NewTripFlowConsumer(rabbitmq *messaging.RabbitMQ, tripFlowHandler domain.TripFlowHandler) *TripFlowConsumer {
+	return &TripFlowConsumer{rabbitmq: rabbitmq, tripFlowHandler: tripFlowHandler}
 }

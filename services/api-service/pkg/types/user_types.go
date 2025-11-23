@@ -11,3 +11,9 @@ type CreateDriverParam struct {
 	PackageSlug string
 	Location    types.Coordinate
 }
+
+type UpdateRiderLocationParam struct {
+	RiderId     string
+	Location    types.Coordinate
+	Destination types.Coordinate
+}

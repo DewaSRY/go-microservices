@@ -58,6 +58,7 @@ func (t *RabbitMQ) setupExchangesAndQueues() error {
 		return fmt.Errorf("failed_to_create_exchange_%s:%v", TRIP_EXCHANGE, err)
 	}
 
+	//	User
 	if err := t.declareAndBindingQueue(
 		TRIP_EXCHANGE,
 		UserEstablishConnectionQueue,
@@ -74,6 +75,27 @@ func (t *RabbitMQ) setupExchangesAndQueues() error {
 		UserEstablishConnectionNotificationQueue,
 		[]string{
 			contracts.UserInitEventSuccess,
+			contracts.RouteFindEvent,
+		},
+	); err != nil {
+		return err
+	}
+	// trip flow
+	if err := t.declareAndBindingQueue(
+		TRIP_EXCHANGE,
+		TripFlowQueue,
+		[]string{
+			contracts.TripCreateInitEvent,
+		},
+	); err != nil {
+		return err
+	}
+
+	if err := t.declareAndBindingQueue(
+		TRIP_EXCHANGE,
+		TripFlowNotificationQueue,
+		[]string{
+			contracts.TripCreateSuccessEvent,
 		},
 	); err != nil {
 		return err

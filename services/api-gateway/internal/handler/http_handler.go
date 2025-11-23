@@ -2,8 +2,8 @@ package handler
 
 import (
 	"DewaSRY/go-microservices/services/api-gateway/internal/domain"
-	"DewaSRY/go-microservices/services/api-gateway/internal/dto"
 	grpcclient "DewaSRY/go-microservices/services/api-gateway/internal/grpc_client"
+	"DewaSRY/go-microservices/services/api-gateway/pkg/types"
 	"DewaSRY/go-microservices/shared/contracts"
 	tripgrpc "DewaSRY/go-microservices/shared/proto/trip_proto"
 	"DewaSRY/go-microservices/shared/util"
@@ -16,7 +16,7 @@ type httpHandler struct {
 
 // PostStartTrip implements domain.HttpHandler.
 func (h *httpHandler) PostStartTrip(w http.ResponseWriter, r *http.Request) {
-	var reqBody dto.StartTripRequest
+	var reqBody types.StartTripRequest
 	ctx := r.Context()
 
 	if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
@@ -66,7 +66,7 @@ func (h *httpHandler) PostStartTrip(w http.ResponseWriter, r *http.Request) {
 
 // PostTripPreview implements domain.HttpHandler.
 func (h *httpHandler) PostTripPreview(w http.ResponseWriter, r *http.Request) {
-	var reqBody dto.PreviewTripRequest
+	var reqBody types.PreviewTripRequest
 	ctx := r.Context()
 
 	if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {

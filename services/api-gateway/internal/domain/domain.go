@@ -12,5 +12,6 @@ type HttpHandler interface {
 }
 
 type RideShareServices interface {
-	UserInitEvent(ctx context.Context, connectionId string, data []byte)
+	UserInitEvent(ctx context.Context, connectionId string, data []byte) error
+	CreateTripEvent(ctx context.Context, connectionId string, data []byte) error
 }

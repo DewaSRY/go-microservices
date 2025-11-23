@@ -7,8 +7,9 @@ import (
 )
 
 type UserRepository interface {
-	CreateRider(ctx context.Context, data _type.CreateRiderParam) error
-	CreateDriver(ctx context.Context, data _type.CreateDriverParam) error
+	CreateRider(ctx context.Context, connectionId string, data _type.CreateRiderParam) error
+	CreateDriver(ctx context.Context, connectionId string, data _type.CreateDriverParam) error
+	UpdateRiderLocation(ctx context.Context, riderId string, location []byte, destination []byte) error
 }
 
 type UserEventHandler interface {
@@ -18,4 +19,5 @@ type UserEventHandler interface {
 
 type UserService interface {
 	UserInit(ctx context.Context, request messaging.InitConnectionRequest) error
+	UpdateRiderLocation(ctx context.Context, data _type.UpdateRiderLocationParam) error
 }

@@ -41,10 +41,8 @@ func (t *paymentService) CreatePaymentSession(ctx context.Context, tripID string
 	}
 
 	paymentModel := &models.TransactionModel{
-		ID:       uuid.New().String(),
-		RiderID:  userID,
-		DriverID: driverID,
-		Status:   "success",
+		Id:     uuid.New().String(),
+		Status: "success",
 	}
 
 	if err := t.paymentRepo.CreateTransaction(ctx, paymentModel); err != nil {

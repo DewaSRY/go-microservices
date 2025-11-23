@@ -47,10 +47,10 @@ func (t *grpcHandler) CreateTrip(ctx context.Context, request *tripgrpc.CreateTr
 	}
 
 	response := &tripgrpc.CreateTripResponse{
-		TripID: currentTrip.ID,
+		TripID: currentTrip.Id,
 	}
 
-	tripProto, _ := t.service.GetTripProto(ctx, currentTrip.ID)
+	tripProto, _ := t.service.GetTripProto(ctx, currentTrip.Id)
 	t.tripEventPublisher.PublishTripCreated(ctx, tripProto)
 	return response, nil
 }

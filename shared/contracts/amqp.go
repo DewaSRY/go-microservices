@@ -46,6 +46,9 @@ const (
 	RiderEventCreateTrip = "rider.event.create-trip"
 	RiderUpdateTrip      = "rider.event.update-trip"
 
-	//
+	//trip flow
+	TripCreateInitEvent    = "trip_flow.create.request"
+	TripCreateSuccessEvent = "trip_flow.create-success.response"
 
+	RouteFindEvent = "trip.route-found.response"
 )

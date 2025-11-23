@@ -35,8 +35,8 @@ func (t *tripService) GetTripProto(ctx context.Context, tripId string) (*tripgrp
 	currentTripModel, err := t.GetTripByID(ctx, tripId)
 
 	trip := &tripgrpc.Trip{
-		Id:     currentTripModel.ID,
-		UserID: currentTripModel.UserID,
+		Id:     currentTripModel.Id,
+		UserID: currentTripModel.RiderId,
 		Status: currentTripModel.Status,
 	}
 
@@ -44,7 +44,7 @@ func (t *tripService) GetTripProto(ctx context.Context, tripId string) (*tripgrp
 		return nil, fmt.Errorf("model_not_found:%v", err)
 	}
 
-	tripFareModel, _ := t.GetFareById(ctx, currentTripModel.RideFareID)
+	tripFareModel, _ := t.GetFareById(ctx, currentTripModel.RiderId)
 
 	if tripFareModel != nil {
 		trip.SelectedFare = &tripgrpc.RideFare{
@@ -121,10 +121,9 @@ func (t *tripService) GetFareById(ctx context.Context, fareId string) (*models.F
 // CreateTrip implements domain.TripService.
 func (t *tripService) CreateTrip(ctx context.Context, fare *models.FareModel) (*models.TripModel, error) {
 	newTrip := &models.TripModel{
-		ID:         uuid.New().String(),
-		UserID:     fare.UserID,
-		Status:     "pending",
-		RideFareID: fare.ID,
+		Id:      uuid.New().String(),
+		RiderId: fare.UserID,
+		Status:  "pending",
 	}
 
 	if err := t.Repo.CreateTrip(ctx, newTrip); err != nil {

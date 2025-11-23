@@ -39,7 +39,7 @@ func (t *driverService) GetDriverProto(ctx context.Context, driverId string) (*d
 	}
 
 	driverProto := &drivergrpc.Driver{
-		Id:             currentModel.ID,
+		Id:             currentModel.Id,
 		ProfilePicture: currentModel.ProfilePicture,
 		CarPlate:       currentModel.CarPlate,
 		PackageSlug:    currentModel.PackageSlug,
@@ -86,7 +86,7 @@ func (t *driverService) RegisterDriver(ctx context.Context, driverId string, pac
 	}
 
 	currentDriver := models.DriverModel{
-		ID:             driverId,
+		Id:             driverId,
 		PackageSlug:    packageSlug,
 		ProfilePicture: randomAvatar,
 		CarPlate:       randomPlat,

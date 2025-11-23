@@ -5,6 +5,7 @@ import (
 	"DewaSRY/go-microservices/services/api-service/pkg/types"
 	"DewaSRY/go-microservices/shared/messaging"
 	"context"
+	"encoding/json"
 )
 
 type userService struct {
@@ -12,16 +13,32 @@ type userService struct {
 	userRepo domain.UserRepository
 }
 
+// UpdateRiderLocation implements domain.UserService.
+func (t *userService) UpdateRiderLocation(ctx context.Context, data types.UpdateRiderLocationParam) error {
+
+	byteLocation, err := json.Marshal(data.Location)
+	if err != nil {
+		return err
+	}
+
+	byteDestination, err := json.Marshal(data.Destination)
+	if err != nil {
+		return err
+	}
+
+	return t.userRepo.UpdateRiderLocation(ctx, data.RiderId, byteLocation, byteDestination)
+}
+
 // UserInit implements domain.UserService.
 func (t *userService) UserInit(ctx context.Context, request messaging.InitConnectionRequest) error {
 	switch request.Entity {
 	case "DRIVER":
-		t.userRepo.CreateDriver(ctx, types.CreateDriverParam{
+		t.userRepo.CreateDriver(ctx, request.ConnectionId, types.CreateDriverParam{
 			PackageSlug: request.PackageSlug,
 			Location:    request.Coordinate,
 		})
 	case "RIDER":
-		t.userRepo.CreateRider(ctx, types.CreateRiderParam{
+		t.userRepo.CreateRider(ctx, request.ConnectionId, types.CreateRiderParam{
 			PackageSlug: request.PackageSlug,
 			Location:    request.Coordinate,
 		})

@@ -8,15 +8,29 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type userRepository struct {
 	db *db.PostgresManager
 }
 
+// UpdateRiderLocation implements domain.UserRepository.
+func (t *userRepository) UpdateRiderLocation(ctx context.Context, riderId string, location []byte, destination []byte) error {
+	if result := t.db.DB.WithContext(ctx).Model(&models.RiderModel{}).Where("id = ?", riderId).Updates(
+		map[string]interface{}{
+			"location":    location,
+			"destination": destination,
+			"updated_at":  gorm.Expr("NOW()"),
+		},
+	); result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+
 // CreateDriver implements domain.UserRepository.
-func (t *userRepository) CreateDriver(ctx context.Context, data types.CreateDriverParam) error {
+func (t *userRepository) CreateDriver(ctx context.Context, connectionId string, data types.CreateDriverParam) error {
 	jsonLocation, err := json.Marshal(data.Location)
 
 	if err != nil {
@@ -24,7 +38,7 @@ func (t *userRepository) CreateDriver(ctx context.Context, data types.CreateDriv
 	}
 
 	newDriver := models.DriverModel{
-		ID:          uuid.New().String(),
+		Id:          connectionId,
 		PackageSlug: data.PackageSlug,
 		IsActive:    true,
 		Location:    jsonLocation,
@@ -38,7 +52,7 @@ func (t *userRepository) CreateDriver(ctx context.Context, data types.CreateDriv
 }
 
 // CreateRider implements domain.UserRepository.
-func (t *userRepository) CreateRider(ctx context.Context, data types.CreateRiderParam) error {
+func (t *userRepository) CreateRider(ctx context.Context, connectionId string, data types.CreateRiderParam) error {
 
 	jsonLocation, err := json.Marshal(data.Location)
 
@@ -47,7 +61,7 @@ func (t *userRepository) CreateRider(ctx context.Context, data types.CreateRider
 	}
 
 	newCreateRider := models.RiderModel{
-		ID:          uuid.New().String(),
+		Id:          connectionId,
 		PackageSlug: data.PackageSlug,
 		IsActive:    true,
 		Location:    jsonLocation,

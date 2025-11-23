@@ -8,12 +8,14 @@ CREATE TABLE drivers (
     id VARCHAR(64) PRIMARY KEY, 
     name VARCHAR(64), 
     profile_picture VARCHAR(64), 
-    geohash VARCHAR(64), 
-    car_plate VARCHAR(24) , 
+    car_plate VARCHAR(24), 
     package_slug VARCHAR(64),
     is_active BOOLEAN NOT NULL DEFAULT FALSE,
     user_id VARCHAR(64),
-    location JSONB
+    location JSONB,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL
 );
 
 DROP  TABLE IF EXISTS riders;
@@ -22,7 +24,11 @@ CREATE TABLE riders (
     package_slug VARCHAR(64) NOT NULL,
     is_active BOOLEAN NOT NULL DEFAULT FALSE,
     user_id VARCHAR(64),
-    location JSONB
+    location JSONB,
+    destination JSONB,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL
 );
 
 DROP  TABLE IF EXISTS fares;
@@ -31,7 +37,10 @@ CREATE TABLE fares (
     user_id VARCHAR(64) NOT NULL,
     package_slug VARCHAR(50) NOT NULL,
     total_price_in_cents DOUBLE PRECISION NOT NULL DEFAULT 0,
-    routes JSONB
+    routes JSONB,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL
 );
 
 DROP  TABLE IF EXISTS transactions;
@@ -48,9 +57,9 @@ CREATE TABLE transactions (
 DROP  TABLE IF EXISTS trips;
 CREATE TABLE trips (
     id VARCHAR(64) PRIMARY KEY,
-    user_id VARCHAR(64) NOT NULL,
     status VARCHAR(50) NOT NULL DEFAULT 'pending',
-    ride_fare_id VARCHAR(64),
+    rider_id VARCHAR(64) NOT NULL,
+    transaction_id VARCHAR(64),
     driver_id VARCHAR(64),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

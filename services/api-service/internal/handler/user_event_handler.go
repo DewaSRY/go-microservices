@@ -6,7 +6,6 @@ import (
 	"DewaSRY/go-microservices/shared/messaging"
 	"context"
 	"encoding/json"
-	"log"
 )
 
 type userEventHandler struct {
@@ -27,7 +26,9 @@ func (t *userEventHandler) HandlerUserInitConnection(ctx context.Context, data [
 		return
 	}
 
-	t.userService.UserInit(ctx, payload)
+	if err := t.userService.UserInit(ctx, payload); err != nil {
+		return
+	}
 
 	successResponse, err := json.Marshal(map[string]any{
 		"message": "success_init_data",
@@ -36,8 +37,6 @@ func (t *userEventHandler) HandlerUserInitConnection(ctx context.Context, data [
 	if err != nil {
 		return
 	}
-
-	log.Printf("send message to : %v id", payload.ConnectionId)
 
 	if err := t.rabbitmq.PublishingMessage(ctx, contracts.UserInitEventSuccess, contracts.AmqpMessage{
 		OwnerID: payload.ConnectionId,

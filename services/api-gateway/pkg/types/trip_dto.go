@@ -1,4 +1,4 @@
-package dto
+package types
 
 import "DewaSRY/go-microservices/shared/types"
 

@@ -2,6 +2,7 @@ package service
 
 import (
 	"DewaSRY/go-microservices/services/api-gateway/internal/domain"
+	"DewaSRY/go-microservices/services/api-gateway/pkg/types"
 	"DewaSRY/go-microservices/shared/contracts"
 	"DewaSRY/go-microservices/shared/messaging"
 	"context"
@@ -13,13 +14,47 @@ type rideShareService struct {
 	rabbitMq *messaging.RabbitMQ
 }
 
+// CreateTripEvent implements domain.RideShareServices.
+func (t *rideShareService) CreateTripEvent(ctx context.Context, connectionId string, data []byte) error {
+	var parseData types.CreateTripRequest
+
+	if err := json.Unmarshal(data, &parseData); err != nil {
+		log.Printf("error_failed_to_process_user_init_data:%v", err)
+		return nil
+	}
+
+	resultData, err := json.Marshal(
+		messaging.CreateTripRequest{
+			ConnectionId: connectionId,
+			RiderId:      parseData.RiderId,
+			Pickup:       parseData.Pickup,
+			Destination:  parseData.Destination,
+		},
+	)
+
+	if err != nil {
+		log.Printf("failed_to_parse:%v", err)
+		return nil
+	}
+
+	if err := t.rabbitMq.PublishingMessage(ctx, contracts.TripCreateInitEvent,
+		contracts.MessageData{
+			ConnectionId: connectionId,
+			Data:         resultData,
+		}); err != nil {
+		log.Printf("failed_to_parse:%v", err)
+	}
+
+	return nil
+}
+
 // UserInitEvent implements domain.RideShareServices.
-func (t *rideShareService) UserInitEvent(ctx context.Context, connectionId string, data []byte) {
+func (t *rideShareService) UserInitEvent(ctx context.Context, connectionId string, data []byte) error {
 	var parseData messaging.InitConnectionRequest
 
 	if err := json.Unmarshal(data, &parseData); err != nil {
 		log.Printf("error_failed_to_process_user_init_data:%v", err)
-		return
+		return nil
 	}
 
 	resultData, err := json.Marshal(
@@ -33,7 +68,7 @@ func (t *rideShareService) UserInitEvent(ctx context.Context, connectionId strin
 
 	if err != nil {
 		log.Printf("failed_to_parse:%v", err)
-		return
+		return nil
 	}
 
 	if err := t.rabbitMq.PublishingMessage(ctx, contracts.UserInitEvent,
@@ -43,6 +78,8 @@ func (t *rideShareService) UserInitEvent(ctx context.Context, connectionId strin
 		}); err != nil {
 		log.Printf("failed_to_parse:%v", err)
 	}
+
+	return nil
 }
 
 func NewRideShareService(rabbitMq *messaging.RabbitMQ) domain.RideShareServices {
