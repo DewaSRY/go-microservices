@@ -37,7 +37,7 @@ func (t *userRepository) CreateDriver(ctx context.Context, connectionId string, 
 		return err
 	}
 
-	newDriver := models.DriverModel{
+	newDriver := &models.DriverModel{
 		Id:          connectionId,
 		PackageSlug: data.PackageSlug,
 		IsActive:    true,
@@ -60,7 +60,7 @@ func (t *userRepository) CreateRider(ctx context.Context, connectionId string, d
 		return err
 	}
 
-	newCreateRider := models.RiderModel{
+	newCreateRider := &models.RiderModel{
 		Id:          connectionId,
 		PackageSlug: data.PackageSlug,
 		IsActive:    true,

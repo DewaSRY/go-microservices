@@ -8,7 +8,6 @@ type UserInitRequest struct {
 }
 
 type CreateTripRequest struct {
-	RiderId     string           `json:"riderId"`
 	Pickup      types.Coordinate `json:"pickup"`
 	Destination types.Coordinate `json:"destination"`
 }

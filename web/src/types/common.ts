@@ -14,3 +14,9 @@ export enum Entity {
   RIDER = "RIDER",
   DRIVER = "DRIVER",
 }
+
+export type RouteData = {
+  coordinate: Coordinate[];
+  distance: number;
+  duration: number;
+};

@@ -80,9 +80,12 @@ func (t *WsHandler) WsHandleStartConnection(w http.ResponseWriter, r *http.Reque
 			log.Printf("error_unmarshaling_rider_message: %v", err)
 			continue
 		}
+
+		log.Printf("connection_if:%s_event:%s", connectionId, messageData.Type)
+
 		switch messageData.Type {
-		case contracts.UserInitEvent:
-			t.tripService.UserInitEvent(ctx, connectionId, messageData.Data)
+		case contracts.UserInitEventRequest:
+			t.tripService.UserInitEventRequest(ctx, connectionId, messageData.Data)
 		case contracts.TripCreateInitEvent:
 			t.tripService.CreateTripEvent(ctx, connectionId, messageData.Data)
 		default:

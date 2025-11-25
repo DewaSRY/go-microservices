@@ -17,7 +17,7 @@ type TripFlowConsumer struct {
 }
 
 func (t *TripFlowConsumer) Listen() error {
-	return t.rabbitmq.ConsumeMessage(messaging.UserEstablishConnectionQueue, func(ctx context.Context, msg amqp091.Delivery) error {
+	return t.rabbitmq.ConsumeMessage(messaging.TripFlowQueue, func(ctx context.Context, msg amqp091.Delivery) error {
 		var message contracts.MessageData
 		if err := json.Unmarshal(msg.Body, &message); err != nil {
 			log.Printf("Failed to unmarshal message: %v", err)
@@ -25,7 +25,7 @@ func (t *TripFlowConsumer) Listen() error {
 		}
 
 		switch msg.RoutingKey {
-		case contracts.UserInitEvent:
+		case contracts.TripCreateInitProcess:
 			t.tripFlowHandler.HandlerTripCreate(ctx, message.Data)
 		}
 

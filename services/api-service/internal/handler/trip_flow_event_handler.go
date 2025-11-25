@@ -7,6 +7,7 @@ import (
 	"DewaSRY/go-microservices/shared/messaging"
 	"context"
 	"encoding/json"
+	"log"
 )
 
 type tripFlowEventHandler struct {
@@ -51,7 +52,8 @@ func (t *tripFlowEventHandler) HandlerTripCreate(ctx context.Context, data []byt
 		return
 	}
 
-	if err := t.rabbitmq.PublishingMessage(ctx, contracts.RouteFindEvent, contracts.MessageData{
+	log.Print("send route data to ", payload.ConnectionId)
+	if err := t.rabbitmq.PublishingMessage(ctx, contracts.RouteFoundEvent, contracts.MessageData{
 		ConnectionId: payload.ConnectionId,
 		Data:         routeResponse,
 	}); err != nil {
@@ -60,6 +62,16 @@ func (t *tripFlowEventHandler) HandlerTripCreate(ctx context.Context, data []byt
 
 }
 
-func NewTripFlowEventHandler(tripFlowService domain.TripFlowService, userService domain.UserService, rabbitmq *messaging.RabbitMQ) domain.TripFlowHandler {
-	return &tripFlowEventHandler{tripFlowService: tripFlowService, rabbitmq: rabbitmq, userService: userService}
+func NewTripFlowEventHandler(
+	rabbitmq *messaging.RabbitMQ,
+	tripFlowService domain.TripFlowService,
+	userService domain.UserService,
+	osrmIntegration domain.OsrmIntegrationService,
+) domain.TripFlowHandler {
+	return &tripFlowEventHandler{
+		rabbitmq:        rabbitmq,
+		tripFlowService: tripFlowService,
+		userService:     userService,
+		osrmIntegration: osrmIntegration,
+	}
 }

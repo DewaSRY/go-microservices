@@ -9,9 +9,10 @@ import {
   createContext,
 } from "react";
 
-import { RiderEvents } from "@/contracts/common";
+import { RideEvents, RiderEvents } from "@/contracts/common";
 
 import { WEBSOCKET_URL } from "@constants/environment";
+import { Coordinate, RouteData } from "@/types/common";
 
 type ConnectionState = RiderEvents | undefined;
 
@@ -20,6 +21,7 @@ const SocketProviderContext = createContext({
   isConnected: false,
   connectionState: undefined as ConnectionState,
   isLoading: false,
+  routeData: undefined as RouteData | undefined,
 });
 
 SocketProviderContext.displayName = "socket-provider";
@@ -40,13 +42,14 @@ export default function Provider({
   const [currentState, setCurrentState] = useState<ConnectionState>(undefined);
   const [isConnected, setIsConnected] = useState(false);
 
+  const [route, setRoute] = useState<RouteData | undefined>(undefined);
+
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
 
   const connect = useCallback(() => {
     try {
       const ws = new WebSocket(`${WEBSOCKET_URL}/connect`);
-
       ws.onmessage = (event) => {
         const message = JSON.parse(event.data) as RiderWsResponse;
 
@@ -54,6 +57,8 @@ export default function Provider({
           case RiderEvents.CONNECTION_SUCCESS:
             setCurrentState(message.type);
             break;
+          case RideEvents.ROUTE_FOUND:
+            setRoute(message.data);
           default:
             setCurrentState(undefined);
         }
@@ -83,7 +88,7 @@ export default function Provider({
 
   useEffect(() => {
     connect();
-  });
+  }, []);
 
   const sendMessage = useCallback((data: RiderWsRequest) => {
     const ws = socketRef.current;
@@ -101,6 +106,7 @@ export default function Provider({
         isConnected,
         connectionState: currentState,
         isLoading,
+        routeData: route,
       }}
     >
       {children}

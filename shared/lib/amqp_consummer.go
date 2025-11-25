@@ -42,15 +42,13 @@ func (qc *queueConsumer) Start() error {
 
 	go func() {
 		for msg := range msgs {
-			var msgBody contracts.AmqpMessage
+			var msgBody contracts.MessageData
 			if err := json.Unmarshal(msg.Body, &msgBody); err != nil {
 				log.Println("Failed to unmarshal message:", err)
 				continue
 			}
 
-			log.Print(msgBody.OwnerID)
-			if len(msgBody.OwnerID) == 0 {
-
+			if len(msgBody.ConnectionId) == 0 {
 				continue
 			}
 
@@ -67,8 +65,8 @@ func (qc *queueConsumer) Start() error {
 				Data: payload,
 			}
 
-			if err := qc.connMgr.Emit(msgBody.OwnerID, clientMsg); err != nil {
-				log.Printf("Failed_to_send_message_to_user_%s: %v", msgBody.OwnerID, err)
+			if err := qc.connMgr.Emit(msgBody.ConnectionId, clientMsg); err != nil {
+				log.Printf("Failed_to_send_message_to_user_%s: %v", msgBody.ConnectionId, err)
 			}
 		}
 	}()

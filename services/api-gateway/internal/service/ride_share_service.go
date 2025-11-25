@@ -26,7 +26,7 @@ func (t *rideShareService) CreateTripEvent(ctx context.Context, connectionId str
 	resultData, err := json.Marshal(
 		messaging.CreateTripRequest{
 			ConnectionId: connectionId,
-			RiderId:      parseData.RiderId,
+			RiderId:      connectionId,
 			Pickup:       parseData.Pickup,
 			Destination:  parseData.Destination,
 		},
@@ -37,7 +37,7 @@ func (t *rideShareService) CreateTripEvent(ctx context.Context, connectionId str
 		return nil
 	}
 
-	if err := t.rabbitMq.PublishingMessage(ctx, contracts.TripCreateInitEvent,
+	if err := t.rabbitMq.PublishingMessage(ctx, contracts.TripCreateInitProcess,
 		contracts.MessageData{
 			ConnectionId: connectionId,
 			Data:         resultData,
@@ -48,15 +48,14 @@ func (t *rideShareService) CreateTripEvent(ctx context.Context, connectionId str
 	return nil
 }
 
-// UserInitEvent implements domain.RideShareServices.
-func (t *rideShareService) UserInitEvent(ctx context.Context, connectionId string, data []byte) error {
+// UserInitEventRequest implements domain.RideShareServices.
+func (t *rideShareService) UserInitEventRequest(ctx context.Context, connectionId string, data []byte) error {
 	var parseData messaging.InitConnectionRequest
 
 	if err := json.Unmarshal(data, &parseData); err != nil {
 		log.Printf("error_failed_to_process_user_init_data:%v", err)
 		return nil
 	}
-
 	resultData, err := json.Marshal(
 		messaging.InitConnectionRequest{
 			ConnectionId: connectionId,
@@ -71,7 +70,7 @@ func (t *rideShareService) UserInitEvent(ctx context.Context, connectionId strin
 		return nil
 	}
 
-	if err := t.rabbitMq.PublishingMessage(ctx, contracts.UserInitEvent,
+	if err := t.rabbitMq.PublishingMessage(ctx, contracts.UserInitEventProcess,
 		contracts.MessageData{
 			ConnectionId: connectionId,
 			Data:         resultData,

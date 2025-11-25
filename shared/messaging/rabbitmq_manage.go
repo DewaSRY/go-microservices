@@ -63,7 +63,7 @@ func (t *RabbitMQ) setupExchangesAndQueues() error {
 		TRIP_EXCHANGE,
 		UserEstablishConnectionQueue,
 		[]string{
-			contracts.UserInitEvent,
+			contracts.UserInitEventProcess,
 			contracts.UserCloseConnectiondataEvent,
 		},
 	); err != nil {
@@ -74,8 +74,7 @@ func (t *RabbitMQ) setupExchangesAndQueues() error {
 		TRIP_EXCHANGE,
 		UserEstablishConnectionNotificationQueue,
 		[]string{
-			contracts.UserInitEventSuccess,
-			contracts.RouteFindEvent,
+			contracts.UserInitSuccessResponse,
 		},
 	); err != nil {
 		return err
@@ -85,7 +84,7 @@ func (t *RabbitMQ) setupExchangesAndQueues() error {
 		TRIP_EXCHANGE,
 		TripFlowQueue,
 		[]string{
-			contracts.TripCreateInitEvent,
+			contracts.TripCreateInitProcess,
 		},
 	); err != nil {
 		return err
@@ -95,7 +94,7 @@ func (t *RabbitMQ) setupExchangesAndQueues() error {
 		TRIP_EXCHANGE,
 		TripFlowNotificationQueue,
 		[]string{
-			contracts.TripCreateSuccessEvent,
+			contracts.RouteFoundEvent,
 		},
 	); err != nil {
 		return err

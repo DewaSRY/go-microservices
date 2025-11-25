@@ -3,11 +3,12 @@ import icon from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import L from "leaflet";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import useRiderStore from "@/hooks/store/use-rider-store";
-import MapClickHandler from "./map-click-handler";
+import MapClickHandler from "../common/map-click-handler";
 import { Button } from "../ui/button";
-
+import { useSocketContext } from "@components/provider/socket-provider";
+import { RoutingControl } from "@components/common/RoutingControl";
 const userMarker = new L.Icon({
   iconUrl:
     "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/Map_pin_icon.svg/176px-Map_pin_icon.svg.png",
@@ -33,12 +34,21 @@ export default function HomeMapWidget() {
   const { destination, setDestination, currentLocation, setLocation } =
     useRiderStore();
 
+  const { routeData } = useSocketContext();
   function handleMapClick(e: L.LeafletMouseEvent) {
     setDestination({
       latitude: e.latlng.lat,
       longitude: e.latlng.lng,
     });
   }
+
+  const parsedRoute = useMemo(
+    () =>
+      routeData?.coordinate.map(
+        (coord) => [coord.latitude, coord.longitude] as [number, number]
+      ),
+    [routeData]
+  );
 
   useEffect(() => {
     const map = mapRef.current;
@@ -104,6 +114,8 @@ export default function HomeMapWidget() {
             </Popup>
           </Marker>
         )}
+
+        {parsedRoute && <RoutingControl route={parsedRoute} />}
         <MapClickHandler onClick={handleMapClick} />
       </MapContainer>
     </div>

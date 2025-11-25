@@ -48,8 +48,6 @@ export default function UserSettingSideSheet() {
       setTabMode("start-connection-setting");
     }
 
-    console.log(connectionState);
-    console.log(connectionState === RiderEvents.CONNECTION_SUCCESS);
     if (
       isModeAndSlugFilled &&
       connectionState === RiderEvents.CONNECTION_SUCCESS

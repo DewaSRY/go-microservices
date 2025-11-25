@@ -38,8 +38,9 @@ const (
 	PaymentCmdCreateSession = "payment.cmd.create_session"
 
 	// user
-	UserInitEvent                = "user.init.request"
-	UserInitEventSuccess         = "user.init-success.response"
+	UserInitEventRequest         = "user.init.request"
+	UserInitEventProcess         = "user.init.process"
+	UserInitSuccessResponse      = "user.init-success.response"
 	UserCloseConnectiondataEvent = "user.event.disconnect"
 
 	//
@@ -47,8 +48,10 @@ const (
 	RiderUpdateTrip      = "rider.event.update-trip"
 
 	//trip flow
-	TripCreateInitEvent    = "trip_flow.create.request"
+	TripCreateInitEvent = "trip_flow.create.request"
+
+	TripCreateInitProcess  = "trip_flow.create.process"
 	TripCreateSuccessEvent = "trip_flow.create-success.response"
 
-	RouteFindEvent = "trip.route-found.response"
+	RouteFoundEvent = "trip.route-found.response"
 )

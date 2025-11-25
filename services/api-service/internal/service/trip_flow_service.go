@@ -8,17 +8,17 @@ import (
 
 type tripFlowService struct {
 	rabbitMq     *messaging.RabbitMQ
-	tripFlowRepo domain.TripFlowService
+	tripFlowRepo domain.TripFlowRepository
 }
 
 // TripCreate implements domain.TripFlowService.
 func (t *tripFlowService) TripCreate(ctx context.Context, riderId string) error {
-	return t.tripFlowRepo.TripCreate(ctx, riderId)
+	return t.tripFlowRepo.CreateTrip(ctx, riderId)
 }
 
-func NewtripFlowService(
+func NewTripFlowService(
 	rabbitMq *messaging.RabbitMQ,
-	tripFlowRepo domain.TripFlowService,
+	tripFlowRepo domain.TripFlowRepository,
 ) domain.TripFlowService {
 	return &tripFlowService{
 		rabbitMq:     rabbitMq,

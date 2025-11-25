@@ -48,13 +48,27 @@ func main() {
 	}
 
 	userRepository := repository.NewUserRepository(db)
+	tripFlowRepository := repository.NewTripFlowRepository(db)
+
 	userService := service.NewUserService(rabbitmq, userRepository)
+	tripFlowService := service.NewTripFlowService(rabbitmq, tripFlowRepository)
+	osrmService := service.NewOsrmIntegrationService()
+
 	userEventHandler := handler.NewUserEventHandler(userService, rabbitmq)
+	tripFlowEventHandler := handler.NewTripFlowEventHandler(rabbitmq, tripFlowService, userService, osrmService)
 
 	userEventConsumer := events.NewUserConsumer(rabbitmq, userEventHandler)
+	tripFlowConsumer := events.NewTripFlowConsumer(rabbitmq, tripFlowEventHandler)
 
 	go func() {
 		if err := userEventConsumer.Listen(); err != nil {
+			log.Printf("failed_to_listen_service:%v", err)
+			cancel()
+		}
+	}()
+
+	go func() {
+		if err := tripFlowConsumer.Listen(); err != nil {
 			log.Printf("failed_to_listen_service:%v", err)
 			cancel()
 		}
