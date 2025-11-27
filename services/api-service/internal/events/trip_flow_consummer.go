@@ -27,6 +27,8 @@ func (t *TripFlowConsumer) Listen() error {
 		switch msg.RoutingKey {
 		case contracts.TripCreateInitProcess:
 			t.tripFlowHandler.HandlerTripCreate(ctx, message.Data)
+		case contracts.RiderCreateTripProcess:
+			t.tripFlowHandler.HandlerRiderCreateTrip(ctx, message.Data)
 		}
 
 		return nil

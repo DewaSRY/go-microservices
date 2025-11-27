@@ -37,6 +37,7 @@ const (
 	// Payment commands (payment.cmd.*)
 	PaymentCmdCreateSession = "payment.cmd.create_session"
 
+	//#################################
 	// user
 	UserInitEventRequest         = "user.init.request"
 	UserInitEventProcess         = "user.init.process"
@@ -46,6 +47,10 @@ const (
 	//
 	RiderEventCreateTrip = "rider.event.create-trip"
 	RiderUpdateTrip      = "rider.event.update-trip"
+
+	//rider
+	RiderCreateTripRequest = "rider.create-trip.request"
+	RiderCreateTripProcess = "rider.create-trip.process"
 
 	//trip flow
 	TripCreateInitEvent = "trip_flow.create.request"

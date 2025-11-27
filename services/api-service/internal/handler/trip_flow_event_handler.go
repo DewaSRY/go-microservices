@@ -7,7 +7,6 @@ import (
 	"DewaSRY/go-microservices/shared/messaging"
 	"context"
 	"encoding/json"
-	"log"
 )
 
 type tripFlowEventHandler struct {
@@ -15,6 +14,52 @@ type tripFlowEventHandler struct {
 	tripFlowService domain.TripFlowService
 	userService     domain.UserService
 	osrmIntegration domain.OsrmIntegrationService
+}
+
+// HandlerRiderCreateTrip implements domain.TripFlowHandler.
+func (t *tripFlowEventHandler) HandlerRiderCreateTrip(ctx context.Context, data []byte) {
+	var payload messaging.RiderCreateTripRequest
+
+	if err := json.Unmarshal(data, &payload); err != nil {
+		return
+	}
+
+	if err := t.userService.CreateRider(ctx, types.CreateRiderParam{
+		ConnectionId: payload.ConnectionId,
+		Location:     payload.Pickup,
+		Destination:  payload.Destination,
+	}); err != nil {
+		return
+	}
+
+	if err := t.tripFlowService.CreateRiderTrip(ctx, types.CreateTripParam{
+		RiderId: payload.ConnectionId,
+	}); err != nil {
+		return
+	}
+
+	routeValue, err := t.osrmIntegration.GetRoutes(ctx, payload.Pickup, payload.Destination)
+	if err != nil {
+		return
+	}
+
+	routeResponse, err := json.Marshal(messaging.RoutesResponse{
+		Coordinate: routeValue.Coordinate,
+		Distance:   routeValue.Distance,
+		Duration:   routeValue.Duration,
+	})
+
+	if err != nil {
+		return
+	}
+
+	if err := t.rabbitmq.PublishingMessage(ctx, contracts.RouteFoundEvent, contracts.MessageData{
+		ConnectionId: payload.ConnectionId,
+		Data:         routeResponse,
+	}); err != nil {
+		return
+	}
+
 }
 
 // HandlerTripCreate implements domain.TripFlowHandler.
@@ -52,7 +97,6 @@ func (t *tripFlowEventHandler) HandlerTripCreate(ctx context.Context, data []byt
 		return
 	}
 
-	log.Print("send route data to ", payload.ConnectionId)
 	if err := t.rabbitmq.PublishingMessage(ctx, contracts.RouteFoundEvent, contracts.MessageData{
 		ConnectionId: payload.ConnectionId,
 		Data:         routeResponse,

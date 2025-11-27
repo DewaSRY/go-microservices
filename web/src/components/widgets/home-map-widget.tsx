@@ -6,9 +6,12 @@ import L from "leaflet";
 import { useEffect, useMemo, useRef } from "react";
 import useRiderStore from "@/hooks/store/use-rider-store";
 import MapClickHandler from "../common/map-click-handler";
-import { Button } from "../ui/button";
 import { useSocketContext } from "@components/provider/socket-provider";
 import { RoutingControl } from "@components/common/RoutingControl";
+
+import useUserRideProfile from "@/hooks/state/useUserRideProfile";
+import useUserFlow from "@/hooks/state/use-user-flow";
+import { RiderFlowEvent } from "@/types/events";
 const userMarker = new L.Icon({
   iconUrl:
     "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/Map_pin_icon.svg/176px-Map_pin_icon.svg.png",
@@ -30,17 +33,12 @@ if (typeof window !== "undefined") {
 
 export default function HomeMapWidget() {
   const mapRef = useRef<L.Map>(null);
-
   const { destination, setDestination, currentLocation, setLocation } =
     useRiderStore();
 
+  const { currentEvent, isLockDestination } = useUserFlow();
   const { routeData } = useSocketContext();
-  function handleMapClick(e: L.LeafletMouseEvent) {
-    setDestination({
-      latitude: e.latlng.lat,
-      longitude: e.latlng.lng,
-    });
-  }
+  const { mode } = useUserRideProfile();
 
   const parsedRoute = useMemo(
     () =>
@@ -49,6 +47,13 @@ export default function HomeMapWidget() {
       ),
     [routeData]
   );
+
+  function handlerSelectDestination(e: L.LeafletMouseEvent) {
+    setDestination({
+      latitude: e.latlng.lat,
+      longitude: e.latlng.lng,
+    });
+  }
 
   useEffect(() => {
     const map = mapRef.current;
@@ -88,6 +93,12 @@ export default function HomeMapWidget() {
     }
   }, []);
 
+  useEffect(() => {
+    console.log(
+      isLockDestination ? "destination locked" : "destination unlocked"
+    );
+  });
+
   return (
     <div className="flex-1 h-full w-full">
       <MapContainer
@@ -100,11 +111,15 @@ export default function HomeMapWidget() {
           url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
           attribution="&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors &copy; <a href='https://carto.com/'>CARTO</a>"
         />
-        <Marker
-          position={[currentLocation.latitude, currentLocation.longitude]}
-          icon={userMarker}
-        />
-        {destination && (
+
+        {mode !== undefined && (
+          <Marker
+            position={[currentLocation.latitude, currentLocation.longitude]}
+            icon={userMarker}
+          />
+        )}
+
+        {destination && mode !== undefined && (
           <Marker
             position={[destination.latitude, destination.longitude]}
             icon={userMarker}
@@ -116,7 +131,10 @@ export default function HomeMapWidget() {
         )}
 
         {parsedRoute && <RoutingControl route={parsedRoute} />}
-        <MapClickHandler onClick={handleMapClick} />
+
+        {isLockDestination === false && (
+          <MapClickHandler onClick={handlerSelectDestination} />
+        )}
       </MapContainer>
     </div>
   );

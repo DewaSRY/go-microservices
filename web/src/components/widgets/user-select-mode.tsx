@@ -3,7 +3,7 @@ import { Entity } from "@/types/common";
 
 import { Button } from "@components/ui/button";
 
-export default function userSettingMode() {
+export default function UserSelectMode() {
   const { setMode } = useUserMode();
 
   return (

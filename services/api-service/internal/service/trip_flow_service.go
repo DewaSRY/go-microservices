@@ -2,13 +2,28 @@ package service
 
 import (
 	"DewaSRY/go-microservices/services/api-service/internal/domain"
+	_types "DewaSRY/go-microservices/services/api-service/pkg/types"
 	"DewaSRY/go-microservices/shared/messaging"
+	"DewaSRY/go-microservices/shared/models"
 	"context"
+
+	"github.com/google/uuid"
 )
 
 type tripFlowService struct {
-	rabbitMq     *messaging.RabbitMQ
 	tripFlowRepo domain.TripFlowRepository
+}
+
+// CreateRiderTrip implements domain.TripFlowService.
+func (t *tripFlowService) CreateRiderTrip(ctx context.Context, data _types.CreateTripParam) error {
+
+	createModel := models.TripModel{
+		RiderId: data.RiderId,
+		Status:  "pending",
+		Id:      uuid.New().String(),
+	}
+
+	return t.tripFlowRepo.CreateOrUpdateRiderTrip(ctx, createModel)
 }
 
 // TripCreate implements domain.TripFlowService.
@@ -21,7 +36,6 @@ func NewTripFlowService(
 	tripFlowRepo domain.TripFlowRepository,
 ) domain.TripFlowService {
 	return &tripFlowService{
-		rabbitMq:     rabbitMq,
 		tripFlowRepo: tripFlowRepo,
 	}
 }

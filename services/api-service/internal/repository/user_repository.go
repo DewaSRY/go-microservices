@@ -9,10 +9,20 @@ import (
 	"encoding/json"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type userRepository struct {
 	db *db.PostgresManager
+}
+
+// CreateOrUpdateRiderModel implements domain.UserRepository.
+func (t *userRepository) CreateOrUpdateRiderModel(ctx context.Context, model models.RiderModel) error {
+	db := t.db.DB.WithContext(ctx)
+	return db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "id"}},
+		DoUpdates: clause.AssignmentColumns([]string{"location", "destination", "updated_at"}),
+	}).Create(&model).Error
 }
 
 // UpdateRiderLocation implements domain.UserRepository.
@@ -61,10 +71,9 @@ func (t *userRepository) CreateRider(ctx context.Context, connectionId string, d
 	}
 
 	newCreateRider := &models.RiderModel{
-		Id:          connectionId,
-		PackageSlug: data.PackageSlug,
-		IsActive:    true,
-		Location:    jsonLocation,
+		Id:       connectionId,
+		IsActive: true,
+		Location: jsonLocation,
 	}
 
 	if result := t.db.DB.WithContext(ctx).Create(newCreateRider); result.Error != nil {

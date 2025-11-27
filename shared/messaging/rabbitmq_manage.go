@@ -85,6 +85,7 @@ func (t *RabbitMQ) setupExchangesAndQueues() error {
 		TripFlowQueue,
 		[]string{
 			contracts.TripCreateInitProcess,
+			contracts.RiderCreateTripProcess,
 		},
 	); err != nil {
 		return err

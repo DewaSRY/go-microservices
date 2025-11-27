@@ -4,8 +4,6 @@
 [ ] flow register driver
 
 ```mermaid
-
-
 - make connection
 - fill the credential
 - wait for ride

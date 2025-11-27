@@ -3,8 +3,9 @@ package types
 import "DewaSRY/go-microservices/shared/types"
 
 type CreateRiderParam struct {
-	PackageSlug string
-	Location    types.Coordinate
+	Location     types.Coordinate
+	Destination  types.Coordinate
+	ConnectionId string
 }
 
 type CreateDriverParam struct {

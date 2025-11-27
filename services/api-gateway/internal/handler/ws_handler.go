@@ -88,6 +88,8 @@ func (t *WsHandler) WsHandleStartConnection(w http.ResponseWriter, r *http.Reque
 			t.tripService.UserInitEventRequest(ctx, connectionId, messageData.Data)
 		case contracts.TripCreateInitEvent:
 			t.tripService.CreateTripEvent(ctx, connectionId, messageData.Data)
+		case contracts.RiderCreateTripRequest:
+			t.tripService.RiderCreateTripRequest(ctx, connectionId, messageData.Data)
 		default:
 			log.Printf("trip_received_unknown_messages: %v", messageData.Type)
 		}

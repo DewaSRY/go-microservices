@@ -4,6 +4,7 @@ import (
 	"DewaSRY/go-microservices/services/api-service/internal/domain"
 	"DewaSRY/go-microservices/services/api-service/pkg/types"
 	"DewaSRY/go-microservices/shared/messaging"
+	"DewaSRY/go-microservices/shared/models"
 	"context"
 	"encoding/json"
 )
@@ -11,6 +12,29 @@ import (
 type userService struct {
 	rabbitMq *messaging.RabbitMQ
 	userRepo domain.UserRepository
+}
+
+// CreateRider implements domain.UserService.
+func (t *userService) CreateRider(ctx context.Context, data types.CreateRiderParam) error {
+
+	locationJson, err := json.Marshal(data.Location)
+	if err != nil {
+		return err
+	}
+
+	destinationJson, err := json.Marshal(data.Destination)
+	if err != nil {
+		return err
+	}
+
+	newRiderModel := models.RiderModel{
+		Id:          data.ConnectionId,
+		Location:    locationJson,
+		Destination: destinationJson,
+		IsActive:    true,
+	}
+
+	return t.userRepo.CreateOrUpdateRiderModel(ctx, newRiderModel)
 }
 
 // UpdateRiderLocation implements domain.UserService.
@@ -31,18 +55,18 @@ func (t *userService) UpdateRiderLocation(ctx context.Context, data types.Update
 
 // UserInit implements domain.UserService.
 func (t *userService) UserInit(ctx context.Context, request messaging.InitConnectionRequest) error {
-	switch request.Entity {
-	case "DRIVER":
-		t.userRepo.CreateDriver(ctx, request.ConnectionId, types.CreateDriverParam{
-			PackageSlug: request.PackageSlug,
-			Location:    request.Coordinate,
-		})
-	case "RIDER":
-		t.userRepo.CreateRider(ctx, request.ConnectionId, types.CreateRiderParam{
-			PackageSlug: request.PackageSlug,
-			Location:    request.Coordinate,
-		})
-	}
+	// switch request.Entity {
+	// case "DRIVER":
+	// 	t.userRepo.CreateDriver(ctx, request.ConnectionId, types.CreateDriverParam{
+	// 		PackageSlug: request.PackageSlug,
+	// 		Location:    request.Coordinate,
+	// 	})
+	// case "RIDER":
+	// 	t.userRepo.CreateRider(ctx, request.ConnectionId, types.CreateRiderParam{
+	// 		PackageSlug: request.PackageSlug,
+	// 		Location:    request.Coordinate,
+	// 	})
+	// }
 
 	return nil
 }

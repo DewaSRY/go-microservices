@@ -5,13 +5,17 @@ import useSettingDrawerWidget from "@/hooks/state/useUserSettingDrawer";
 import useUserRideProfile from "@/hooks/state/useUserRideProfile";
 import { useSocketContext } from "@components/provider/socket-provider";
 import UserSettingProfile from "@components/widgets/user-setting-profile";
-import UserSettingMode from "@components/widgets/user-setting-mode";
+import UserSelectMode from "@/components/widgets/user-select-mode";
 import { cn } from "@/libs/utils";
 import { useEffect, useState } from "react";
 import UserSettingSlug from "./user-setting-slug";
 import UserSettingInitData from "./user-setting-init-data";
 import { RiderEvents } from "@/contracts/common";
 import RiderSelectDestination from "./rider-select-destination";
+
+import useUserFlow from "@/hooks/state/use-user-flow";
+import { RiderFlowEvent } from "@/types/events";
+import UserSettingSelectedTrip from "./user-setting-selected-trip";
 
 type userSettingTab =
   | "mode-setting"
@@ -20,6 +24,8 @@ type userSettingTab =
   | "init-data-success";
 
 export default function UserSettingSideSheet() {
+  const { currentEvent } = useUserFlow();
+
   const { connectionState } = useSocketContext();
   const { open, setIsOpen } = useSettingDrawerWidget();
   const { initData, mode, packageSlug } = useUserRideProfile();
@@ -56,6 +62,9 @@ export default function UserSettingSideSheet() {
     }
   }, [mode, packageSlug, connectionState]);
 
+  useEffect(() => {
+    console.log(currentEvent);
+  });
   return (
     <>
       {/* Your trigger button anywhere */}
@@ -76,9 +85,17 @@ export default function UserSettingSideSheet() {
             </header>
 
             <div className="p-4 flex-1 overflow-auto grow h-[80%] ">
-              {currentMode === "mode-setting" && <UserSettingMode />}
+              {mode === undefined && <UserSelectMode />}
 
-              {currentMode === "slug-setting" && <UserSettingSlug />}
+              {currentEvent === RiderFlowEvent.RIDER_INIT_CONNECTION && (
+                <UserSettingSlug />
+              )}
+
+              {currentEvent === RiderFlowEvent.TRIP_REQUESTED && (
+                <UserSettingSelectedTrip />
+              )}
+
+              {/* {currentMode === "slug-setting" && <UserSettingSlug />}
 
               {currentMode === "start-connection-setting" && (
                 <UserSettingInitData />
@@ -87,7 +104,8 @@ export default function UserSettingSideSheet() {
               {currentMode === "init-data-success" && (
                 <RiderSelectDestination />
               )}
-              {currentMode === undefined && <p>this is undefine</p>}
+
+              {currentMode === undefined && <p>this is undefine</p>} */}
             </div>
 
             <footer className="p-4 border-t flex justify-between">

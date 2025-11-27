@@ -11,3 +11,8 @@ type CreateTripRequest struct {
 	Pickup      types.Coordinate `json:"pickup"`
 	Destination types.Coordinate `json:"destination"`
 }
+
+type RiderCreateTripRequest struct {
+	Pickup      types.Coordinate `json:"pickup"`
+	Destination types.Coordinate `json:"destination"`
+}
