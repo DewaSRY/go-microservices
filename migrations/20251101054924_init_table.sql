@@ -46,8 +46,8 @@ CREATE TABLE fares (
 DROP  TABLE IF EXISTS transactions;
 CREATE TABLE transactions (
     id VARCHAR(64) PRIMARY KEY,
-    rider_id VARCHAR(64) NOT NULL,
-    driver_id VARCHAR(64) NOT NULL,
+    rider_id VARCHAR(64),
+    driver_id VARCHAR(64),
     status VARCHAR(50) NOT NULL DEFAULT 'pending',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -58,7 +58,7 @@ DROP  TABLE IF EXISTS trips;
 CREATE TABLE trips (
     id VARCHAR(64) PRIMARY KEY,
     status VARCHAR(50) NOT NULL DEFAULT 'pending',
-    rider_id VARCHAR(64) NOT NULL,
+    rider_id VARCHAR(64),
     transaction_id VARCHAR(64),
     driver_id VARCHAR(64),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

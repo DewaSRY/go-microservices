@@ -24,7 +24,7 @@ const useUserRideProfile = create<typeof initState & Action>((set) => {
     });
 
     if (data !== undefined) {
-      localStorage.setItem("mode", data);
+      // localStorage.setItem("mode", data);
     } else {
       localStorage.removeItem("mode");
     }
@@ -39,7 +39,7 @@ const useUserRideProfile = create<typeof initState & Action>((set) => {
     });
 
     if (data !== undefined) {
-      localStorage.setItem("package-slug", data);
+      // localStorage.setItem("package-slug", data);
     } else {
       localStorage.removeItem("package-slug");
     }

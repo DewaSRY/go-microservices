@@ -5,9 +5,10 @@ import (
 	"DewaSRY/go-microservices/shared/db"
 	"DewaSRY/go-microservices/shared/models"
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
-	"gorm.io/gorm/clause"
+	"gorm.io/gorm"
 )
 
 type tripFlowRepository struct {
@@ -17,12 +18,18 @@ type tripFlowRepository struct {
 // CreateOrUpdateRiderTrip implements domain.TripFlowRepository.
 func (t *tripFlowRepository) CreateOrUpdateRiderTrip(ctx context.Context, model models.TripModel) error {
 	db := t.db.DB.WithContext(ctx)
-	return db.Clauses(
-		clause.OnConflict{
-			Columns:   []clause.Column{{Name: "rider_id"}},
-			DoUpdates: clause.AssignmentColumns([]string{"status", "updated_at"}),
-		},
-	).Create(&model).Error
+
+	var existingTrip models.TripModel
+	err := db.First(&existingTrip, "rider_id = ?", model.RiderId).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return db.Create(&model).Error
+		}
+
+		return err
+	}
+
+	return db.Model(&existingTrip).Updates(model).Error
 }
 
 // CreateTrip implements domain.TripFlowRepository.
