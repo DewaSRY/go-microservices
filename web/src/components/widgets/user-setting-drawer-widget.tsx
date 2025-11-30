@@ -87,9 +87,9 @@ export default function UserSettingSideSheet() {
             <div className="p-4 flex-1 overflow-auto grow h-[80%] ">
               {mode === undefined && <UserSelectMode />}
 
-              {currentEvent === RiderFlowEvent.RIDER_INIT_CONNECTION && (
+              {/* {currentEvent === RiderFlowEvent.RIDER_INIT_CONNECTION && (
                 <UserSettingSlug />
-              )}
+              )} */}
 
               {currentEvent === RiderFlowEvent.TRIP_REQUESTED && (
                 <UserSettingSelectedTrip />

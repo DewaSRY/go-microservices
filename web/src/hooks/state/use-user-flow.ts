@@ -13,6 +13,7 @@ export default function useUserFlow() {
 
   const [currentEvent, setCurrentEvent] = useState<eventState>(undefined);
   const [isLockDestination, setLockDestination] = useState<boolean>(false);
+  const [isHaveRideRoute, setIsHaveRideRoute] = useState<boolean>(false);
 
   useEffect(() => {
     if (mode === undefined) {
@@ -22,19 +23,19 @@ export default function useUserFlow() {
     }
 
     if (mode === Entity.RIDER) {
-      setCurrentEvent(RiderFlowEvent.RIDER_INIT_CONNECTION);
-      setLockDestination(false);
-    }
-
-    if (mode === Entity.RIDER && destination) {
       setCurrentEvent(RiderFlowEvent.TRIP_REQUESTED);
       setLockDestination(false);
     }
 
-    if (mode === Entity.RIDER && destination && isLockDestination) {
+    if (mode === Entity.RIDER && destination && isHaveRideRoute) {
       setCurrentEvent(RiderFlowEvent.WAITING_FOR_DRIVER);
       setLockDestination(true);
     }
+
+    // if (mode === Entity.RIDER && destination && isHaveRideRoute) {
+    //   setCurrentEvent(RiderFlowEvent.TRIP_REQUESTED);
+    //   setLockDestination(false);
+    // }
   }, [mode, destination]);
 
   function setLockDestinationState(value: boolean) {
@@ -46,5 +47,6 @@ export default function useUserFlow() {
     currentEvent,
     setLockDestinationState,
     isLockDestination,
+    setIsHaveRideRoute,
   };
 }

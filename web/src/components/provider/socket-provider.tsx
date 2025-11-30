@@ -22,6 +22,7 @@ const SocketProviderContext = createContext({
   connectionState: undefined as ConnectionState,
   isLoading: false,
   routeData: undefined as RouteData | undefined,
+  resetRoute: () => {},
 });
 
 SocketProviderContext.displayName = "socket-provider";
@@ -39,6 +40,7 @@ export default function Provider({
   reconnectInterval = 3000,
 }: ProviderPops) {
   const [isLoading, setIsLoading] = useState(false);
+
   const [currentState, setCurrentState] = useState<ConnectionState>(undefined);
   const [isConnected, setIsConnected] = useState(false);
 
@@ -87,6 +89,7 @@ export default function Provider({
   }, []);
 
   useEffect(() => {
+    setRoute(undefined);
     connect();
   }, []);
 
@@ -99,6 +102,10 @@ export default function Provider({
     }
   }, []);
 
+  function resetRoute() {
+    setRoute(undefined);
+  }
+
   return (
     <SocketProviderContext.Provider
       value={{
@@ -107,6 +114,7 @@ export default function Provider({
         connectionState: currentState,
         isLoading,
         routeData: route,
+        resetRoute,
       }}
     >
       {children}

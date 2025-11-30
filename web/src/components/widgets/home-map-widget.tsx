@@ -36,7 +36,7 @@ export default function HomeMapWidget() {
   const { destination, setDestination, currentLocation, setLocation } =
     useRiderStore();
 
-  const { currentEvent, isLockDestination } = useUserFlow();
+  const { currentEvent, isLockDestination, setIsHaveRideRoute } = useUserFlow();
   const { routeData } = useSocketContext();
   const { mode } = useUserRideProfile();
 
@@ -49,11 +49,16 @@ export default function HomeMapWidget() {
   );
 
   function handlerSelectDestination(e: L.LeafletMouseEvent) {
+    if (isLockDestination) return;
     setDestination({
       latitude: e.latlng.lat,
       longitude: e.latlng.lng,
     });
   }
+
+  useEffect(() => {
+    setIsHaveRideRoute(() => !!routeData);
+  }, [routeData]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -93,12 +98,6 @@ export default function HomeMapWidget() {
     }
   }, []);
 
-  useEffect(() => {
-    console.log(
-      isLockDestination ? "destination locked" : "destination unlocked"
-    );
-  });
-
   return (
     <div className="flex-1 h-full w-full">
       <MapContainer
@@ -132,7 +131,7 @@ export default function HomeMapWidget() {
 
         {parsedRoute && <RoutingControl route={parsedRoute} />}
 
-        {isLockDestination === false && (
+        {currentEvent === RiderFlowEvent.TRIP_REQUESTED && (
           <MapClickHandler onClick={handlerSelectDestination} />
         )}
       </MapContainer>
