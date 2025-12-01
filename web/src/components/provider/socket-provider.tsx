@@ -61,6 +61,7 @@ export default function Provider({
             break;
           case RideEvents.ROUTE_FOUND:
             setRoute(message.data);
+            break;
           default:
             setCurrentState(undefined);
         }

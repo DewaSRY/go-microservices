@@ -3,68 +3,25 @@ import { ScrollArea } from "@components/ui/scroll-area";
 
 import useSettingDrawerWidget from "@/hooks/state/useUserSettingDrawer";
 import useUserRideProfile from "@/hooks/state/useUserRideProfile";
-import { useSocketContext } from "@components/provider/socket-provider";
 import UserSettingProfile from "@components/widgets/user-setting-profile";
 import UserSelectMode from "@/components/widgets/user-select-mode";
 import { cn } from "@/libs/utils";
-import { useEffect, useState } from "react";
-import UserSettingSlug from "./user-setting-slug";
-import UserSettingInitData from "./user-setting-init-data";
-import { RiderEvents } from "@/contracts/common";
-import RiderSelectDestination from "./rider-select-destination";
+import { useEffect } from "react";
 
-import useUserFlow from "@/hooks/state/use-user-flow";
+import { useFlowContext } from "@components/provider/user-flow-provider";
 import { RiderFlowEvent } from "@/types/events";
 import UserSettingSelectedTrip from "./user-setting-selected-trip";
 
-type userSettingTab =
-  | "mode-setting"
-  | "slug-setting"
-  | "start-connection-setting"
-  | "init-data-success";
-
 export default function UserSettingSideSheet() {
-  const { currentEvent } = useUserFlow();
+  const { currentEvent } = useFlowContext();
 
-  const { connectionState } = useSocketContext();
   const { open, setIsOpen } = useSettingDrawerWidget();
-  const { initData, mode, packageSlug } = useUserRideProfile();
-
-  const [currentMode, setTabMode] = useState<userSettingTab>("mode-setting");
+  const { initData, mode } = useUserRideProfile();
 
   useEffect(() => {
     initData();
   }, []);
 
-  useEffect(() => {
-    if (mode === undefined) {
-      setTabMode("mode-setting");
-    }
-
-    if (mode !== undefined && packageSlug === undefined) {
-      setTabMode("slug-setting");
-    }
-
-    if (mode && packageSlug) {
-      setTabMode("start-connection-setting");
-    }
-
-    const isModeAndSlugFilled = mode !== undefined && packageSlug !== undefined;
-    if (isModeAndSlugFilled) {
-      setTabMode("start-connection-setting");
-    }
-
-    if (
-      isModeAndSlugFilled &&
-      connectionState === RiderEvents.CONNECTION_SUCCESS
-    ) {
-      setTabMode("init-data-success");
-    }
-  }, [mode, packageSlug, connectionState]);
-
-  useEffect(() => {
-    console.log(currentEvent);
-  });
   return (
     <>
       {/* Your trigger button anywhere */}
@@ -91,7 +48,8 @@ export default function UserSettingSideSheet() {
                 <UserSettingSlug />
               )} */}
 
-              {currentEvent === RiderFlowEvent.TRIP_REQUESTED && (
+              {(currentEvent === RiderFlowEvent.TRIP_REQUESTED ||
+                currentEvent === RiderFlowEvent.WAITING_FOR_DRIVER) && (
                 <UserSettingSelectedTrip />
               )}
 

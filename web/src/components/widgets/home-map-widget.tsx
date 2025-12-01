@@ -10,7 +10,7 @@ import { useSocketContext } from "@components/provider/socket-provider";
 import { RoutingControl } from "@components/common/RoutingControl";
 
 import useUserRideProfile from "@/hooks/state/useUserRideProfile";
-import useUserFlow from "@/hooks/state/use-user-flow";
+import { useFlowContext } from "@components/provider/user-flow-provider";
 import { RiderFlowEvent } from "@/types/events";
 const userMarker = new L.Icon({
   iconUrl:
@@ -36,8 +36,9 @@ export default function HomeMapWidget() {
   const { destination, setDestination, currentLocation, setLocation } =
     useRiderStore();
 
-  const { currentEvent, isLockDestination, setIsHaveRideRoute } = useUserFlow();
-  const { routeData } = useSocketContext();
+  const { currentEvent, isLockDestination, setIsHaveRideRoute } =
+    useFlowContext();
+  const { routeData, resetRoute } = useSocketContext();
   const { mode } = useUserRideProfile();
 
   const parsedRoute = useMemo(
@@ -57,7 +58,7 @@ export default function HomeMapWidget() {
   }
 
   useEffect(() => {
-    setIsHaveRideRoute(() => !!routeData);
+    setIsHaveRideRoute(!!routeData);
   }, [routeData]);
 
   useEffect(() => {
@@ -131,9 +132,11 @@ export default function HomeMapWidget() {
 
         {parsedRoute && <RoutingControl route={parsedRoute} />}
 
-        {currentEvent === RiderFlowEvent.TRIP_REQUESTED && (
+        {/* {currentEvent === RiderFlowEvent.TRIP_REQUESTED && (
           <MapClickHandler onClick={handlerSelectDestination} />
-        )}
+        )} */}
+
+        <MapClickHandler onClick={handlerSelectDestination} />
       </MapContainer>
     </div>
   );
