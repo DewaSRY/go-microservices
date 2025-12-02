@@ -14,6 +14,25 @@ type userService struct {
 	userRepo domain.UserRepository
 }
 
+// CreateDriver implements domain.UserService.
+func (t *userService) CreateDriver(ctx context.Context, data types.CreateDriverParam) error {
+
+	locationJson, err := json.Marshal(data.Location)
+	if err != nil {
+		return err
+	}
+
+	newDriverModel := models.DriverModel{
+		Id:          data.ConnectionId,
+		Location:    locationJson,
+		IsActive:    true,
+		PackageSlug: data.PackageSlug,
+	}
+
+	return t.userRepo.CreateOrUpdateDriverModel(ctx, newDriverModel)
+
+}
+
 // CreateRider implements domain.UserService.
 func (t *userService) CreateRider(ctx context.Context, data types.CreateRiderParam) error {
 

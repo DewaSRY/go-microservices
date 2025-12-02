@@ -6,7 +6,6 @@ import (
 	"DewaSRY/go-microservices/shared/models"
 	drivergrpc "DewaSRY/go-microservices/shared/proto/driver_proto"
 	"DewaSRY/go-microservices/shared/types"
-	"DewaSRY/go-microservices/shared/util"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -40,8 +39,8 @@ func (t *driverService) GetDriverProto(ctx context.Context, driverId string) (*d
 
 	driverProto := &drivergrpc.Driver{
 		Id:             currentModel.Id,
-		ProfilePicture: currentModel.ProfilePicture,
-		CarPlate:       currentModel.CarPlate,
+		ProfilePicture: "",
+		CarPlate:       "",
 		PackageSlug:    currentModel.PackageSlug,
 		Location:       &driverLocation,
 	}
@@ -72,8 +71,8 @@ func (t *driverService) RegisterDriver(ctx context.Context, driverId string, pac
 	randomIndex := rand.IntN(len(driverUtil.PredefinedRoutes))
 	randomRoute := driverUtil.PredefinedRoutes[randomIndex]
 
-	randomPlat := driverUtil.GenerateRandomPlate()
-	randomAvatar := util.GetRandomAvatar(randomIndex)
+	// randomPlat := driverUtil.GenerateRandomPlate()
+	// randomAvatar := util.GetRandomAvatar(randomIndex)
 	// geoHash := geohash.Encode(randomRoute[0][0], randomRoute[0][1])
 
 	jsonCoordinate, err := json.Marshal(types.Coordinate{
@@ -86,12 +85,10 @@ func (t *driverService) RegisterDriver(ctx context.Context, driverId string, pac
 	}
 
 	currentDriver := models.DriverModel{
-		Id:             driverId,
-		PackageSlug:    packageSlug,
-		ProfilePicture: randomAvatar,
-		CarPlate:       randomPlat,
-		IsActive:       true,
-		Location:       jsonCoordinate,
+		Id:          driverId,
+		PackageSlug: packageSlug,
+		IsActive:    true,
+		Location:    jsonCoordinate,
 	}
 
 	if err := t.driverRepo.CreateDriver(ctx, &currentDriver); err != nil {

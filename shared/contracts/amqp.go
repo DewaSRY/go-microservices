@@ -59,4 +59,7 @@ const (
 	TripCreateSuccessEvent = "trip_flow.create-success.response"
 
 	RouteFoundEvent = "trip.route-found.response"
+
+	DriverInitEvent        = "driver.init.request"
+	DriverInitEventProcess = "driver.init.process"
 )

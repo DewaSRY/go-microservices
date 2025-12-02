@@ -7,8 +7,6 @@ DROP  TABLE IF EXISTS drivers;
 CREATE TABLE drivers (
     id VARCHAR(64) PRIMARY KEY, 
     name VARCHAR(64), 
-    profile_picture VARCHAR(64), 
-    car_plate VARCHAR(24), 
     package_slug VARCHAR(64),
     is_active BOOLEAN NOT NULL DEFAULT FALSE,
     user_id VARCHAR(64),

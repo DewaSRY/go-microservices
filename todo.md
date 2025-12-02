@@ -1,4 +1,5 @@
-[ ] handle event after the rider trip create
+[x] handle event after the rider trip create
+[ ] Create driver flow
 [ ] handle event for driver find the rider
 
 rider flow

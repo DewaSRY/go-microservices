@@ -29,6 +29,8 @@ func (t *TripFlowConsumer) Listen() error {
 			t.tripFlowHandler.HandlerTripCreate(ctx, message.Data)
 		case contracts.RiderCreateTripProcess:
 			t.tripFlowHandler.HandlerRiderCreateTrip(ctx, message.Data)
+		case contracts.DriverInitEventProcess:
+			t.tripFlowHandler.HandlerDriverInit(ctx, message.Data)
 		}
 
 		return nil

@@ -86,6 +86,7 @@ func (t *RabbitMQ) setupExchangesAndQueues() error {
 		[]string{
 			contracts.TripCreateInitProcess,
 			contracts.RiderCreateTripProcess,
+			contracts.DriverInitEventProcess,
 		},
 	); err != nil {
 		return err

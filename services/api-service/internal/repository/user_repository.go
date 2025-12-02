@@ -16,6 +16,15 @@ type userRepository struct {
 	db *db.PostgresManager
 }
 
+// CreateOrUpdateDriverModel implements domain.UserRepository.
+func (t *userRepository) CreateOrUpdateDriverModel(ctx context.Context, model models.DriverModel) error {
+	db := t.db.DB.WithContext(ctx)
+	return db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "id"}},
+		DoUpdates: clause.AssignmentColumns([]string{"location", "is_active", "updated_at", "package_slug"}),
+	}).Create(&model).Error
+}
+
 // CreateOrUpdateRiderModel implements domain.UserRepository.
 func (t *userRepository) CreateOrUpdateRiderModel(ctx context.Context, model models.RiderModel) error {
 	db := t.db.DB.WithContext(ctx)

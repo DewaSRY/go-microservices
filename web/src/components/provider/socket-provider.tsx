@@ -1,4 +1,4 @@
-import { RiderWsRequest } from "@/contracts/ws-request";
+import { UserWsRequest } from "@/contracts/ws-request";
 import { RiderWsResponse } from "@/contracts/ws-response";
 import { useCallback, useRef, useState } from "react";
 import { useEffect } from "react";
@@ -17,7 +17,7 @@ import { Coordinate, RouteData } from "@/types/common";
 type ConnectionState = RiderEvents | undefined;
 
 const SocketProviderContext = createContext({
-  sendMessage: (_data: RiderWsRequest) => {},
+  sendMessage: (_data: UserWsRequest) => {},
   isConnected: false,
   connectionState: undefined as ConnectionState,
   isLoading: false,
@@ -94,7 +94,7 @@ export default function Provider({
     connect();
   }, []);
 
-  const sendMessage = useCallback((data: RiderWsRequest) => {
+  const sendMessage = useCallback((data: UserWsRequest) => {
     const ws = socketRef.current;
     if (ws && ws.readyState === WebSocket.OPEN) {
       ws.send(JSON.stringify(data));

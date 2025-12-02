@@ -1,4 +1,4 @@
-import { RiderWsRequest } from "@/contracts/ws-request";
+import { UserWsRequest } from "@/contracts/ws-request";
 import { RiderWsResponse } from "@/contracts/ws-response";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useEffect } from "react";
@@ -9,11 +9,13 @@ import {
   createContext,
 } from "react";
 import { Entity } from "@/types/common";
-import { RiderFlowEvent } from "@/types/events";
+import { RiderFlowEvent, DriverFlowEvents } from "@/types/events";
 
 import useRiderProfile from "@/hooks/state/useUserRideProfile";
 import useRiderStore from "@/hooks/store/use-rider-store";
-type eventState = RiderFlowEvent | undefined;
+
+type eventState = RiderFlowEvent | DriverFlowEvents | undefined;
+
 const UserFlowProvider = createContext({
   currentEvent: undefined as eventState | undefined,
   setLockDestinationState: (val: boolean) => {},
@@ -28,23 +30,32 @@ interface ProviderPops
     PropsWithChildren {}
 
 export default function Provider({ children }: ProviderPops) {
-  const { mode } = useRiderProfile();
+  const { mode, packageSlug } = useRiderProfile();
   const { destination, setDestination } = useRiderStore();
 
   const [isLockDestination, setLockDestination] = useState<boolean>(false);
   const [isHaveRideRoute, setIsHaveRideRoute] = useState<boolean>(false);
 
   const currentEvent = useMemo(() => {
-    if (mode !== Entity.RIDER) return undefined;
-    console.log("is have route", isHaveRideRoute);
-    if (isHaveRideRoute) {
-      return RiderFlowEvent.WAITING_FOR_DRIVER;
+    if (mode === Entity.RIDER) {
+      if (isHaveRideRoute) {
+        return RiderFlowEvent.WAITING_FOR_DRIVER;
+      }
+      if (isHaveRideRoute === false) {
+        return RiderFlowEvent.TRIP_REQUESTED;
+      }
     }
-    if (isHaveRideRoute === false) {
-      return RiderFlowEvent.TRIP_REQUESTED;
+
+    if (mode === Entity.DRIVER) {
+      if (packageSlug !== undefined) {
+        return DriverFlowEvents.DRIVER_WAITING_FOR_RIDER;
+      }
+
+      return DriverFlowEvents.DRIVER_INIT_CONN;
     }
+
     return undefined;
-  }, [mode, isHaveRideRoute]);
+  }, [mode, isHaveRideRoute, packageSlug]);
 
   useEffect(() => {
     if (mode === Entity.RIDER) {
@@ -64,10 +75,6 @@ export default function Provider({ children }: ProviderPops) {
       setDestination(undefined);
     }
   }, [mode, destination, isHaveRideRoute]);
-
-  useEffect(() => {
-    console.log("current event is", currentEvent);
-  });
 
   function _setIsHaveRideRoute(val: boolean) {
     setIsHaveRideRoute(val);

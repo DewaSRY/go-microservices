@@ -13,6 +13,7 @@ type UserRepository interface {
 	UpdateRiderLocation(ctx context.Context, riderId string, location []byte, destination []byte) error
 
 	CreateOrUpdateRiderModel(ctx context.Context, model models.RiderModel) error
+	CreateOrUpdateDriverModel(ctx context.Context, model models.DriverModel) error
 }
 
 type UserEventHandler interface {
@@ -25,4 +26,5 @@ type UserService interface {
 	UpdateRiderLocation(ctx context.Context, data _type.UpdateRiderLocationParam) error
 
 	CreateRider(ctx context.Context, data _type.CreateRiderParam) error
+	CreateDriver(ctx context.Context, data _type.CreateDriverParam) error
 }

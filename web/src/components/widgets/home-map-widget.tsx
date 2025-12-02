@@ -19,6 +19,12 @@ const userMarker = new L.Icon({
   iconAnchor: [20, 40],
 });
 
+const driverMarker = new L.Icon({
+  iconUrl: "https://www.svgrepo.com/show/25407/car.svg",
+  iconSize: [30, 30],
+  iconAnchor: [15, 30],
+});
+
 if (typeof window !== "undefined") {
   import("leaflet").then((L) => {
     const DefaultIcon = L.default.icon({
@@ -112,13 +118,19 @@ export default function HomeMapWidget() {
           attribution="&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors &copy; <a href='https://carto.com/'>CARTO</a>"
         />
 
-        {mode !== undefined && (
+        {mode === "RIDER" && (
           <Marker
             position={[currentLocation.latitude, currentLocation.longitude]}
             icon={userMarker}
           />
         )}
 
+        {mode === "DRIVER" && (
+          <Marker
+            position={[currentLocation.latitude, currentLocation.longitude]}
+            icon={driverMarker}
+          />
+        )}
         {destination && mode !== undefined && (
           <Marker
             position={[destination.latitude, destination.longitude]}

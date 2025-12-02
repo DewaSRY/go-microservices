@@ -15,6 +15,7 @@ type TripFlowRepository interface {
 type TripFlowHandler interface {
 	HandlerTripCreate(ctx context.Context, data []byte)
 	HandlerRiderCreateTrip(ctx context.Context, data []byte)
+	HandlerDriverInit(ctx context.Context, data []byte)
 }
 
 type TripFlowService interface {
