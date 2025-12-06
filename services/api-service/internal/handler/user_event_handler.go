@@ -42,7 +42,6 @@ func (t *userEventHandler) HandlerUserInitConnection(ctx context.Context, data [
 		return
 	}
 
-	log.Print("send data to ", payload.ConnectionId)
 	if err := t.rabbitmq.PublishingMessage(ctx, contracts.UserInitSuccessResponse, contracts.MessageData{
 		ConnectionId: payload.ConnectionId,
 		Data:         successResponse,

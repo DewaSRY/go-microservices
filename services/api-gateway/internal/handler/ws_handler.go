@@ -81,8 +81,6 @@ func (t *WsHandler) WsHandleStartConnection(w http.ResponseWriter, r *http.Reque
 			continue
 		}
 
-		log.Printf("connection_if:%s_event:%s", connectionId, messageData.Type)
-
 		switch messageData.Type {
 		case contracts.UserInitEventRequest:
 			t.tripService.UserInitEventRequest(ctx, connectionId, messageData.Data)
@@ -92,6 +90,8 @@ func (t *WsHandler) WsHandleStartConnection(w http.ResponseWriter, r *http.Reque
 		case contracts.RiderCreateTripRequest:
 			t.tripService.RiderCreateTripRequest(ctx, connectionId, messageData.Data)
 		case contracts.DriverInitEvent:
+			log.Printf("connection_if:%s_event:%s", connectionId, messageData.Type)
+
 			t.tripService.DriverInitRequest(ctx, connectionId, messageData.Data)
 		default:
 			log.Printf("trip_received_unknown_messages: %v", messageData.Type)

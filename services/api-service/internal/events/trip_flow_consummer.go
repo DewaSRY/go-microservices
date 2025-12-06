@@ -30,6 +30,7 @@ func (t *TripFlowConsumer) Listen() error {
 		case contracts.RiderCreateTripProcess:
 			t.tripFlowHandler.HandlerRiderCreateTrip(ctx, message.Data)
 		case contracts.DriverInitEventProcess:
+			log.Print("this is get call")
 			t.tripFlowHandler.HandlerDriverInit(ctx, message.Data)
 		}
 

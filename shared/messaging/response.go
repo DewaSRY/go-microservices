@@ -12,3 +12,12 @@ type RoutesResponse struct {
 	Distance   float64            `json:"distance"`
 	Duration   float64            `json:"duration"`
 }
+
+type DriverRecordResponse struct {
+	Coordinate  types.Coordinate `json:"coordinate"`
+	PackageSlug string           `json:"packageSlug"`
+}
+
+type DriverActiveListResponse struct {
+	DriverList []DriverRecordResponse `json:"driverList"`
+}

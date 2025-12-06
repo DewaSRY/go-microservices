@@ -16,6 +16,39 @@ type userRepository struct {
 	db *db.PostgresManager
 }
 
+// GetWaitingRiderIdConnectionList implements domain.UserRepository.
+func (t *userRepository) GetWaitingRiderIdConnectionList(ctx context.Context) ([]string, error) {
+	var ridersId []string
+
+	result := t.db.DB.WithContext(ctx).
+		Model(&models.TripModel{}).
+		Select("rider_id").
+		Where("LENGTH(transaction_id)  = 0").
+		Pluck("rider_id", &ridersId)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return ridersId, nil
+
+}
+
+// GetDriverList implements domain.UserRepository.
+func (t *userRepository) GetDriverActiveList(ctx context.Context) ([]models.DriverModel, error) {
+	var drivers []models.DriverModel
+
+	result := t.db.DB.WithContext(ctx).
+		Where("is_active = ?", true).
+		Find(&drivers)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return drivers, nil
+}
+
 // CreateOrUpdateDriverModel implements domain.UserRepository.
 func (t *userRepository) CreateOrUpdateDriverModel(ctx context.Context, model models.DriverModel) error {
 	db := t.db.DB.WithContext(ctx)

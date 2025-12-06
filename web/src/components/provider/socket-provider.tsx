@@ -62,6 +62,9 @@ export default function Provider({
           case RideEvents.ROUTE_FOUND:
             setRoute(message.data);
             break;
+          case RideEvents.DRIVER_ACTIVE:
+            console.log(message.data);
+            break;
           default:
             setCurrentState(undefined);
         }

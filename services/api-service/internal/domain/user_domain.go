@@ -14,6 +14,9 @@ type UserRepository interface {
 
 	CreateOrUpdateRiderModel(ctx context.Context, model models.RiderModel) error
 	CreateOrUpdateDriverModel(ctx context.Context, model models.DriverModel) error
+
+	GetDriverActiveList(ctx context.Context) ([]models.DriverModel, error)
+	GetWaitingRiderIdConnectionList(ctx context.Context) ([]string, error)
 }
 
 type UserEventHandler interface {
@@ -27,4 +30,6 @@ type UserService interface {
 
 	CreateRider(ctx context.Context, data _type.CreateRiderParam) error
 	CreateDriver(ctx context.Context, data _type.CreateDriverParam) error
+
+	NotifyDriverActive(ctx context.Context) error
 }

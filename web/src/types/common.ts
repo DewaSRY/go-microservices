@@ -20,3 +20,8 @@ export type RouteData = {
   distance: number;
   duration: number;
 };
+
+export type DriverActiveRecord = {
+  coordinate: Coordinate;
+  packageSlug: PackageSlug;
+};

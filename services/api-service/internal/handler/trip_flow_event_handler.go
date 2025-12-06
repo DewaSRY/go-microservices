@@ -34,7 +34,9 @@ func (t *tripFlowEventHandler) HandlerDriverInit(ctx context.Context, data []byt
 		return
 	}
 
-	//notify all user about active driver
+	if err := t.userService.NotifyDriverActive(ctx); err != nil {
+		return
+	}
 }
 
 // HandlerRiderCreateTrip implements domain.TripFlowHandler.

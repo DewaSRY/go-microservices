@@ -6,6 +6,7 @@ export enum RiderEvents {
 
 export enum RideEvents {
   ROUTE_FOUND = "trip.route-found.response",
+  DRIVER_ACTIVE = "driver.active-notify.response",
 }
 
 export enum DriverEvents {

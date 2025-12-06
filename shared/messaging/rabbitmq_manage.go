@@ -75,6 +75,7 @@ func (t *RabbitMQ) setupExchangesAndQueues() error {
 		UserEstablishConnectionNotificationQueue,
 		[]string{
 			contracts.UserInitSuccessResponse,
+			contracts.DriverActiveResponse,
 		},
 	); err != nil {
 		return err

@@ -60,6 +60,9 @@ const (
 
 	RouteFoundEvent = "trip.route-found.response"
 
+	//
 	DriverInitEvent        = "driver.init.request"
 	DriverInitEventProcess = "driver.init.process"
+
+	DriverActiveResponse = "driver.active-notify.response"
 )
