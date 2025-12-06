@@ -6,7 +6,7 @@ import { RiderEvents } from "@/contracts/common";
 import { useFlowContext } from "@components/provider/user-flow-provider";
 import { RiderFlowEvent } from "@/types/events";
 
-export default function UserSettingSelectedTrip() {
+export default function RiderCreateTrip() {
   const { currentEvent } = useFlowContext();
   const { currentLocation, destination, setDestination } = useRiderStore();
   const { sendMessage } = useSocketContext();
@@ -24,29 +24,12 @@ export default function UserSettingSelectedTrip() {
     }
   }
 
-  function handleCancelTrip() {
-    if (currentLocation && destination) {
-      setDestination(undefined);
-      resetRoute();
-    }
-  }
-
   return (
     <div>
       <div>Selected Trip Settings Component</div>
       <div>
-        <Button
-          disabled={currentEvent !== RiderFlowEvent.TRIP_REQUESTED}
-          onClick={handleStartTrip}
-        >
+        <Button disabled={destination === undefined} onClick={handleStartTrip}>
           Start Trip
-        </Button>
-
-        <Button
-          disabled={currentEvent !== RiderFlowEvent.WAITING_FOR_DRIVER}
-          onClick={handleCancelTrip}
-        >
-          Cancel Trip
         </Button>
       </div>
     </div>

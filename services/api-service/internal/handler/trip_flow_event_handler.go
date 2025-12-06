@@ -83,6 +83,10 @@ func (t *tripFlowEventHandler) HandlerRiderCreateTrip(ctx context.Context, data 
 		return
 	}
 
+	if err := t.userService.NotifyDriverActive(ctx); err != nil {
+		return
+	}
+
 }
 
 // HandlerTripCreate implements domain.TripFlowHandler.

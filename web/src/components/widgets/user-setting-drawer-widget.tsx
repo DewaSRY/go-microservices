@@ -10,8 +10,10 @@ import { useEffect } from "react";
 
 import { useFlowContext } from "@components/provider/user-flow-provider";
 import { DriverFlowEvents, RiderFlowEvent } from "@/types/events";
-import UserSettingSelectedTrip from "./user-setting-selected-trip";
-import DriverSettingSlug from "./driver-setting-slug";
+import UserSettingSelectedTrip from "./rider-listing-driver";
+import RiderListingDriver from "./driver-setting-slug";
+import UserSettingWaitingDriver from "./rider-listing-driver";
+import RiderCreateTrip from "./rider-create-trip copy";
 
 export default function UserSettingSideSheet() {
   const { currentEvent } = useFlowContext();
@@ -45,13 +47,16 @@ export default function UserSettingSideSheet() {
             <div className="p-4 flex-1 overflow-auto grow h-[80%] ">
               {mode === undefined && <UserSelectMode />}
 
-              {(currentEvent === RiderFlowEvent.TRIP_REQUESTED ||
-                currentEvent === RiderFlowEvent.WAITING_FOR_DRIVER) && (
-                <UserSettingSelectedTrip />
+              {currentEvent === RiderFlowEvent.TRIP_REQUESTED && (
+                <RiderCreateTrip />
+              )}
+
+              {currentEvent === RiderFlowEvent.WAITING_FOR_DRIVER && (
+                <UserSettingWaitingDriver />
               )}
 
               {currentEvent === DriverFlowEvents.DRIVER_INIT_CONN && (
-                <DriverSettingSlug />
+                <RiderListingDriver />
               )}
 
               {/* {currentMode === "slug-setting" && <UserSettingSlug />}

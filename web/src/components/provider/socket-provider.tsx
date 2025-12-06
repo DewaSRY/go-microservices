@@ -12,7 +12,7 @@ import {
 import { RideEvents, RiderEvents } from "@/contracts/common";
 
 import { WEBSOCKET_URL } from "@constants/environment";
-import { Coordinate, RouteData } from "@/types/common";
+import { Coordinate, DriverActiveRecord, RouteData } from "@/types/common";
 
 type ConnectionState = RiderEvents | undefined;
 
@@ -23,6 +23,7 @@ const SocketProviderContext = createContext({
   isLoading: false,
   routeData: undefined as RouteData | undefined,
   resetRoute: () => {},
+  driverActive: [] as DriverActiveRecord[],
 });
 
 SocketProviderContext.displayName = "socket-provider";
@@ -40,12 +41,10 @@ export default function Provider({
   reconnectInterval = 3000,
 }: ProviderPops) {
   const [isLoading, setIsLoading] = useState(false);
-
   const [currentState, setCurrentState] = useState<ConnectionState>(undefined);
   const [isConnected, setIsConnected] = useState(false);
-
   const [route, setRoute] = useState<RouteData | undefined>(undefined);
-
+  const [driverActive, setDriverActive] = useState<DriverActiveRecord[]>([]);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
 
@@ -63,7 +62,9 @@ export default function Provider({
             setRoute(message.data);
             break;
           case RideEvents.DRIVER_ACTIVE:
-            console.log(message.data);
+            setDriverActive((prev) => {
+              return [...prev, ...message.data];
+            });
             break;
           default:
             setCurrentState(undefined);
@@ -119,6 +120,7 @@ export default function Provider({
         isLoading,
         routeData: route,
         resetRoute,
+        driverActive: driverActive,
       }}
     >
       {children}

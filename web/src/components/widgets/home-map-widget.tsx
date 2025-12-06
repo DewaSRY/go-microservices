@@ -44,7 +44,7 @@ export default function HomeMapWidget() {
 
   const { currentEvent, isLockDestination, setIsHaveRideRoute } =
     useFlowContext();
-  const { routeData, resetRoute } = useSocketContext();
+  const { routeData, resetRoute, driverActive } = useSocketContext();
   const { mode } = useUserRideProfile();
 
   const parsedRoute = useMemo(
@@ -125,12 +125,25 @@ export default function HomeMapWidget() {
           />
         )}
 
+        {mode === "RIDER" && (
+          <div>
+            {driverActive.map((x, idx) => (
+              <Marker
+                key={idx}
+                position={[x.coordinate.latitude, x.coordinate.longitude]}
+                icon={driverMarker}
+              />
+            ))}
+          </div>
+        )}
+
         {mode === "DRIVER" && (
           <Marker
             position={[currentLocation.latitude, currentLocation.longitude]}
             icon={driverMarker}
           />
         )}
+
         {destination && mode !== undefined && (
           <Marker
             position={[destination.latitude, destination.longitude]}
@@ -144,11 +157,9 @@ export default function HomeMapWidget() {
 
         {parsedRoute && <RoutingControl route={parsedRoute} />}
 
-        {/* {currentEvent === RiderFlowEvent.TRIP_REQUESTED && (
+        {currentEvent === RiderFlowEvent.TRIP_REQUESTED && (
           <MapClickHandler onClick={handlerSelectDestination} />
-        )} */}
-
-        <MapClickHandler onClick={handlerSelectDestination} />
+        )}
       </MapContainer>
     </div>
   );
