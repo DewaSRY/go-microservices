@@ -44,7 +44,7 @@ export default function HomeMapWidget() {
 
   const { currentEvent, isLockDestination, setIsHaveRideRoute } =
     useFlowContext();
-  const { routeData, resetRoute, driverActive } = useSocketContext();
+  const { routeData, driverActive } = useSocketContext();
   const { mode } = useUserRideProfile();
 
   const parsedRoute = useMemo(
