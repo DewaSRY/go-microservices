@@ -24,6 +24,7 @@ const SocketProviderContext = createContext({
   routeData: undefined as RouteData | undefined,
   resetRoute: () => {},
   driverActive: [] as DriverActiveRecord[],
+  transactionId: undefined as string | undefined,
 });
 
 SocketProviderContext.displayName = "socket-provider";
@@ -45,6 +46,9 @@ export default function Provider({
   const [isConnected, setIsConnected] = useState(false);
   const [route, setRoute] = useState<RouteData | undefined>(undefined);
   const [driverActive, setDriverActive] = useState<DriverActiveRecord[]>([]);
+  const [transactionId, setTransactionId] = useState<string | undefined>(
+    undefined
+  );
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
 
@@ -65,6 +69,9 @@ export default function Provider({
             setDriverActive((prev) => {
               return [...prev, ...message.data];
             });
+            break;
+          case RideEvents.RIDER_CREATE_TRANSACTION:
+            setTransactionId(message.data.transactionId);
             break;
           default:
             setCurrentState(undefined);
@@ -121,6 +128,7 @@ export default function Provider({
         routeData: route,
         resetRoute,
         driverActive: driverActive,
+        transactionId,
       }}
     >
       {children}

@@ -9,11 +9,76 @@ import (
 	_types "DewaSRY/go-microservices/shared/types"
 	"context"
 	"encoding/json"
+
+	"github.com/google/uuid"
 )
 
 type userService struct {
 	rabbitMq *messaging.RabbitMQ
 	userRepo domain.UserRepository
+	tripRepo domain.TripFlowRepository
+}
+
+// RiderNotifyTransaction implements domain.UserService.
+func (t *userService) RiderNotifyTransaction(ctx context.Context, connection string, transactionId string) error {
+
+	jsonData, err := json.Marshal(messaging.RiderCreateTransactionResponse{
+		TransactionId: transactionId,
+	})
+
+	if err != nil {
+		return nil
+	}
+
+	if err := t.rabbitMq.PublishingMessage(
+		ctx, contracts.RiderCreateTransactionResponse,
+		contracts.MessageData{
+			ConnectionId: connection,
+			Data:         jsonData,
+		}); err != nil {
+		return nil
+	}
+	return nil
+}
+
+// DriverNotifyTransaction implements domain.UserService.
+func (t *userService) DriverNotifyTransaction(ctx context.Context, driverId string, transactionId string) error {
+
+	jsonData, err := json.Marshal(messaging.RiderCreateTransactionResponse{
+		TransactionId: transactionId,
+	})
+
+	if err != nil {
+		return nil
+	}
+
+	if err := t.rabbitMq.PublishingMessage(
+		ctx, contracts.RiderCreateTransactionResponse,
+		contracts.MessageData{
+			ConnectionId: driverId,
+			Data:         jsonData,
+		}); err != nil {
+		return nil
+	}
+	return nil
+}
+
+// RiderStartTransaction implements domain.UserService.
+func (t *userService) RiderStartTransaction(ctx context.Context, riderId string, driverId string) (string, error) {
+
+	transactionId := uuid.New().String()
+	transactionModel := models.TransactionModel{
+		Id:       transactionId,
+		RiderId:  riderId,
+		DriverId: driverId,
+		Status:   "PENDING",
+	}
+
+	if err := t.tripRepo.CreateOrUpdateTransactionModel(ctx, transactionModel); err != nil {
+		return "", err
+	}
+
+	return transactionId, nil
 }
 
 // NotifyDriverActive implements domain.UserService.
@@ -49,6 +114,7 @@ func (t *userService) NotifyDriverActive(ctx context.Context) error {
 		driverRecordList = append(driverRecordList, messaging.DriverRecordResponse{
 			Coordinate:  unMarshelLocation,
 			PackageSlug: d.PackageSlug,
+			DriverId:    d.Id,
 		})
 	}
 
@@ -148,9 +214,11 @@ func (t *userService) UserInit(ctx context.Context, request messaging.InitConnec
 func NewUserService(
 	rabbitMq *messaging.RabbitMQ,
 	userRepo domain.UserRepository,
+	tripRepo domain.TripFlowRepository,
 ) domain.UserService {
 	return &userService{
 		rabbitMq: rabbitMq,
 		userRepo: userRepo,
+		tripRepo: tripRepo,
 	}
 }

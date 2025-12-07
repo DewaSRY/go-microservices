@@ -86,13 +86,12 @@ func (t *WsHandler) WsHandleStartConnection(w http.ResponseWriter, r *http.Reque
 			t.tripService.UserInitEventRequest(ctx, connectionId, messageData.Data)
 		case contracts.TripCreateInitEvent:
 			t.tripService.CreateTripEvent(ctx, connectionId, messageData.Data)
-			// use tunnel
 		case contracts.RiderCreateTripRequest:
 			t.tripService.RiderCreateTripRequest(ctx, connectionId, messageData.Data)
 		case contracts.DriverInitEvent:
-			log.Printf("connection_if:%s_event:%s", connectionId, messageData.Type)
-
 			t.tripService.DriverInitRequest(ctx, connectionId, messageData.Data)
+		case contracts.RiderCreateTransactionRequest:
+			t.tripService.RiderCreateTransaction(ctx, connectionId, messageData.Data)
 		default:
 			log.Printf("trip_received_unknown_messages: %v", messageData.Type)
 		}

@@ -16,8 +16,13 @@ type RoutesResponse struct {
 type DriverRecordResponse struct {
 	Coordinate  types.Coordinate `json:"coordinate"`
 	PackageSlug string           `json:"packageSlug"`
+	DriverId    string           `json:"driverId"`
 }
 
 type DriverActiveListResponse struct {
 	DriverList []DriverRecordResponse `json:"driverList"`
+}
+
+type RiderCreateTransactionResponse struct {
+	TransactionId string `json:"transactionId"`
 }

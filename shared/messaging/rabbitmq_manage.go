@@ -76,10 +76,12 @@ func (t *RabbitMQ) setupExchangesAndQueues() error {
 		[]string{
 			contracts.UserInitSuccessResponse,
 			contracts.DriverActiveResponse,
+			contracts.RiderCreateTransactionResponse,
 		},
 	); err != nil {
 		return err
 	}
+
 	// trip flow
 	if err := t.declareAndBindingQueue(
 		TRIP_EXCHANGE,
@@ -88,6 +90,7 @@ func (t *RabbitMQ) setupExchangesAndQueues() error {
 			contracts.TripCreateInitProcess,
 			contracts.RiderCreateTripProcess,
 			contracts.DriverInitEventProcess,
+			contracts.RiderCreateTransactionProcess,
 		},
 	); err != nil {
 		return err

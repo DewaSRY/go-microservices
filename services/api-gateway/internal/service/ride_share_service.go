@@ -14,6 +14,38 @@ type rideShareService struct {
 	rabbitMq *messaging.RabbitMQ
 }
 
+// RiderCreateTransaction implements domain.RideShareServices.
+func (t *rideShareService) RiderCreateTransaction(ctx context.Context, connectionId string, data []byte) error {
+	var parseData types.RiderCreateTransactionRequest
+
+	if err := json.Unmarshal(data, &parseData); err != nil {
+		log.Printf("error_failed_to_process_user_init_data:%v", err)
+		return nil
+	}
+
+	resultData, err := json.Marshal(
+		messaging.RiderCreateTransactionRequest{
+			ConnectionId: connectionId,
+			DriverId:     parseData.DriverId,
+		},
+	)
+
+	if err != nil {
+		log.Printf("failed_to_parse:%v", err)
+		return nil
+	}
+
+	if err := t.rabbitMq.PublishingMessage(ctx, contracts.RiderCreateTransactionProcess,
+		contracts.MessageData{
+			ConnectionId: connectionId,
+			Data:         resultData,
+		}); err != nil {
+		log.Printf("failed_to_parse:%v", err)
+	}
+
+	return nil
+}
+
 // DriverInitRequest implements domain.RideShareServices.
 func (t *rideShareService) DriverInitRequest(ctx context.Context, connectionId string, data []byte) error {
 	var parseData types.DriverInitRequest

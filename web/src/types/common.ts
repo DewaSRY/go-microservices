@@ -24,4 +24,9 @@ export type RouteData = {
 export type DriverActiveRecord = {
   coordinate: Coordinate;
   packageSlug: PackageSlug;
+  driverId: string;
+};
+
+export type RiderCreateTransactionResponse = {
+  transactionId: string;
 };

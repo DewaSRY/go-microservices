@@ -16,4 +16,5 @@ type RideShareServices interface {
 	CreateTripEvent(ctx context.Context, connectionId string, data []byte) error
 	RiderCreateTripRequest(ctx context.Context, connectionId string, data []byte) error
 	DriverInitRequest(ctx context.Context, connectionId string, data []byte) error
+	RiderCreateTransaction(ctx context.Context, connectionId string, data []byte) error
 }

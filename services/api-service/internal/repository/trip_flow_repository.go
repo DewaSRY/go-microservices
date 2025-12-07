@@ -15,6 +15,23 @@ type tripFlowRepository struct {
 	db *db.PostgresManager
 }
 
+// CreateOrUpdateTransactionModel implements domain.TripFlowRepository.
+func (t *tripFlowRepository) CreateOrUpdateTransactionModel(ctx context.Context, model models.TransactionModel) error {
+	db := t.db.DB.WithContext(ctx)
+
+	var existingTrip models.TransactionModel
+	err := db.First(&existingTrip, "rider_id = ?", model.RiderId).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return db.Create(&model).Error
+		}
+
+		return err
+	}
+
+	return db.Model(&existingTrip).Updates(model).Error
+}
+
 // CreateOrUpdateRiderTrip implements domain.TripFlowRepository.
 func (t *tripFlowRepository) CreateOrUpdateRiderTrip(ctx context.Context, model models.TripModel) error {
 	db := t.db.DB.WithContext(ctx)

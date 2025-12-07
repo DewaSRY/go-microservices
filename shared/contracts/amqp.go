@@ -65,4 +65,10 @@ const (
 	DriverInitEventProcess = "driver.init.process"
 
 	DriverActiveResponse = "driver.active-notify.response"
+
+	//transaction
+	RiderCreateTransactionRequest = "rider.create-transaction.request"
+	RiderCreateTransactionProcess = "rider.create-transaction.process"
+
+	RiderCreateTransactionResponse = "rider.create-transaction.response"
 )

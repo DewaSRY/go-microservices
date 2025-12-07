@@ -10,10 +10,10 @@ import { useEffect } from "react";
 
 import { useFlowContext } from "@components/provider/user-flow-provider";
 import { DriverFlowEvents, RiderFlowEvent } from "@/types/events";
-import UserSettingSelectedTrip from "./rider-listing-driver";
 import RiderListingDriver from "./driver-setting-slug";
 import UserSettingWaitingDriver from "./rider-listing-driver";
 import RiderCreateTrip from "./rider-create-trip copy";
+import DriverTransaction from "./driver-transaction";
 
 export default function UserSettingSideSheet() {
   const { currentEvent } = useFlowContext();
@@ -57,6 +57,10 @@ export default function UserSettingSideSheet() {
 
               {currentEvent === DriverFlowEvents.DRIVER_INIT_CONN && (
                 <RiderListingDriver />
+              )}
+
+              {currentEvent === DriverFlowEvents.RIDER_CREATE_TRANSACTION && (
+                <DriverTransaction />
               )}
 
               {/* {currentMode === "slug-setting" && <UserSettingSlug />}

@@ -1,7 +1,9 @@
 import { Coordinate, PackageSlug, Entity } from "@/types/common";
 import { RiderEvents } from "./common";
 
-export type RiderWsRequest = RiderCreateTripRequest;
+export type RiderWsRequest =
+  | RiderCreateTripRequest
+  | RiderCreateTransactionRequest;
 
 // interface RiderInitConnection {
 //   type: RiderEvents.INIT_CONNECTION;
@@ -25,5 +27,12 @@ interface RiderCreateTripRequest {
   data: {
     pickup: Coordinate;
     destination: Coordinate;
+  };
+}
+
+interface RiderCreateTransactionRequest {
+  type: RiderEvents.RIDER_CREATE_TRANSACTION;
+  data: {
+    driverId: string;
   };
 }

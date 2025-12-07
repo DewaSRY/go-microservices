@@ -32,4 +32,8 @@ type UserService interface {
 	CreateDriver(ctx context.Context, data _type.CreateDriverParam) error
 
 	NotifyDriverActive(ctx context.Context) error
+
+	RiderStartTransaction(ctx context.Context, riderId string, driverId string) (string, error)
+	DriverNotifyTransaction(ctx context.Context, driverId string, transactionId string) error
+	RiderNotifyTransaction(ctx context.Context, connection string, transactionId string) error
 }

@@ -1,11 +1,16 @@
-import { DriverActiveRecord, RouteData } from "@/types/common";
+import {
+  DriverActiveRecord,
+  RouteData,
+  RiderCreateTransactionResponse,
+} from "@/types/common";
 import { RiderEvents, RideEvents } from "./common";
 
 //Messages sent from client to server via web socket
 export type RiderWsResponse =
   | RiderInitConnectionSuccess
   | TripFound
-  | DriverActiveList;
+  | DriverActiveList
+  | RiderCreateTransaction;
 
 interface RiderInitConnectionSuccess {
   type: RiderEvents.CONNECTION_SUCCESS;
@@ -22,4 +27,9 @@ interface TripFound {
 interface DriverActiveList {
   type: RideEvents.DRIVER_ACTIVE;
   data: DriverActiveRecord[];
+}
+
+interface RiderCreateTransaction {
+  type: RideEvents.RIDER_CREATE_TRANSACTION;
+  data: RiderCreateTransactionResponse;
 }

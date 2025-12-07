@@ -50,7 +50,7 @@ func main() {
 	userRepository := repository.NewUserRepository(db)
 	tripFlowRepository := repository.NewTripFlowRepository(db)
 
-	userService := service.NewUserService(rabbitmq, userRepository)
+	userService := service.NewUserService(rabbitmq, userRepository, tripFlowRepository)
 	tripFlowService := service.NewTripFlowService(rabbitmq, tripFlowRepository)
 	osrmService := service.NewOsrmIntegrationService()
 

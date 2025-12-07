@@ -1,5 +1,4 @@
-import { UserWsRequest } from "@/contracts/ws-request";
-import { RiderWsResponse } from "@/contracts/ws-response";
+///
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useEffect } from "react";
 import {
@@ -13,6 +12,7 @@ import { RiderFlowEvent, DriverFlowEvents } from "@/types/events";
 
 import useRiderProfile from "@/hooks/state/useUserRideProfile";
 import useRiderStore from "@/hooks/store/use-rider-store";
+import { useSocketContext } from "./socket-provider";
 
 type eventState = RiderFlowEvent | DriverFlowEvents | undefined;
 
@@ -32,21 +32,31 @@ interface ProviderPops
 export default function Provider({ children }: ProviderPops) {
   const { mode, packageSlug } = useRiderProfile();
   const { destination, setDestination } = useRiderStore();
+  const { transactionId } = useSocketContext();
 
   const [isLockDestination, setLockDestination] = useState<boolean>(false);
   const [isHaveRideRoute, setIsHaveRideRoute] = useState<boolean>(false);
 
   const currentEvent = useMemo(() => {
     if (mode === Entity.RIDER) {
+      if (isHaveRideRoute && transactionId !== undefined) {
+        return RiderFlowEvent.RIDER_CREATE_TRANSACTION;
+      }
+
       if (isHaveRideRoute) {
         return RiderFlowEvent.WAITING_FOR_DRIVER;
       }
+
       if (isHaveRideRoute === false) {
         return RiderFlowEvent.TRIP_REQUESTED;
       }
     }
 
     if (mode === Entity.DRIVER) {
+      if (packageSlug !== undefined && transactionId !== undefined) {
+        return DriverFlowEvents.RIDER_CREATE_TRANSACTION;
+      }
+
       if (packageSlug !== undefined) {
         return DriverFlowEvents.DRIVER_WAITING_FOR_RIDER;
       }

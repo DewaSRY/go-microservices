@@ -17,6 +17,28 @@ type tripFlowEventHandler struct {
 	osrmIntegration domain.OsrmIntegrationService
 }
 
+// HandleRiderCreateTransaction implements domain.TripFlowHandler.
+func (t *tripFlowEventHandler) HandleRiderCreateTransaction(ctx context.Context, data []byte) {
+	var payload messaging.RiderCreateTransactionRequest
+
+	if err := json.Unmarshal(data, &payload); err != nil {
+		return
+	}
+
+	transactionId, err := t.userService.RiderStartTransaction(ctx, payload.ConnectionId, payload.DriverId)
+	if err != nil {
+		return
+	}
+
+	if err := t.userService.DriverNotifyTransaction(ctx, payload.DriverId, transactionId); err != nil {
+		return
+	}
+
+	if err := t.userService.RiderNotifyTransaction(ctx, payload.ConnectionId, transactionId); err != nil {
+		return
+	}
+}
+
 // HandlerDriverInit implements domain.TripFlowHandler.
 func (t *tripFlowEventHandler) HandlerDriverInit(ctx context.Context, data []byte) {
 	var payload messaging.DriverInitRequest

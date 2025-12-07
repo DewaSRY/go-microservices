@@ -21,3 +21,7 @@ type DriverInitRequest struct {
 	Location    types.Coordinate `json:"location"`
 	PackageSlug string           `json:"packageSlug"`
 }
+
+type RiderCreateTransactionRequest struct {
+	DriverId string `json:"driverId"`
+}
