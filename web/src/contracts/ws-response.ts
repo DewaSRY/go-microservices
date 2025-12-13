@@ -10,7 +10,8 @@ export type RiderWsResponse =
   | RiderInitConnectionSuccess
   | TripFound
   | DriverActiveList
-  | RiderCreateTransaction;
+  | RiderCreateTransaction
+  | TransactionAcceptedResponse;
 
 interface RiderInitConnectionSuccess {
   type: RiderEvents.CONNECTION_SUCCESS;
@@ -20,16 +21,23 @@ interface RiderInitConnectionSuccess {
 }
 
 interface TripFound {
-  type: RideEvents.ROUTE_FOUND;
+  type: RideEvents.ROUTE_FOUND_RESPONSE;
   data: RouteData;
 }
 
 interface DriverActiveList {
-  type: RideEvents.DRIVER_ACTIVE;
+  type: RideEvents.DRIVER_ACTIVE_RESPONSE;
   data: DriverActiveRecord[];
 }
 
 interface RiderCreateTransaction {
-  type: RideEvents.RIDER_CREATE_TRANSACTION;
+  type: RideEvents.RIDER_CREATE_TRANSACTION_RESPONSE;
   data: RiderCreateTransactionResponse;
+}
+
+interface TransactionAcceptedResponse {
+  type: RideEvents.TRANSACTION_ACCEPTED_RESPONSE;
+  data: {
+    transactionId: string;
+  };
 }

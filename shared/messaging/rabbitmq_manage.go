@@ -65,6 +65,7 @@ func (t *RabbitMQ) setupExchangesAndQueues() error {
 		[]string{
 			contracts.UserInitEventProcess,
 			contracts.UserCloseConnectiondataEvent,
+			contracts.UserDisconnectedProcess,
 		},
 	); err != nil {
 		return err
@@ -75,8 +76,10 @@ func (t *RabbitMQ) setupExchangesAndQueues() error {
 		UserEstablishConnectionNotificationQueue,
 		[]string{
 			contracts.UserInitSuccessResponse,
+			contracts.RouteFoundEvent,
 			contracts.DriverActiveResponse,
 			contracts.RiderCreateTransactionResponse,
+			contracts.TransactionAcceptedResponse,
 		},
 	); err != nil {
 		return err
@@ -91,6 +94,7 @@ func (t *RabbitMQ) setupExchangesAndQueues() error {
 			contracts.RiderCreateTripProcess,
 			contracts.DriverInitEventProcess,
 			contracts.RiderCreateTransactionProcess,
+			contracts.DriverAcceptTransactionProcess,
 		},
 	); err != nil {
 		return err
@@ -99,91 +103,89 @@ func (t *RabbitMQ) setupExchangesAndQueues() error {
 	if err := t.declareAndBindingQueue(
 		TRIP_EXCHANGE,
 		TripFlowNotificationQueue,
-		[]string{
-			contracts.RouteFoundEvent,
-		},
+		[]string{},
 	); err != nil {
 		return err
 	}
 
-	if err := t.declareAndBindingQueue(
-		TRIP_EXCHANGE,
-		FindAvailableDriversQueue,
-		[]string{
-			contracts.TripEventCreated,
-			contracts.TripEventDriverNotInterested,
-			contracts.TripEventDriversFound,
-		},
-	); err != nil {
-		return err
-	}
+	// if err := t.declareAndBindingQueue(
+	// 	TRIP_EXCHANGE,
+	// 	FindAvailableDriversQueue,
+	// 	[]string{
+	// 		contracts.TripEventCreated,
+	// 		contracts.TripEventDriverNotInterested,
+	// 		contracts.TripEventDriversFound,
+	// 	},
+	// ); err != nil {
+	// 	return err
+	// }
 
-	if err := t.declareAndBindingQueue(
-		TRIP_EXCHANGE,
-		DriverCmdTripRequestQueue,
-		[]string{contracts.DriverCmdTripRequest},
-	); err != nil {
-		return err
-	}
+	// if err := t.declareAndBindingQueue(
+	// 	TRIP_EXCHANGE,
+	// 	DriverCmdTripRequestQueue,
+	// 	[]string{contracts.DriverCmdTripRequest},
+	// ); err != nil {
+	// 	return err
+	// }
 
-	if err := t.declareAndBindingQueue(
-		TRIP_EXCHANGE,
-		DriverTripResponseQueue,
-		[]string{contracts.DriverCmdTripAccept, contracts.DriverCmdTripDecline},
-	); err != nil {
-		return err
-	}
+	// if err := t.declareAndBindingQueue(
+	// 	TRIP_EXCHANGE,
+	// 	DriverTripResponseQueue,
+	// 	[]string{contracts.DriverCmdTripAccept, contracts.DriverCmdTripDecline},
+	// ); err != nil {
+	// 	return err
+	// }
 
-	if err := t.declareAndBindingQueue(
-		TRIP_EXCHANGE,
-		NotifyMatchingTripQueue,
-		[]string{contracts.TripEventDriversFound},
-	); err != nil {
-		return err
-	}
+	// if err := t.declareAndBindingQueue(
+	// 	TRIP_EXCHANGE,
+	// 	NotifyMatchingTripQueue,
+	// 	[]string{contracts.TripEventDriversFound},
+	// ); err != nil {
+	// 	return err
+	// }
 
-	if err := t.declareAndBindingQueue(
-		TRIP_EXCHANGE,
-		NotifyDriverNoDriversFoundQueue,
-		[]string{contracts.TripEventNoDriversFound},
-	); err != nil {
-		return err
-	}
+	// if err := t.declareAndBindingQueue(
+	// 	TRIP_EXCHANGE,
+	// 	NotifyDriverNoDriversFoundQueue,
+	// 	[]string{contracts.TripEventNoDriversFound},
+	// ); err != nil {
+	// 	return err
+	// }
 
-	if err := t.declareAndBindingQueue(
-		TRIP_EXCHANGE,
-		NotifyDriverAssignQueue,
-		[]string{contracts.TripEventDriverAssigned},
-	); err != nil {
-		return err
-	}
+	// if err := t.declareAndBindingQueue(
+	// 	TRIP_EXCHANGE,
+	// 	NotifyDriverAssignQueue,
+	// 	[]string{contracts.TripEventDriverAssigned},
+	// ); err != nil {
+	// 	return err
+	// }
 
-	if err := t.declareAndBindingQueue(
-		TRIP_EXCHANGE,
-		PaymentTripResponseQueue,
-		[]string{contracts.PaymentCmdCreateSession},
-	); err != nil {
-		return err
-	}
+	// if err := t.declareAndBindingQueue(
+	// 	TRIP_EXCHANGE,
+	// 	PaymentTripResponseQueue,
+	// 	[]string{contracts.PaymentCmdCreateSession},
+	// ); err != nil {
+	// 	return err
+	// }
 
-	if err := t.declareAndBindingQueue(
-		TRIP_EXCHANGE,
-		NotifyPaymentSessionCreatedQueue,
-		[]string{contracts.PaymentEventSessionCreated},
-	); err != nil {
-		return err
-	}
+	// if err := t.declareAndBindingQueue(
+	// 	TRIP_EXCHANGE,
+	// 	NotifyPaymentSessionCreatedQueue,
+	// 	[]string{contracts.PaymentEventSessionCreated},
+	// ); err != nil {
+	// 	return err
+	// }
 
-	if err := t.declareAndBindingQueue(
-		TRIP_EXCHANGE,
-		NotifyPaymentSuccessQueue,
-		[]string{
-			contracts.PaymentEventSuccess,
-			contracts.PaymentEventComplete,
-		},
-	); err != nil {
-		return err
-	}
+	// if err := t.declareAndBindingQueue(
+	// 	TRIP_EXCHANGE,
+	// 	NotifyPaymentSuccessQueue,
+	// 	[]string{
+	// 		contracts.PaymentEventSuccess,
+	// 		contracts.PaymentEventComplete,
+	// 	},
+	// ); err != nil {
+	// 	return err
+	// }
 	return nil
 }
 

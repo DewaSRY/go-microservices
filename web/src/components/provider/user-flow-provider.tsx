@@ -32,15 +32,19 @@ interface ProviderPops
 export default function Provider({ children }: ProviderPops) {
   const { mode, packageSlug } = useRiderProfile();
   const { destination, setDestination } = useRiderStore();
-  const { transactionId } = useSocketContext();
+  const { transactionId, isTransactionAccepted } = useSocketContext();
 
   const [isLockDestination, setLockDestination] = useState<boolean>(false);
   const [isHaveRideRoute, setIsHaveRideRoute] = useState<boolean>(false);
 
   const currentEvent = useMemo(() => {
     if (mode === Entity.RIDER) {
+      if (isTransactionAccepted) {
+        return RiderFlowEvent.RIDER_TRANSACTION_SUCCESS;
+      }
+
       if (isHaveRideRoute && transactionId !== undefined) {
-        return RiderFlowEvent.RIDER_CREATE_TRANSACTION;
+        return RiderFlowEvent.RIDER_WAITING_DRIVER_CONFIRMATION;
       }
 
       if (isHaveRideRoute) {
@@ -53,6 +57,10 @@ export default function Provider({ children }: ProviderPops) {
     }
 
     if (mode === Entity.DRIVER) {
+      if (isTransactionAccepted) {
+        return DriverFlowEvents.DRIVER_TRANSACTION_SUCCESS;
+      }
+
       if (packageSlug !== undefined && transactionId !== undefined) {
         return DriverFlowEvents.RIDER_CREATE_TRANSACTION;
       }
@@ -65,7 +73,13 @@ export default function Provider({ children }: ProviderPops) {
     }
 
     return undefined;
-  }, [mode, isHaveRideRoute, packageSlug]);
+  }, [
+    mode,
+    isHaveRideRoute,
+    packageSlug,
+    transactionId,
+    isTransactionAccepted,
+  ]);
 
   useEffect(() => {
     if (mode === Entity.RIDER) {

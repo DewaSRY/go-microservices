@@ -12,6 +12,9 @@ type TripFlowRepository interface {
 	CreateOrUpdateRiderTrip(ctx context.Context, model models.TripModel) error
 
 	CreateOrUpdateTransactionModel(ctx context.Context, model models.TransactionModel) error
+
+	GetTransactionById(ctx context.Context, transactionId string) (models.TransactionModel, error)
+	CleanUpTransaction(ctx context.Context, connectionId string) error
 }
 
 type TripFlowHandler interface {
@@ -19,9 +22,11 @@ type TripFlowHandler interface {
 	HandlerRiderCreateTrip(ctx context.Context, data []byte)
 	HandlerDriverInit(ctx context.Context, data []byte)
 	HandleRiderCreateTransaction(ctx context.Context, data []byte)
+	HandleDriverAcceptedTransaction(ctx context.Context, data []byte)
 }
 
 type TripFlowService interface {
 	TripCreate(ctx context.Context, riderId string) error
 	CreateRiderTrip(ctx context.Context, data _types.CreateTripParam) error
+	DriverAcceptedTransaction(ctx context.Context, transactionId string) (*models.TransactionModel, error)
 }

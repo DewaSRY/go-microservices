@@ -12,7 +12,7 @@ import {
 import { RideEvents, RiderEvents } from "@/contracts/common";
 
 import { WEBSOCKET_URL } from "@constants/environment";
-import { Coordinate, DriverActiveRecord, RouteData } from "@/types/common";
+import { DriverActiveRecord, RouteData } from "@/types/common";
 
 type ConnectionState = RiderEvents | undefined;
 
@@ -25,6 +25,7 @@ const SocketProviderContext = createContext({
   resetRoute: () => {},
   driverActive: [] as DriverActiveRecord[],
   transactionId: undefined as string | undefined,
+  isTransactionAccepted: undefined as boolean | undefined,
 });
 
 SocketProviderContext.displayName = "socket-provider";
@@ -49,6 +50,9 @@ export default function Provider({
   const [transactionId, setTransactionId] = useState<string | undefined>(
     undefined
   );
+  const [isTransactionAccepted, setIsTransactionAccepted] = useState<
+    boolean | undefined
+  >(undefined);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
 
@@ -58,20 +62,25 @@ export default function Provider({
       ws.onmessage = (event) => {
         const message = JSON.parse(event.data) as RiderWsResponse;
 
+        console.log(message);
         switch (message.type) {
           case RiderEvents.CONNECTION_SUCCESS:
             setCurrentState(message.type);
             break;
-          case RideEvents.ROUTE_FOUND:
+          case RideEvents.ROUTE_FOUND_RESPONSE:
             setRoute(message.data);
             break;
-          case RideEvents.DRIVER_ACTIVE:
-            setDriverActive((prev) => {
-              return [...prev, ...message.data];
+          case RideEvents.DRIVER_ACTIVE_RESPONSE:
+            console.log(message);
+            setDriverActive(() => {
+              return message.data;
             });
             break;
-          case RideEvents.RIDER_CREATE_TRANSACTION:
+          case RideEvents.RIDER_CREATE_TRANSACTION_RESPONSE:
             setTransactionId(message.data.transactionId);
+            break;
+          case RideEvents.TRANSACTION_ACCEPTED_RESPONSE:
+            setIsTransactionAccepted(true);
             break;
           default:
             setCurrentState(undefined);
@@ -129,6 +138,7 @@ export default function Provider({
         resetRoute,
         driverActive: driverActive,
         transactionId,
+        isTransactionAccepted,
       }}
     >
       {children}

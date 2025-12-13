@@ -26,3 +26,7 @@ type DriverActiveListResponse struct {
 type RiderCreateTransactionResponse struct {
 	TransactionId string `json:"transactionId"`
 }
+
+type TransactionAcceptedResponse struct {
+	TransactionId string `json:"transactionId"`
+}

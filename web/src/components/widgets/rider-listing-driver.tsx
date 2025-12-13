@@ -2,7 +2,6 @@ import { Button } from "../ui/button";
 
 import useRiderStore from "@/hooks/store/use-rider-store";
 import { useSocketContext } from "@/components/provider/socket-provider";
-import { RiderEvents } from "@/contracts/common";
 import { useFlowContext } from "@components/provider/user-flow-provider";
 import { RiderFlowEvent } from "@/types/events";
 import DriverActiveCard from "./driver-active-card";
@@ -35,6 +34,7 @@ export default function RiderListingDriver() {
                 key={idx}
                 title={`car-${idx}`}
                 packageSlug={x.packageSlug}
+                driverId={x.driverId}
               />
             ))}
           </div>

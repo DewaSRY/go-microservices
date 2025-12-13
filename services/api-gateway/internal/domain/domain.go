@@ -12,9 +12,10 @@ type HttpHandler interface {
 }
 
 type RideShareServices interface {
-	UserInitEventRequest(ctx context.Context, connectionId string, data []byte) error
+	UserDisconnected(ctx context.Context, connectionId string) error
 	CreateTripEvent(ctx context.Context, connectionId string, data []byte) error
 	RiderCreateTripRequest(ctx context.Context, connectionId string, data []byte) error
 	DriverInitRequest(ctx context.Context, connectionId string, data []byte) error
 	RiderCreateTransaction(ctx context.Context, connectionId string, data []byte) error
+	DriverAcceptedTransaction(ctx context.Context, connectionId string, data []byte) error
 }

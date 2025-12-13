@@ -11,9 +11,13 @@ import { useEffect } from "react";
 import { useFlowContext } from "@components/provider/user-flow-provider";
 import { DriverFlowEvents, RiderFlowEvent } from "@/types/events";
 import RiderListingDriver from "./driver-setting-slug";
-import UserSettingWaitingDriver from "./rider-listing-driver";
+import RiderSettingWaitingDriver from "./rider-listing-driver";
 import RiderCreateTrip from "./rider-create-trip copy";
 import DriverTransaction from "./driver-transaction";
+import DriverWaitingRide from "./driver-waiting-ride";
+import RiderWaitingDriverConfirmation from "./rider-waiting-driver-confirmation";
+import RiderTransactionSuccess from "./rider-transaction-success";
+import DriverTransactionSuccess from "./driver-transaction-success";
 
 export default function UserSettingSideSheet() {
   const { currentEvent } = useFlowContext();
@@ -28,7 +32,7 @@ export default function UserSettingSideSheet() {
   return (
     <>
       {/* Your trigger button anywhere */}
-      <Button onClick={() => setIsOpen(true)}>Open Settings</Button>
+      <Button onClick={setIsOpen.bind(null, true)}>Open Settings</Button>
 
       {/* Slide-in panel */}
       <div
@@ -52,28 +56,33 @@ export default function UserSettingSideSheet() {
               )}
 
               {currentEvent === RiderFlowEvent.WAITING_FOR_DRIVER && (
-                <UserSettingWaitingDriver />
+                <RiderSettingWaitingDriver />
               )}
 
               {currentEvent === DriverFlowEvents.DRIVER_INIT_CONN && (
                 <RiderListingDriver />
               )}
 
+              {currentEvent ===
+                RiderFlowEvent.RIDER_WAITING_DRIVER_CONFIRMATION && (
+                <RiderWaitingDriverConfirmation />
+              )}
+
+              {currentEvent === RiderFlowEvent.RIDER_TRANSACTION_SUCCESS && (
+                <RiderTransactionSuccess />
+              )}
+
+              {currentEvent === DriverFlowEvents.DRIVER_WAITING_FOR_RIDER && (
+                <DriverWaitingRide />
+              )}
+
               {currentEvent === DriverFlowEvents.RIDER_CREATE_TRANSACTION && (
                 <DriverTransaction />
               )}
 
-              {/* {currentMode === "slug-setting" && <UserSettingSlug />}
-
-              {currentMode === "start-connection-setting" && (
-                <UserSettingInitData />
+              {currentEvent === DriverFlowEvents.DRIVER_TRANSACTION_SUCCESS && (
+                <DriverTransactionSuccess />
               )}
-
-              {currentMode === "init-data-success" && (
-                <RiderSelectDestination />
-              )}
-
-              {currentMode === undefined && <p>this is undefine</p>} */}
             </div>
 
             <footer className="p-4 border-t flex justify-between">

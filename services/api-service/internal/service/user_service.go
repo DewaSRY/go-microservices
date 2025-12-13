@@ -19,6 +19,51 @@ type userService struct {
 	tripRepo domain.TripFlowRepository
 }
 
+// UserCleanUpData implements domain.UserService.
+func (t *userService) UserCleanUpData(ctx context.Context, connectionId string) error {
+
+	if err := t.userRepo.CleanUpDriverData(ctx, connectionId); err != nil {
+		return err
+	}
+
+	if err := t.userRepo.CleanUpRiderData(ctx, connectionId); err != nil {
+		return nil
+	}
+
+	if err := t.tripRepo.CleanUpTransaction(ctx, connectionId); err != nil {
+		return nil
+	}
+
+	return nil
+}
+
+// NotifyDriverAcceptedTransaction implements domain.userService.
+func (t *userService) NotifyDriverAcceptedTransaction(ctx context.Context, transactionId string, driverId string, riderId string) error {
+	responseJson, err := json.Marshal(messaging.TransactionAcceptedResponse{
+		TransactionId: transactionId,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	if err := t.rabbitMq.PublishingMessage(ctx, contracts.TransactionAcceptedResponse, contracts.MessageData{
+		ConnectionId: driverId,
+		Data:         responseJson,
+	}); err != nil {
+		return err
+	}
+
+	if err := t.rabbitMq.PublishingMessage(ctx, contracts.TransactionAcceptedResponse, contracts.MessageData{
+		ConnectionId: riderId,
+		Data:         responseJson,
+	}); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // RiderNotifyTransaction implements domain.UserService.
 func (t *userService) RiderNotifyTransaction(ctx context.Context, connection string, transactionId string) error {
 
@@ -87,10 +132,6 @@ func (t *userService) NotifyDriverActive(ctx context.Context) error {
 
 	if err != nil {
 		return err
-	}
-
-	if len(driverList) == 0 {
-		return nil
 	}
 
 	waitingRiderList, err := t.userRepo.GetWaitingRiderIdConnectionList(ctx)
@@ -191,24 +232,6 @@ func (t *userService) UpdateRiderLocation(ctx context.Context, data types.Update
 	}
 
 	return t.userRepo.UpdateRiderLocation(ctx, data.RiderId, byteLocation, byteDestination)
-}
-
-// UserInit implements domain.UserService.
-func (t *userService) UserInit(ctx context.Context, request messaging.InitConnectionRequest) error {
-	// switch request.Entity {
-	// case "DRIVER":
-	// 	t.userRepo.CreateDriver(ctx, request.ConnectionId, types.CreateDriverParam{
-	// 		PackageSlug: request.PackageSlug,
-	// 		Location:    request.Coordinate,
-	// 	})
-	// case "RIDER":
-	// 	t.userRepo.CreateRider(ctx, request.ConnectionId, types.CreateRiderParam{
-	// 		PackageSlug: request.PackageSlug,
-	// 		Location:    request.Coordinate,
-	// 	})
-	// }
-
-	return nil
 }
 
 func NewUserService(

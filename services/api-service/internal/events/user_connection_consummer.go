@@ -24,11 +24,9 @@ func (t *UserConnectionConsumer) Listen() error {
 			return err
 		}
 
-		log.Printf("test_:%v", msg.RoutingKey)
-
 		switch msg.RoutingKey {
-		case contracts.UserInitEventProcess:
-			t.userHandler.HandlerUserInitConnection(ctx, message.Data)
+		case contracts.UserDisconnectedProcess:
+			t.userHandler.HandlerUserDisconnect(ctx, message.Data)
 		}
 
 		return nil

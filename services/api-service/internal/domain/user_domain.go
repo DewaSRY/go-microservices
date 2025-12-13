@@ -2,7 +2,6 @@ package domain
 
 import (
 	_type "DewaSRY/go-microservices/services/api-service/pkg/types"
-	"DewaSRY/go-microservices/shared/messaging"
 	"DewaSRY/go-microservices/shared/models"
 	"context"
 )
@@ -17,15 +16,17 @@ type UserRepository interface {
 
 	GetDriverActiveList(ctx context.Context) ([]models.DriverModel, error)
 	GetWaitingRiderIdConnectionList(ctx context.Context) ([]string, error)
+
+	//TODO: clean up
+	CleanUpDriverData(ctx context.Context, connectionId string) error
+	CleanUpRiderData(ctx context.Context, connectionId string) error
 }
 
 type UserEventHandler interface {
-	HandlerUserInitConnection(ctx context.Context, data []byte)
 	HandlerUserDisconnect(ctx context.Context, data []byte)
 }
 
 type UserService interface {
-	UserInit(ctx context.Context, request messaging.InitConnectionRequest) error
 	UpdateRiderLocation(ctx context.Context, data _type.UpdateRiderLocationParam) error
 
 	CreateRider(ctx context.Context, data _type.CreateRiderParam) error
@@ -36,4 +37,7 @@ type UserService interface {
 	RiderStartTransaction(ctx context.Context, riderId string, driverId string) (string, error)
 	DriverNotifyTransaction(ctx context.Context, driverId string, transactionId string) error
 	RiderNotifyTransaction(ctx context.Context, connection string, transactionId string) error
+	NotifyDriverAcceptedTransaction(ctx context.Context, transactionId string, driverId string, riderId string) error
+
+	UserCleanUpData(ctx context.Context, connectionId string) error
 }

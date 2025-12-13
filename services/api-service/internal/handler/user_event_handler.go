@@ -2,11 +2,9 @@ package handler
 
 import (
 	"DewaSRY/go-microservices/services/api-service/internal/domain"
-	"DewaSRY/go-microservices/shared/contracts"
 	"DewaSRY/go-microservices/shared/messaging"
 	"context"
 	"encoding/json"
-	"log"
 )
 
 type userEventHandler struct {
@@ -15,38 +13,18 @@ type userEventHandler struct {
 }
 
 // HandlerUserDisconnect implements domain.UserEventHandler.
-func (u *userEventHandler) HandlerUserDisconnect(ctx context.Context, data []byte) {
-	panic("unimplemented")
-}
-
-// HandlerUserInitConnection implements domain.UserEventHandler.
-func (t *userEventHandler) HandlerUserInitConnection(ctx context.Context, data []byte) {
-	var payload messaging.InitConnectionRequest
+func (t *userEventHandler) HandlerUserDisconnect(ctx context.Context, data []byte) {
+	var payload messaging.UserDisconnectionRequest
 
 	if err := json.Unmarshal(data, &payload); err != nil {
-		log.Printf("error_failed_to_init_user_connection:%v", err)
 		return
 	}
 
-	if err := t.userService.UserInit(ctx, payload); err != nil {
-		log.Printf("error_failed_to_init_user_connection:%v", err)
+	if err := t.userService.UserCleanUpData(ctx, payload.ConnectionId); err != nil {
 		return
 	}
 
-	successResponse, err := json.Marshal(map[string]any{
-		"message": "success_init_data",
-	})
-
-	if err != nil {
-		log.Printf("error_failed_to_init_user_connection:%v", err)
-		return
-	}
-
-	if err := t.rabbitmq.PublishingMessage(ctx, contracts.UserInitSuccessResponse, contracts.MessageData{
-		ConnectionId: payload.ConnectionId,
-		Data:         successResponse,
-	}); err != nil {
-		log.Printf("error_failed_to_publish_%v", err)
+	if err := t.userService.NotifyDriverActive(ctx); err != nil {
 		return
 	}
 

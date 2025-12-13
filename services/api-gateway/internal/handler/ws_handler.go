@@ -53,12 +53,16 @@ func (t *WsHandler) WsHandleStartConnection(w http.ResponseWriter, r *http.Reque
 	if err != nil {
 		log.Printf("failed_to_start_connection")
 	}
-	defer conn.Close()
+
 	ctx := r.Context()
 	connectionId := uuid.New().String()
-
 	t.connManager.Add(connectionId, conn)
-	defer t.connManager.Remove(connectionId)
+
+	defer func() {
+		conn.Close()
+		t.tripService.UserDisconnected(ctx, connectionId)
+		t.connManager.Remove(connectionId)
+	}()
 
 	t.makeQueueConsumer(
 		[]string{
@@ -82,8 +86,6 @@ func (t *WsHandler) WsHandleStartConnection(w http.ResponseWriter, r *http.Reque
 		}
 
 		switch messageData.Type {
-		case contracts.UserInitEventRequest:
-			t.tripService.UserInitEventRequest(ctx, connectionId, messageData.Data)
 		case contracts.TripCreateInitEvent:
 			t.tripService.CreateTripEvent(ctx, connectionId, messageData.Data)
 		case contracts.RiderCreateTripRequest:
@@ -92,6 +94,8 @@ func (t *WsHandler) WsHandleStartConnection(w http.ResponseWriter, r *http.Reque
 			t.tripService.DriverInitRequest(ctx, connectionId, messageData.Data)
 		case contracts.RiderCreateTransactionRequest:
 			t.tripService.RiderCreateTransaction(ctx, connectionId, messageData.Data)
+		case contracts.DriverAcceptTransactionRequest:
+			t.tripService.DriverAcceptedTransaction(ctx, connectionId, messageData.Data)
 		default:
 			log.Printf("trip_received_unknown_messages: %v", messageData.Type)
 		}

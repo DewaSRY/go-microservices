@@ -39,10 +39,11 @@ const (
 
 	//#################################
 	// user
-	UserInitEventRequest         = "user.init.request"
 	UserInitEventProcess         = "user.init.process"
 	UserInitSuccessResponse      = "user.init-success.response"
 	UserCloseConnectiondataEvent = "user.event.disconnect"
+
+	UserDisconnectedProcess = "user.disconnected.process"
 
 	//
 	RiderEventCreateTrip = "rider.event.create-trip"
@@ -71,4 +72,9 @@ const (
 	RiderCreateTransactionProcess = "rider.create-transaction.process"
 
 	RiderCreateTransactionResponse = "rider.create-transaction.response"
+
+	DriverAcceptTransactionRequest = "driver.transaction.accepted.request"
+	DriverAcceptTransactionProcess = "driver.transaction.accepted.process"
+
+	TransactionAcceptedResponse = "transaction.accepted.response"
 )

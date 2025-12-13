@@ -12,7 +12,42 @@ import (
 
 type tripFlowService struct {
 	tripFlowRepo domain.TripFlowRepository
+	rabbitMq     *messaging.RabbitMQ
 }
+
+// DriverAcceptedTransaction implements domain.TripFlowService.
+func (t *tripFlowService) DriverAcceptedTransaction(ctx context.Context, transactionId string) (*models.TransactionModel, error) {
+	transactionModel, err := t.tripFlowRepo.GetTransactionById(ctx, transactionId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	transactionModel.Status = "ACCEPTED"
+
+	if err := t.tripFlowRepo.CreateOrUpdateTransactionModel(ctx, transactionModel); err != nil {
+		return nil, err
+	}
+
+	return &transactionModel, nil
+}
+
+// DriverAcceptedTransaction implements domain.TripFlowService.
+// func (t *tripFlowService) DriverAcceptedTransaction(ctx context.Context, transactionId string) (models.TransactionModel, error) {
+// 	transactionModel, err := t.tripFlowRepo.GetTransactionById(ctx, transactionId)
+
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	transactionModel.Status = "ACCEPTED"
+
+// 	if err := t.tripFlowRepo.CreateOrUpdateTransactionModel(ctx, transactionModel); err != nil {
+// 		return nil, err
+// 	}
+
+// 	return transactionModel, nil
+// }
 
 // CreateRiderTrip implements domain.TripFlowService.
 func (t *tripFlowService) CreateRiderTrip(ctx context.Context, data _types.CreateTripParam) error {
@@ -37,5 +72,6 @@ func NewTripFlowService(
 ) domain.TripFlowService {
 	return &tripFlowService{
 		tripFlowRepo: tripFlowRepo,
+		rabbitMq:     rabbitMq,
 	}
 }

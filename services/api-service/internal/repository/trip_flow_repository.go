@@ -15,6 +15,41 @@ type tripFlowRepository struct {
 	db *db.PostgresManager
 }
 
+// CleanUpTransaction implements domain.TripFlowRepository.
+func (t *tripFlowRepository) CleanUpTransaction(ctx context.Context, connectionId string) error {
+	// panic("unimplemented"	)
+
+	result := t.db.DB.WithContext(ctx).Model(models.TransactionModel{}).
+		Where("status = ?", "ACCEPTED").
+		Where("(rider_id = ? OR driver_id = ?)", connectionId, connectionId)
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}
+
+// GetTransactionById implements domain.TripFlowRepository.
+func (t *tripFlowRepository) GetTransactionById(ctx context.Context, transactionId string) (models.TransactionModel, error) {
+	var tx models.TransactionModel
+
+	err := t.db.DB.
+		WithContext(ctx).
+		Where("id = ?", transactionId).
+		First(&tx).
+		Error
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return models.TransactionModel{}, err
+		}
+		return models.TransactionModel{}, err
+	}
+
+	return tx, nil
+}
+
 // CreateOrUpdateTransactionModel implements domain.TripFlowRepository.
 func (t *tripFlowRepository) CreateOrUpdateTransactionModel(ctx context.Context, model models.TransactionModel) error {
 	db := t.db.DB.WithContext(ctx)

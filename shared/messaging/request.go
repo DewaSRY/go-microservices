@@ -32,3 +32,12 @@ type RiderCreateTransactionRequest struct {
 	ConnectionId string `json:"connectionId"`
 	DriverId     string `json:"driverId"`
 }
+
+type DriverAcceptedTransactionRequest struct {
+	ConnectionId  string `json:"connectionId"`
+	TransactionId string `json:"transactionId"`
+}
+
+type UserDisconnectionRequest struct {
+	ConnectionId string `json:"connectionId"`
+}

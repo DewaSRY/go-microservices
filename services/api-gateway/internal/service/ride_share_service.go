@@ -14,6 +14,62 @@ type rideShareService struct {
 	rabbitMq *messaging.RabbitMQ
 }
 
+// UserDisconnected implements domain.RideShareServices.
+func (t *rideShareService) UserDisconnected(ctx context.Context, connectionId string) error {
+	messageData, err := json.Marshal(
+		messaging.UserDisconnectionRequest{
+			ConnectionId: connectionId,
+		},
+	)
+
+	if err != nil {
+		log.Printf("failed_to_parse:%v", err)
+		return nil
+	}
+
+	if err := t.rabbitMq.PublishingMessage(ctx, contracts.UserDisconnectedProcess,
+		contracts.MessageData{
+			ConnectionId: connectionId,
+			Data:         messageData,
+		}); err != nil {
+		log.Printf("failed_to_parse:%v", err)
+	}
+
+	return nil
+}
+
+// DriverAcceptedTransaction implements domain.RideShareServices.
+func (t *rideShareService) DriverAcceptedTransaction(ctx context.Context, connectionId string, data []byte) error {
+	var parseData types.DriverAcceptedTransactionRequest
+
+	if err := json.Unmarshal(data, &parseData); err != nil {
+		log.Printf("error_failed_to_process_user_init_data:%v", err)
+		return nil
+	}
+
+	resultData, err := json.Marshal(
+		messaging.DriverAcceptedTransactionRequest{
+			ConnectionId:  connectionId,
+			TransactionId: parseData.TransactionId,
+		},
+	)
+
+	if err != nil {
+		log.Printf("failed_to_parse:%v", err)
+		return nil
+	}
+
+	if err := t.rabbitMq.PublishingMessage(ctx, contracts.DriverAcceptTransactionProcess,
+		contracts.MessageData{
+			ConnectionId: connectionId,
+			Data:         resultData,
+		}); err != nil {
+		log.Printf("failed_to_parse:%v", err)
+	}
+
+	return nil
+}
+
 // RiderCreateTransaction implements domain.RideShareServices.
 func (t *rideShareService) RiderCreateTransaction(ctx context.Context, connectionId string, data []byte) error {
 	var parseData types.RiderCreateTransactionRequest
@@ -136,39 +192,6 @@ func (t *rideShareService) CreateTripEvent(ctx context.Context, connectionId str
 	}
 
 	if err := t.rabbitMq.PublishingMessage(ctx, contracts.TripCreateInitProcess,
-		contracts.MessageData{
-			ConnectionId: connectionId,
-			Data:         resultData,
-		}); err != nil {
-		log.Printf("failed_to_parse:%v", err)
-	}
-
-	return nil
-}
-
-// UserInitEventRequest implements domain.RideShareServices.
-func (t *rideShareService) UserInitEventRequest(ctx context.Context, connectionId string, data []byte) error {
-	var parseData messaging.InitConnectionRequest
-
-	if err := json.Unmarshal(data, &parseData); err != nil {
-		log.Printf("error_failed_to_process_user_init_data:%v", err)
-		return nil
-	}
-	resultData, err := json.Marshal(
-		messaging.InitConnectionRequest{
-			ConnectionId: connectionId,
-			Coordinate:   parseData.Coordinate,
-			PackageSlug:  parseData.PackageSlug,
-			Entity:       parseData.Entity,
-		},
-	)
-
-	if err != nil {
-		log.Printf("failed_to_parse:%v", err)
-		return nil
-	}
-
-	if err := t.rabbitMq.PublishingMessage(ctx, contracts.UserInitEventProcess,
 		contracts.MessageData{
 			ConnectionId: connectionId,
 			Data:         resultData,

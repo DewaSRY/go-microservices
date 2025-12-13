@@ -25,3 +25,7 @@ type DriverInitRequest struct {
 type RiderCreateTransactionRequest struct {
 	DriverId string `json:"driverId"`
 }
+
+type DriverAcceptedTransactionRequest struct {
+	TransactionId string `json:"transactionId"`
+}

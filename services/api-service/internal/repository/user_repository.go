@@ -16,6 +16,34 @@ type userRepository struct {
 	db *db.PostgresManager
 }
 
+// CleanUpDriverData implements domain.UserRepository.
+func (t *userRepository) CleanUpDriverData(ctx context.Context, connection string) error {
+
+	result := t.db.DB.WithContext(ctx).Model(models.DriverModel{}).
+		Where("id = ?", connection).
+		Update("is_active", false)
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}
+
+// CleanUpRiderData implements domain.UserRepository.
+func (t *userRepository) CleanUpRiderData(ctx context.Context, connection string) error {
+
+	result := t.db.DB.WithContext(ctx).Model(models.RiderModel{}).
+		Where("id = ?", connection).
+		Update("is_active", false)
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}
+
 // GetWaitingRiderIdConnectionList implements domain.UserRepository.
 func (t *userRepository) GetWaitingRiderIdConnectionList(ctx context.Context) ([]string, error) {
 	var ridersId []string

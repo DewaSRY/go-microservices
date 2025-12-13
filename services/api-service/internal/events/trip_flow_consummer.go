@@ -33,6 +33,8 @@ func (t *TripFlowConsumer) Listen() error {
 			t.tripFlowHandler.HandlerDriverInit(ctx, message.Data)
 		case contracts.RiderCreateTransactionProcess:
 			t.tripFlowHandler.HandleRiderCreateTransaction(ctx, message.Data)
+		case contracts.DriverAcceptTransactionProcess:
+			t.tripFlowHandler.HandleDriverAcceptedTransaction(ctx, message.Data)
 		}
 
 		return nil
