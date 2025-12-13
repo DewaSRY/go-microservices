@@ -23,7 +23,7 @@ func (t *tripRepository) FindTripWithFilter(dbFilter domain.DbFilter) (*models.T
 	if result := dbFilter(t.db.DB).Find(&trip); result.Error != nil {
 		return nil, result.Error
 	}
-	if len(trip.ID) == 0 {
+	if len(trip.Id) == 0 {
 		return nil, fmt.Errorf("trip_not_found")
 	}
 

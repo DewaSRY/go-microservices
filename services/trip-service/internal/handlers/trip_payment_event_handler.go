@@ -24,7 +24,7 @@ func (t *tripPaymentEventHandler) HandleAcceptedPayment(ctx context.Context, Tri
 		return fmt.Errorf("trip_with_id_%s_not_found:%v", TripID, err)
 	}
 
-	driverId := trip.DriverID
+	driverId := trip.DriverId
 
 	// contracts.PaymentEventComplete
 

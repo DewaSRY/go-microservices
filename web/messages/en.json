@@ -93,5 +93,8 @@
     "warning": {
       "noStripApiKey": "Strip API KEY is not set on the next js APP"
     }
+  },
+  "navigation": {
+    "logo": "Ride Share"
   }
 }

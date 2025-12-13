@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { Driver, Trip } from "@/types/types";
-import { ClientWsMessage, TripEvents } from "@/contracts";
+import { ClientWsMessage, TripEvents } from "@/_contracts";
 
 const initState = {
   trip: null as Trip | null,

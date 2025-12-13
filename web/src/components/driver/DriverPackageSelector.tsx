@@ -1,6 +1,6 @@
 import { PackagesMeta } from "@/components/common/PackagesMeta";
 import { CarPackageSlug } from "@/types/types";
-import { cn } from "@/lib/utils";
+import { cn } from "@/libs/utils";
 import { useTranslations } from "next-intl";
 
 interface DriverPackageSelectorProps {

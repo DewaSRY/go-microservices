@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useRiderStreamConnection } from "@/hooks/useRiderStreamConnection";
+
 import {
   MapContainer,
   Marker,
@@ -9,10 +10,11 @@ import {
   Rectangle,
   TileLayer,
 } from "react-leaflet";
+
 import L from "leaflet";
 import { getGeohashBounds } from "@/utils/geohash";
 import { useMemo, useRef, useState } from "react";
-import { MapClickHandler } from "@/lib/react-leaflet";
+import { MapClickHandler } from "@/libs/react-leaflet";
 import { Button } from "../ui/button";
 import { RouteFare } from "@/types/types";
 import {
@@ -21,7 +23,7 @@ import {
   HTTPTripStartResponse,
 } from "@/types/dto";
 import { RoutingControl } from "../common/RoutingControl";
-import { API_URL } from "@/constants";
+import { API_URL } from "@constants/environment";
 import { RiderTripOverview } from "./RiderTripOverview";
 import {
   BackendEndpoints,
@@ -29,7 +31,7 @@ import {
   HTTPTripPreviewResponse,
   HTTPTripStartRequestPayload,
   TripEvents,
-} from "@/contracts";
+} from "@/_contracts";
 
 import useRiderStore from "@/hooks/useRiderStore";
 import { useTranslations } from "next-intl";
@@ -197,9 +199,13 @@ export default function RiderMap({ onRouteSelected }: RiderMapProps) {
           style={{ height: "100%", width: "100%" }}
           ref={mapRef}
         >
-          <TileLayer
+          {/* <TileLayer
             url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
             attribution="&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors &copy; <a href='https://carto.com/'>CARTO</a>"
+          /> */}
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           />
           <Marker
             position={[location.latitude, location.longitude]}
@@ -271,6 +277,7 @@ export default function RiderMap({ onRouteSelected }: RiderMapProps) {
               </Popup>
             </Marker>
           ))}
+
           {destination && (
             <Marker position={destination} icon={userMarker}>
               <Popup>{commonT("destination")}</Popup>

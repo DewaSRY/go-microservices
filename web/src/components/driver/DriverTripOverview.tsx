@@ -1,6 +1,6 @@
 import { TripOverviewCard } from "../common/TripOverviewCard";
 import { Button } from "../ui/button";
-import { TripEvents } from "@/contracts";
+import { TripEvents } from "@/_contracts";
 import useDriverStore from "@/hooks/useDriverStore";
 import { useTranslations } from "next-intl";
 

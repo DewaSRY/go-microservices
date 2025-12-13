@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { WEBSOCKET_URL } from "../constants";
+import { WEBSOCKET_URL } from "../constants/environment";
 import { CarPackageSlug } from "../types/types";
 import {
   ServerWsMessage,
@@ -7,7 +7,7 @@ import {
   isValidWsMessage,
   isValidTripEvent,
   BackendEndpoints,
-} from "../contracts";
+} from "../_contracts";
 import { useRouter } from "next/navigation";
 import useDriverStore from "./useDriverStore";
 

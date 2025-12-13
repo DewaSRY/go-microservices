@@ -37,7 +37,7 @@ func (t *tripDriverEventHandler) HandleTripAccepted(ctx context.Context, tripID 
 		return fmt.Errorf("failed_to_get_trip_with_id_%s:%v", tripID, err)
 	}
 
-	fare, err := t.tripService.GetFareById(ctx, trip.RideFareID)
+	fare, err := t.tripService.GetFareById(ctx, trip.RiderId)
 	if err != nil {
 		return fmt.Errorf("failed_to_get_trip_with_id_%s:%v", tripID, err)
 	}
@@ -52,7 +52,7 @@ func (t *tripDriverEventHandler) HandleTripAccepted(ctx context.Context, tripID 
 		ctx,
 		contracts.TripEventDriverAssigned,
 		contracts.AmqpMessage{
-			OwnerID: trip.UserID,
+			OwnerID: trip.RiderId,
 			Data:    marshalledTrip,
 		}); err != nil {
 		return err
@@ -61,7 +61,7 @@ func (t *tripDriverEventHandler) HandleTripAccepted(ctx context.Context, tripID 
 	marshalledPayload, err := json.Marshal(
 		messaging.PaymentTripResponseData{
 			TripID:   tripID,
-			UserID:   trip.UserID,
+			UserID:   trip.RiderId,
 			DriverID: driver.Id,
 			Amount:   fare.TotalPriceInCents,
 			Currency: "USD",
@@ -75,7 +75,7 @@ func (t *tripDriverEventHandler) HandleTripAccepted(ctx context.Context, tripID 
 		ctx,
 		contracts.PaymentCmdCreateSession,
 		contracts.AmqpMessage{
-			OwnerID: trip.UserID,
+			OwnerID: trip.RiderId,
 			Data:    marshalledPayload,
 		},
 	); err != nil {

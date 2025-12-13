@@ -1,16 +1,21 @@
 package models
 
-import "gorm.io/datatypes"
+import (
+	"time"
+
+	"gorm.io/datatypes"
+	"gorm.io/gorm"
+)
 
 type DriverModel struct {
-	ID             string         `gorm:"primaryKey;type:varchar(64)"`
-	Name           string         `gorm:"type:varchar(50)"`
-	Geohash        string         `gorm:"type:varchar(64)"`
-	ProfilePicture string         `gorm:"type:varchar(50)"`
-	CarPlate       string         `gorm:"type:varchar(50);not null;"`
-	PackageSlug    string         `gorm:"type:varchar(24);not null;"`
-	IsActive       bool           `gorm:"not null;default:false"`
-	Location       datatypes.JSON `gorm:"type:jsonb"`
+	Id          string         `gorm:"primaryKey;type:varchar(64)"`
+	PackageSlug string         `gorm:"type:varchar(24);not null;"`
+	IsActive    bool           `gorm:"not null;default:false"`
+	UserId      string         `gorm:"type:varchar(64);not null;index"`
+	Location    datatypes.JSON `gorm:"type:jsonb"`
+	CreatedAt   time.Time      `gorm:"autoCreateTime"`
+	UpdatedAt   time.Time      `gorm:"autoUpdateTime"`
+	DeletedAt   gorm.DeletedAt `gorm:"index"`
 }
 
 func (DriverModel) TableName() string {
