@@ -31,12 +31,13 @@ export default function DriverSettingSlug() {
 
   return (
     <div>
-      <div>
+      <div className="flex flex-col gap-2">
         {Object.entries(PackageSlugMeta).map(([slug, meta]) => (
           <div
             key={slug}
             className={cn(
-              "flex items-center gap-3 sm:gap-4 p-3 sm:p-4 sm:rounded-lg sm:border transition-all cursor-pointer",
+              "flex items-center gap-3 sm:gap-4 p-3  transition-all cursor-pointer shadow-lg",
+              "sm:p-4 sm:rounded-lg sm:border",
               "hover:border-primary hover:bg-primary/5"
             )}
             onClick={handlerSelectSlug.bind(null, meta.slug)}

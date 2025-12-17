@@ -22,6 +22,18 @@
     "riderTransactionSuccess": {
       "title": "Transaction Successful",
       "closeTransaction": "Close Transaction"
+    },
+    "driverWaitingRider": {
+      "title": "Waiting for rider",
+      "close": "Close"
+    },
+    "driverGetRiderTransaction": {
+      "title": "A Rider request a ride",
+      "acceptTransaction": "Accept Transaction"
+    },
+    "driverTransactionSuccess": {
+      "title": "Transaction Successful",
+      "closeTransaction": "Close Transaction"
     }
   },
 

@@ -1,8 +1,12 @@
 import { DriverEvents } from "@/contracts/common";
-import { useSocketContext } from "../../provider/socket-provider";
-import { Button } from "../../ui/button";
+import { useSocketContext } from "@/components/provider/socket-provider";
+import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
+import TitleBadge from "@/components/ui/title-badge";
 
 export default function DriverTransaction() {
+  const translate = useTranslations("ride.driverGetRiderTransaction");
+
   const { sendMessage, transactionId } = useSocketContext();
 
   function handleAcceptedTransaction() {
@@ -18,11 +22,16 @@ export default function DriverTransaction() {
 
   return (
     <div>
-      <div>Driver Find rider</div>
+      <TitleBadge>{translate("title")}</TitleBadge>
+      <br className="h-16" />
 
-      <div>
-        <Button onClick={handleAcceptedTransaction}>accepted</Button>
+      <div className="flex flex-col gap-2">
+        <Button onClick={handleAcceptedTransaction}>
+          {translate("acceptTransaction")}
+        </Button>
       </div>
+
+      <br className="h-16" />
     </div>
   );
 }

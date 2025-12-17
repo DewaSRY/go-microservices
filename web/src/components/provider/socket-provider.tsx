@@ -130,11 +130,17 @@ export default function Provider({
   }
 
   function handleReconnect() {
-    setRoute(undefined);
+    socketRef.current?.close();
 
+    setRoute(undefined);
     setTransactionId(undefined);
     setIsTransactionAccepted(undefined);
-    connect();
+
+    // by default when the socket is closed it will reconnect
+    // but if the reconnect is false we need to manually connect
+    if (!reconnect) {
+      connect();
+    }
   }
 
   return (
