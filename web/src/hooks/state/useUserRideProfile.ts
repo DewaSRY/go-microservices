@@ -12,6 +12,7 @@ type Action = {
   setMode: (_data: modeType) => void;
   setPackageSlug: (_data: PackageSlug | undefined) => void;
   initData: () => void;
+  reset: () => void;
 };
 
 const useUserRideProfile = create<typeof initState & Action>((set) => {
@@ -79,11 +80,20 @@ const useUserRideProfile = create<typeof initState & Action>((set) => {
     });
   }
 
+  function reset() {
+    set(() => {
+      return {
+        ...initState,
+      };
+    });
+  }
+
   return {
     ...initState,
     setMode,
     initData,
     setPackageSlug,
+    reset,
   };
 });
 

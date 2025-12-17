@@ -5,7 +5,7 @@ import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import L from "leaflet";
 import { useEffect, useMemo, useRef } from "react";
 import useRiderStore from "@/hooks/store/use-rider-store";
-import MapClickHandler from "../common/map-click-handler";
+import MapClickHandler from "../../common/map-click-handler";
 import { useSocketContext } from "@components/provider/socket-provider";
 import { RoutingControl } from "@components/common/RoutingControl";
 
@@ -149,9 +149,7 @@ export default function HomeMapWidget() {
             position={[destination.latitude, destination.longitude]}
             icon={userMarker}
           >
-            <Popup>
-              <div>hallo</div>
-            </Popup>
+            <Popup></Popup>
           </Marker>
         )}
 

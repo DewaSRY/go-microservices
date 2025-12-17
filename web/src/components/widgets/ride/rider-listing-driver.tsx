@@ -1,12 +1,16 @@
-import { Button } from "../ui/button";
-
+import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 import useRiderStore from "@/hooks/store/use-rider-store";
 import { useSocketContext } from "@/components/provider/socket-provider";
 import { useFlowContext } from "@components/provider/user-flow-provider";
 import { RiderFlowEvent } from "@/types/events";
-import DriverActiveCard from "./driver-active-card";
+import DriverActiveCard from "./driver-active";
+
+import TitleBadge from "@/components/ui/title-badge";
+import { Info } from "lucide-react";
 
 export default function RiderListingDriver() {
+  const translate = useTranslations("ride.listingDriver");
   const { currentEvent } = useFlowContext();
   const { currentLocation, destination, setDestination } = useRiderStore();
   const { resetRoute, driverActive } = useSocketContext();
@@ -20,12 +24,19 @@ export default function RiderListingDriver() {
 
   return (
     <div>
-      <div>this is supper</div>
+      <TitleBadge>{translate("title")}</TitleBadge>
+
+      <br className="h-16" />
 
       <div>
         {driverActive.length === 0 ? (
           <div>
-            <span>waiting for driver</span>
+            <div className="w-11/12 mx-auto rounded-xl bg-yellow-400/10 px-4 py-2 text-gray-700 flex items-center gap-2">
+              <span>
+                <Info />
+              </span>
+              <span>{translate("waitingDriver")}</span>
+            </div>
           </div>
         ) : (
           <div>
@@ -40,12 +51,15 @@ export default function RiderListingDriver() {
           </div>
         )}
       </div>
-      <div>
+
+      <br className="h-16" />
+
+      <div className="flex flex-col gap-2">
         <Button
           disabled={currentEvent !== RiderFlowEvent.WAITING_FOR_DRIVER}
           onClick={handleCancelTrip}
         >
-          Cancel Trip
+          {translate("cancelTrip")}
         </Button>
       </div>
     </div>

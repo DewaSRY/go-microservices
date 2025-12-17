@@ -2,7 +2,7 @@ import useUserSettingDrawer from "@hooks/state/useUserSettingDrawer";
 import { Button } from "@components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/avatar";
 import useUserRideProfile from "@/hooks/state/useUserRideProfile";
-
+import { X } from "lucide-react";
 export default function userSettingProfile() {
   const { setIsOpen } = useUserSettingDrawer();
   const { mode, setMode, setPackageSlug, packageSlug } = useUserRideProfile();
@@ -15,7 +15,9 @@ export default function userSettingProfile() {
   return (
     <div className="flex justify-between items-center">
       <div>
-        <Button onClick={setIsOpen.bind(null, false)}>Close</Button>
+        <Button onClick={setIsOpen.bind(null, false)} size="icon">
+          <X />
+        </Button>
       </div>
 
       <div className="flex justify-end gap-2">

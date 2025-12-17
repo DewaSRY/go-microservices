@@ -1,16 +1,14 @@
-import { Button } from "../ui/button";
-
+import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 import useRiderStore from "@/hooks/store/use-rider-store";
 import { useSocketContext } from "@/components/provider/socket-provider";
 import { RiderEvents } from "@/contracts/common";
-import { useFlowContext } from "@components/provider/user-flow-provider";
-import { RiderFlowEvent } from "@/types/events";
+import TitleBadge from "@/components/ui/title-badge";
 
 export default function RiderCreateTrip() {
-  const { currentEvent } = useFlowContext();
-  const { currentLocation, destination, setDestination } = useRiderStore();
+  const { currentLocation, destination } = useRiderStore();
   const { sendMessage } = useSocketContext();
-  const { resetRoute } = useSocketContext();
+  const translate = useTranslations("ride.rideCreateTrip");
 
   function handleStartTrip() {
     if (currentLocation && destination) {
@@ -26,12 +24,15 @@ export default function RiderCreateTrip() {
 
   return (
     <div>
-      <div>Selected Trip Settings Component</div>
-      <div>
+      <TitleBadge>{translate("title")}</TitleBadge>
+      <br className="h-16" />
+
+      <div className="flex flex-col gap-2">
         <Button disabled={destination === undefined} onClick={handleStartTrip}>
-          Start Trip
+          {translate("startTrip")}
         </Button>
       </div>
+      <br className="h-16" />
     </div>
   );
 }

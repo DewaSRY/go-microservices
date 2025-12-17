@@ -21,6 +21,7 @@ const UserFlowProvider = createContext({
   setLockDestinationState: (val: boolean) => {},
   isLockDestination: false,
   setIsHaveRideRoute: (val: boolean) => {},
+  resetState: () => {},
 });
 
 UserFlowProvider.displayName = "user-flow";
@@ -108,6 +109,12 @@ export default function Provider({ children }: ProviderPops) {
     if (mode !== Entity.RIDER || destination === undefined) return;
     setLockDestination(value);
   }
+
+  function resetState() {
+    setLockDestination(true);
+    setIsHaveRideRoute(false);
+  }
+
   return (
     <UserFlowProvider.Provider
       value={{
@@ -115,6 +122,7 @@ export default function Provider({ children }: ProviderPops) {
         isLockDestination,
         setIsHaveRideRoute: _setIsHaveRideRoute,
         setLockDestinationState,
+        resetState,
       }}
     >
       {children}
