@@ -26,6 +26,7 @@ const SocketProviderContext = createContext({
   driverActive: [] as DriverActiveRecord[],
   transactionId: undefined as string | undefined,
   isTransactionAccepted: undefined as boolean | undefined,
+  handleReconnect: () => {},
 });
 
 SocketProviderContext.displayName = "socket-provider";
@@ -40,11 +41,12 @@ interface ProviderPops
 export default function Provider({
   children,
   reconnect = true,
-  reconnectInterval = 3000,
+  reconnectInterval = 300,
 }: ProviderPops) {
   const [isLoading, setIsLoading] = useState(false);
   const [currentState, setCurrentState] = useState<ConnectionState>(undefined);
   const [isConnected, setIsConnected] = useState(false);
+
   const [route, setRoute] = useState<RouteData | undefined>(undefined);
   const [driverActive, setDriverActive] = useState<DriverActiveRecord[]>([]);
   const [transactionId, setTransactionId] = useState<string | undefined>(
@@ -53,6 +55,7 @@ export default function Provider({
   const [isTransactionAccepted, setIsTransactionAccepted] = useState<
     boolean | undefined
   >(undefined);
+
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
 
@@ -62,7 +65,6 @@ export default function Provider({
       ws.onmessage = (event) => {
         const message = JSON.parse(event.data) as RiderWsResponse;
 
-        console.log(message);
         switch (message.type) {
           case RiderEvents.CONNECTION_SUCCESS:
             setCurrentState(message.type);
@@ -127,9 +129,18 @@ export default function Provider({
     setRoute(undefined);
   }
 
+  function handleReconnect() {
+    setRoute(undefined);
+
+    setTransactionId(undefined);
+    setIsTransactionAccepted(undefined);
+    connect();
+  }
+
   return (
     <SocketProviderContext.Provider
       value={{
+        handleReconnect,
         sendMessage: sendMessage,
         isConnected,
         connectionState: currentState,

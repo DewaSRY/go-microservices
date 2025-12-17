@@ -12,6 +12,7 @@ const initState = {
 type Action = {
   setDestination: (_data: Coordinate | undefined) => void;
   setLocation: (_data: Coordinate) => void;
+  reset: () => void;
 };
 
 const useRiderStore = create<typeof initState & Action>((set) => {
@@ -33,10 +34,19 @@ const useRiderStore = create<typeof initState & Action>((set) => {
     });
   }
 
+  function reset() {
+    set(() => {
+      return {
+        ...initState,
+      };
+    });
+  }
+
   return {
     ...initState,
     setDestination,
     setLocation,
+    reset,
   };
 });
 

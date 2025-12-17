@@ -1,6 +1,6 @@
 import { DriverEvents } from "@/contracts/common";
-import { useSocketContext } from "../provider/socket-provider";
-import { Button } from "../ui/button";
+import { useSocketContext } from "../../provider/socket-provider";
+import { Button } from "../../ui/button";
 
 export default function DriverTransaction() {
   const { sendMessage, transactionId } = useSocketContext();

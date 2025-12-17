@@ -1,4 +1,30 @@
 {
+  "ride": {
+    "mode": {
+      "title": "Select mode",
+      "riderMode": "Need a ride",
+      "driverMode": "Want to give a ride"
+    },
+    "rideCreateTrip": {
+      "title": "Selected Destination to go",
+      "startTrip": "Start Trip"
+    },
+    "listingDriver": {
+      "title": "Select the available driver",
+      "waitingDriver": "Waiting for driver",
+      "cancelTrip": "Cancel Trip"
+    },
+    "waitingConfirmation": {
+      "title": "Waiting Driver Confirmation",
+      "desc": "Please wait while we confirm your payment",
+      "cancelTrip": "Cancel Trip"
+    },
+    "riderTransactionSuccess": {
+      "title": "Transaction Successful",
+      "closeTransaction": "Close Transaction"
+    }
+  },
+
   "HomePage": {
     "title": "Hello world!",
     "successWidget": {
