@@ -4,11 +4,13 @@ import (
 	"DewaSRY/go-microservices/shared/contracts"
 	"DewaSRY/go-microservices/shared/messaging"
 	"encoding/json"
-	"log"
 )
 
+type OnSuccess func(msg contracts.WSMessage)
+type OnError func(err error)
+
 type QueueConsumer interface {
-	Start() error
+	Start(onsuccess OnSuccess, onError OnError) error
 }
 
 type queueConsumer struct {
@@ -25,7 +27,7 @@ func NewQueueConsumer(rb messaging.RabbitMQ, connMgr ConnectionManager, queueNam
 	}
 }
 
-func (qc *queueConsumer) Start() error {
+func (qc *queueConsumer) Start(onsuccess OnSuccess, onError OnError) error {
 	msgs, err := qc.rb.Channel.Consume(
 		qc.queueName,
 		"",    // consumer
@@ -44,7 +46,7 @@ func (qc *queueConsumer) Start() error {
 		for msg := range msgs {
 			var msgBody contracts.MessageData
 			if err := json.Unmarshal(msg.Body, &msgBody); err != nil {
-				log.Println("Failed to unmarshal message:", err)
+				onError(err)
 				continue
 			}
 
@@ -55,7 +57,7 @@ func (qc *queueConsumer) Start() error {
 			var payload any
 			if msgBody.Data != nil {
 				if err := json.Unmarshal(msgBody.Data, &payload); err != nil {
-					log.Println("Failed to unmarshal payload:", err)
+					onError(err)
 					continue
 				}
 			}
@@ -66,8 +68,11 @@ func (qc *queueConsumer) Start() error {
 			}
 
 			if err := qc.connMgr.Emit(msgBody.ConnectionId, clientMsg); err != nil {
-				log.Printf("Failed_to_send_message_to_user_%s: %v", msgBody.ConnectionId, err)
+				onError(err)
+				continue
 			}
+
+			onsuccess(clientMsg)
 		}
 	}()
 
