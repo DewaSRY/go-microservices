@@ -29,17 +29,7 @@ CREATE TABLE riders (
     deleted_at TIMESTAMP NULL
 );
 
-DROP  TABLE IF EXISTS fares;
-CREATE TABLE fares (
-    id VARCHAR(64) PRIMARY KEY,
-    user_id VARCHAR(64) NOT NULL,
-    package_slug VARCHAR(50) NOT NULL,
-    total_price_in_cents DOUBLE PRECISION NOT NULL DEFAULT 0,
-    routes JSONB,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP NULL
-);
+
 
 DROP  TABLE IF EXISTS transactions;
 CREATE TABLE transactions (
@@ -79,7 +69,6 @@ CREATE TABLE users (
 -- +goose StatementBegin
 SELECT 'down SQL query';
 DROP TABLE drivers;
-DROP TABLE fares;
 DROP TABLE transactions;
 DROP TABLE trips;
 DROP TABLE users;
