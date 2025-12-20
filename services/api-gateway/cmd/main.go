@@ -1,6 +1,13 @@
 package main
 
 import (
+	"DewaSRY/go-microservices/services/api-gateway/internal/handler"
+	"DewaSRY/go-microservices/services/api-gateway/internal/service"
+	"DewaSRY/go-microservices/shared/env"
+	"DewaSRY/go-microservices/shared/lib"
+	"DewaSRY/go-microservices/shared/logger"
+	"DewaSRY/go-microservices/shared/messaging"
+	"DewaSRY/go-microservices/shared/middleware"
 	"context"
 	"fmt"
 	"log"
@@ -9,14 +16,6 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
-
-	"DewaSRY/go-microservices/services/api-gateway/internal/handler"
-	"DewaSRY/go-microservices/services/api-gateway/internal/service"
-	"DewaSRY/go-microservices/shared/env"
-	"DewaSRY/go-microservices/shared/lib"
-	"DewaSRY/go-microservices/shared/logger"
-	"DewaSRY/go-microservices/shared/messaging"
-	"DewaSRY/go-microservices/shared/middleware"
 )
 
 var (
@@ -45,9 +44,6 @@ func main() {
 	mux.HandleFunc("GET /health", httpHandler.GetHealthCheck)
 	mux.HandleFunc("POST /trip/preview", httpHandler.PostTripPreview)
 	mux.HandleFunc("POST /trip/start", httpHandler.PostStartTrip)
-
-	mux.HandleFunc("/ws/riders", wsHandler.WsHandleRider)
-	mux.HandleFunc("/ws/drivers", wsHandler.WsHandleDriver)
 	mux.HandleFunc("/ws/connect", wsHandler.WsHandleStartConnection)
 
 	// wrap the handler
