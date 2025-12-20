@@ -10,7 +10,6 @@ import (
 	"DewaSRY/go-microservices/shared/middleware"
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -25,13 +24,21 @@ var (
 )
 
 func main() {
-	rabbitmq, err := messaging.NewRabbitMQManager(rabbitMqURI)
+	ctx, cancel := context.WithCancel(context.Background())
+	rabbitmq, err := messaging.NewRabbitMQManager(ctx, rabbitMqURI)
 	logger := logger.New()
 
+	defer func() {
+		cancel()
+		rabbitmq.Close()
+	}()
+
 	if err != nil {
-		log.Fatal(err)
+		logger.Error("failed_to_connect_to_rabbitmq", err, map[string]interface{}{
+			"service_name": serviceName,
+		})
+		return
 	}
-	defer rabbitmq.Close()
 
 	// INIT
 	mux := http.NewServeMux()
@@ -72,18 +79,21 @@ func main() {
 		"message": "shout_down_the_server",
 	})
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+	// shout down the server gracefully
+	func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
 
-	if err := server.Shutdown(ctx); err != nil {
-		logger.Error("failed_to_shout_down", err, map[string]interface{}{
-			"message": "failed_to_shout_down",
+		if err := server.Shutdown(ctx); err != nil {
+			logger.Error("failed_to_shout_down", err, map[string]interface{}{
+				"message": "failed_to_shout_down",
+			})
+			server.Close()
+		}
+
+		logger.Info("gracefully_Shout_down", map[string]interface{}{
+			"message": "gracefully_Shout_down",
 		})
-		server.Close()
-	}
-
-	logger.Info("gracefully_Shout_down", map[string]interface{}{
-		"message": "gracefully_Shout_down",
-	})
+	}()
 
 }
