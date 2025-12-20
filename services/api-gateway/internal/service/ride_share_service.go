@@ -7,7 +7,7 @@ import (
 	"DewaSRY/go-microservices/shared/messaging"
 	"context"
 	"encoding/json"
-	"log"
+	"errors"
 )
 
 type rideShareService struct {
@@ -23,8 +23,7 @@ func (t *rideShareService) UserDisconnected(ctx context.Context, connectionId st
 	)
 
 	if err != nil {
-		log.Printf("failed_to_parse:%v", err)
-		return nil
+		return errors.New("failed_to_parse_payload")
 	}
 
 	if err := t.rabbitMq.PublishingMessage(ctx, contracts.UserDisconnectedProcess,
@@ -32,7 +31,7 @@ func (t *rideShareService) UserDisconnected(ctx context.Context, connectionId st
 			ConnectionId: connectionId,
 			Data:         messageData,
 		}); err != nil {
-		log.Printf("failed_to_parse:%v", err)
+		return errors.New("failed_to_publish_message")
 	}
 
 	return nil
@@ -43,8 +42,7 @@ func (t *rideShareService) DriverAcceptedTransaction(ctx context.Context, connec
 	var parseData types.DriverAcceptedTransactionRequest
 
 	if err := json.Unmarshal(data, &parseData); err != nil {
-		log.Printf("error_failed_to_process_user_init_data:%v", err)
-		return nil
+		return errors.New("error_failed_to_process_user_init_data")
 	}
 
 	resultData, err := json.Marshal(
@@ -55,8 +53,7 @@ func (t *rideShareService) DriverAcceptedTransaction(ctx context.Context, connec
 	)
 
 	if err != nil {
-		log.Printf("failed_to_parse:%v", err)
-		return nil
+		return errors.New("failed_to_parse")
 	}
 
 	if err := t.rabbitMq.PublishingMessage(ctx, contracts.DriverAcceptTransactionProcess,
@@ -64,7 +61,7 @@ func (t *rideShareService) DriverAcceptedTransaction(ctx context.Context, connec
 			ConnectionId: connectionId,
 			Data:         resultData,
 		}); err != nil {
-		log.Printf("failed_to_parse:%v", err)
+		return errors.New("failed_to_send_message")
 	}
 
 	return nil
@@ -75,8 +72,7 @@ func (t *rideShareService) RiderCreateTransaction(ctx context.Context, connectio
 	var parseData types.RiderCreateTransactionRequest
 
 	if err := json.Unmarshal(data, &parseData); err != nil {
-		log.Printf("error_failed_to_process_user_init_data:%v", err)
-		return nil
+		return errors.New("error_failed_to_process_user_init_data")
 	}
 
 	resultData, err := json.Marshal(
@@ -87,8 +83,7 @@ func (t *rideShareService) RiderCreateTransaction(ctx context.Context, connectio
 	)
 
 	if err != nil {
-		log.Printf("failed_to_parse:%v", err)
-		return nil
+		return errors.New("failed_to_parse")
 	}
 
 	if err := t.rabbitMq.PublishingMessage(ctx, contracts.RiderCreateTransactionProcess,
@@ -96,7 +91,7 @@ func (t *rideShareService) RiderCreateTransaction(ctx context.Context, connectio
 			ConnectionId: connectionId,
 			Data:         resultData,
 		}); err != nil {
-		log.Printf("failed_to_parse:%v", err)
+		return errors.New("failed_to_send_message")
 	}
 
 	return nil
@@ -107,8 +102,7 @@ func (t *rideShareService) DriverInitRequest(ctx context.Context, connectionId s
 	var parseData types.DriverInitRequest
 
 	if err := json.Unmarshal(data, &parseData); err != nil {
-		log.Printf("error_failed_to_process_user_init_data:%v", err)
-		return nil
+		return errors.New("failed_to_read_data")
 	}
 
 	resultData, err := json.Marshal(
@@ -120,8 +114,7 @@ func (t *rideShareService) DriverInitRequest(ctx context.Context, connectionId s
 	)
 
 	if err != nil {
-		log.Printf("failed_to_parse:%v", err)
-		return nil
+		return errors.New("failed_to_parse")
 	}
 
 	if err := t.rabbitMq.PublishingMessage(ctx, contracts.DriverInitEventProcess,
@@ -129,7 +122,7 @@ func (t *rideShareService) DriverInitRequest(ctx context.Context, connectionId s
 			ConnectionId: connectionId,
 			Data:         resultData,
 		}); err != nil {
-		log.Printf("failed_to_parse:%v", err)
+		return errors.New("failed_to_send_message")
 	}
 
 	return nil
@@ -140,8 +133,7 @@ func (t *rideShareService) RiderCreateTripRequest(ctx context.Context, connectio
 	var parseData types.RiderCreateTripRequest
 
 	if err := json.Unmarshal(data, &parseData); err != nil {
-		log.Printf("error_failed_to_process_user_init_data:%v", err)
-		return nil
+		return errors.New("error_failed_to_process_user_init_data")
 	}
 
 	resultData, err := json.Marshal(
@@ -153,8 +145,7 @@ func (t *rideShareService) RiderCreateTripRequest(ctx context.Context, connectio
 	)
 
 	if err != nil {
-		log.Printf("failed_to_parse:%v", err)
-		return nil
+		return errors.New("failed_to_parse")
 	}
 
 	if err := t.rabbitMq.PublishingMessage(ctx, contracts.RiderCreateTripProcess,
@@ -162,7 +153,7 @@ func (t *rideShareService) RiderCreateTripRequest(ctx context.Context, connectio
 			ConnectionId: connectionId,
 			Data:         resultData,
 		}); err != nil {
-		log.Printf("failed_to_parse:%v", err)
+		return errors.New("failed_to_send_message")
 	}
 
 	return nil
@@ -173,8 +164,7 @@ func (t *rideShareService) CreateTripEvent(ctx context.Context, connectionId str
 	var parseData types.CreateTripRequest
 
 	if err := json.Unmarshal(data, &parseData); err != nil {
-		log.Printf("error_failed_to_process_user_init_data:%v", err)
-		return nil
+		return errors.New("error_failed_to_process_user_init_data")
 	}
 
 	resultData, err := json.Marshal(
@@ -187,8 +177,7 @@ func (t *rideShareService) CreateTripEvent(ctx context.Context, connectionId str
 	)
 
 	if err != nil {
-		log.Printf("failed_to_parse:%v", err)
-		return nil
+		return errors.New("failed_to_parse")
 	}
 
 	if err := t.rabbitMq.PublishingMessage(ctx, contracts.TripCreateInitProcess,
@@ -196,7 +185,7 @@ func (t *rideShareService) CreateTripEvent(ctx context.Context, connectionId str
 			ConnectionId: connectionId,
 			Data:         resultData,
 		}); err != nil {
-		log.Printf("failed_to_parse:%v", err)
+		return errors.New("failed_to_send_message")
 	}
 
 	return nil
