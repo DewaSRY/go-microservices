@@ -240,9 +240,11 @@ func (t *tripFlowEventHandler) HandlerTripCreate(ctx context.Context, data []byt
 			})
 			return
 		}
+
 		t.logger.Info("trip_create_and_update_rider_location_successfully", map[string]any{
 			"rider_id": p.RiderId,
 		})
+
 	}(payload)
 
 	// ---- Goroutine 2: Routing via OSRM & Publish Event ----
