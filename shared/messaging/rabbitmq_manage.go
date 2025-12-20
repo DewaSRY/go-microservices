@@ -1,7 +1,6 @@
 package messaging
 
 import (
-	"DewaSRY/go-microservices/shared/contracts"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -21,200 +20,28 @@ type RabbitMQ struct {
 	Channel *amqp.Channel
 }
 
-func NewRabbitMQManager(amqpUrlString string) (*RabbitMQ, error) {
-	conn, err := amqp.Dial(amqpUrlString)
+func NewRabbitMQManager(context context.Context, amqpUrlString string) (*RabbitMQ, error) {
+	rabbitmqConfig := NewRabbitMQConfig()
+	rmq := &RabbitMQ{}
 
-	if err != nil {
+	if err := rabbitmqConfig.CreateConnection(amqpUrlString); err != nil {
 		return nil, fmt.Errorf("failed_to_create_rabbitmq_connection: %v", err)
 	}
 
-	ch, err := conn.Channel()
-	if err != nil {
-		conn.Close()
-		return nil, fmt.Errorf("failed_to_create_channel :%v", err)
-	}
-	rmq := &RabbitMQ{conn: conn, Channel: ch}
+	rmq.conn = rabbitmqConfig.GetConnection()
+	rmq.Channel = rabbitmqConfig.GetChannel()
 
-	if err := rmq.setupExchangesAndQueues(); err != nil {
-		rmq.Close()
-		return nil, fmt.Errorf("failed_to_setup_exchanges_and_queues:%v", err)
-	}
+	go rabbitmqConfig.ReconnectConnection(context, amqpUrlString,
+		func(conn *amqp.Connection, channel *amqp.Channel) {
+			rmq.conn = conn
+			rmq.Channel = channel
+			log.Println("rabbitmq_reconnected_successfully")
+		},
+		func(err error) {
+			log.Printf("rabbitmq_reconnection_error:%v", err)
+		})
 
 	return rmq, nil
-}
-
-func (t *RabbitMQ) setupExchangesAndQueues() error {
-	err := t.Channel.ExchangeDeclare(
-		TRIP_EXCHANGE,
-		"topic", // type
-		true,    //durable
-		false,   // auto-deleted
-		false,   //internal
-		false,   //no wait
-		nil,
-	)
-
-	if err != nil {
-		return fmt.Errorf("failed_to_create_exchange_%s:%v", TRIP_EXCHANGE, err)
-	}
-
-	//	User
-	if err := t.declareAndBindingQueue(
-		TRIP_EXCHANGE,
-		UserEstablishConnectionQueue,
-		[]string{
-			contracts.UserInitEventProcess,
-			contracts.UserCloseConnectiondataEvent,
-			contracts.UserDisconnectedProcess,
-		},
-	); err != nil {
-		return err
-	}
-
-	if err := t.declareAndBindingQueue(
-		TRIP_EXCHANGE,
-		UserEstablishConnectionNotificationQueue,
-		[]string{
-			contracts.UserInitSuccessResponse,
-			contracts.RouteFoundEvent,
-			contracts.DriverActiveResponse,
-			contracts.RiderCreateTransactionResponse,
-			contracts.TransactionAcceptedResponse,
-		},
-	); err != nil {
-		return err
-	}
-
-	// trip flow
-	if err := t.declareAndBindingQueue(
-		TRIP_EXCHANGE,
-		TripFlowQueue,
-		[]string{
-			contracts.TripCreateInitProcess,
-			contracts.RiderCreateTripProcess,
-			contracts.DriverInitEventProcess,
-			contracts.RiderCreateTransactionProcess,
-			contracts.DriverAcceptTransactionProcess,
-		},
-	); err != nil {
-		return err
-	}
-
-	if err := t.declareAndBindingQueue(
-		TRIP_EXCHANGE,
-		TripFlowNotificationQueue,
-		[]string{},
-	); err != nil {
-		return err
-	}
-
-	// if err := t.declareAndBindingQueue(
-	// 	TRIP_EXCHANGE,
-	// 	FindAvailableDriversQueue,
-	// 	[]string{
-	// 		contracts.TripEventCreated,
-	// 		contracts.TripEventDriverNotInterested,
-	// 		contracts.TripEventDriversFound,
-	// 	},
-	// ); err != nil {
-	// 	return err
-	// }
-
-	// if err := t.declareAndBindingQueue(
-	// 	TRIP_EXCHANGE,
-	// 	DriverCmdTripRequestQueue,
-	// 	[]string{contracts.DriverCmdTripRequest},
-	// ); err != nil {
-	// 	return err
-	// }
-
-	// if err := t.declareAndBindingQueue(
-	// 	TRIP_EXCHANGE,
-	// 	DriverTripResponseQueue,
-	// 	[]string{contracts.DriverCmdTripAccept, contracts.DriverCmdTripDecline},
-	// ); err != nil {
-	// 	return err
-	// }
-
-	// if err := t.declareAndBindingQueue(
-	// 	TRIP_EXCHANGE,
-	// 	NotifyMatchingTripQueue,
-	// 	[]string{contracts.TripEventDriversFound},
-	// ); err != nil {
-	// 	return err
-	// }
-
-	// if err := t.declareAndBindingQueue(
-	// 	TRIP_EXCHANGE,
-	// 	NotifyDriverNoDriversFoundQueue,
-	// 	[]string{contracts.TripEventNoDriversFound},
-	// ); err != nil {
-	// 	return err
-	// }
-
-	// if err := t.declareAndBindingQueue(
-	// 	TRIP_EXCHANGE,
-	// 	NotifyDriverAssignQueue,
-	// 	[]string{contracts.TripEventDriverAssigned},
-	// ); err != nil {
-	// 	return err
-	// }
-
-	// if err := t.declareAndBindingQueue(
-	// 	TRIP_EXCHANGE,
-	// 	PaymentTripResponseQueue,
-	// 	[]string{contracts.PaymentCmdCreateSession},
-	// ); err != nil {
-	// 	return err
-	// }
-
-	// if err := t.declareAndBindingQueue(
-	// 	TRIP_EXCHANGE,
-	// 	NotifyPaymentSessionCreatedQueue,
-	// 	[]string{contracts.PaymentEventSessionCreated},
-	// ); err != nil {
-	// 	return err
-	// }
-
-	// if err := t.declareAndBindingQueue(
-	// 	TRIP_EXCHANGE,
-	// 	NotifyPaymentSuccessQueue,
-	// 	[]string{
-	// 		contracts.PaymentEventSuccess,
-	// 		contracts.PaymentEventComplete,
-	// 	},
-	// ); err != nil {
-	// 	return err
-	// }
-	return nil
-}
-
-func (r *RabbitMQ) declareAndBindingQueue(exchange, queueName string, messageTypes []string) error {
-	q, err := r.Channel.QueueDeclare(
-		queueName, // name
-		true,      // durable
-		false,     // delete when unused
-		false,     // exclusive
-		false,     // no-wait
-		nil,       // arguments with DLX config
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for _, msg := range messageTypes {
-		if err := r.Channel.QueueBind(
-			q.Name,   // queue name
-			msg,      // routing key
-			exchange, // exchange
-			false,
-			nil,
-		); err != nil {
-			return fmt.Errorf("failed to bind queue to %s: %v", queueName, err)
-		}
-	}
-
-	return nil
 }
 
 func (t *RabbitMQ) PublishingMessage(ctx context.Context, routingKeys string, message any) error {
@@ -226,7 +53,7 @@ func (t *RabbitMQ) PublishingMessage(ctx context.Context, routingKeys string, me
 
 	return t.Channel.PublishWithContext(ctx,
 		TRIP_EXCHANGE, //Exchange name
-		routingKeys,   // routing key //hallo
+		routingKeys,   // routing key
 		false,         // mandatory,
 		false,         // immediate
 		amqp.Publishing{

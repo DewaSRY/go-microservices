@@ -50,7 +50,7 @@ func main() {
 		return
 	}
 
-	rabbitmq, err := messaging.NewRabbitMQManager(rabbitMqURI)
+	rabbitmq, err := messaging.NewRabbitMQManager(ctx, rabbitMqURI)
 	if err != nil {
 		log.Fatal(err)
 	}

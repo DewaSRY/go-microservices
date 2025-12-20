@@ -37,7 +37,7 @@ func main() {
 		log.Fatalf("failed_to_listen:%v", err)
 	}
 
-	conn, err := messaging.NewRabbitMQManager(amqp_uri)
+	conn, err := messaging.NewRabbitMQManager(ctx, amqp_uri)
 	if err != nil {
 		log.Printf("failed_to_make_connection:%v", err)
 		cancel()

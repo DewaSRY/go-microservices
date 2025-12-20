@@ -10,7 +10,6 @@ import (
 	"DewaSRY/go-microservices/shared/logger"
 	"DewaSRY/go-microservices/shared/messaging"
 	"context"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -25,22 +24,15 @@ var (
 
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
 	logger := logger.New()
 
-	go func() {
-		sigCh := make(chan os.Signal, 1)
-		signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
-
-		<-sigCh
-		cancel()
-	}()
-
-	rabbitmq, err := messaging.NewRabbitMQManager(rabbitMqURI)
+	rabbitmq, err := messaging.NewRabbitMQManager(ctx, rabbitMqURI)
 	if err != nil {
-		log.Fatal(err)
+		logger.Error("failed_to_connect_to_rabbitmq", err, map[string]interface{}{
+			"service_name": "API_SERVICE",
+		})
+		return
 	}
-	defer rabbitmq.Close()
 
 	db, err := db.NewPostgresManager(ctx, postgres_uri)
 	if err != nil {
@@ -91,7 +83,19 @@ func main() {
 		"msg":   "API Service is up and running",
 	})
 
+	defer func() {
+		cancel()
+		rabbitmq.Close()
+	}()
+
 	<-ctx.Done()
+	go func() {
+		sigCh := make(chan os.Signal, 1)
+		signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
+
+		<-sigCh
+		cancel()
+	}()
 	logger.Info("server_is_gracefully_down", map[string]interface{}{
 		"event": "server_is_gracefully_down",
 		"msg":   "Api Service is down",

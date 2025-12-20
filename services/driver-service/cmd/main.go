@@ -26,14 +26,6 @@ var (
 
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	go func() {
-		sigCn := make(chan os.Signal, 1)
-		signal.Notify(sigCn, os.Interrupt, syscall.SIGTERM)
-		<-sigCn
-		cancel()
-	}()
 
 	lis, err := net.Listen("tcp", GrpcAddr)
 	if err != nil {
@@ -41,7 +33,7 @@ func main() {
 		return
 	}
 
-	message_manager, err := messaging.NewRabbitMQManager(amqpUrlString)
+	message_manager, err := messaging.NewRabbitMQManager(ctx, amqpUrlString)
 	if err != nil {
 		log.Fatalf("failed_to_listen: %v", err)
 		return
@@ -59,10 +51,9 @@ func main() {
 	driverService := service.NewDriverService(driverRepo)
 	grpcServer := grpc.NewServer()
 	handler.NewGrpcHandler(grpcServer, driverService)
-
 	event_handler := handler.NewTripEventHandler(driverService, message_manager)
-
 	tripListener := events.NewTripConsumer(message_manager, event_handler)
+
 	go func() {
 		if err := tripListener.Listen(); err != nil {
 			log.Fatalf("failed_to_make_listener_to_trip_event:%v", err)
@@ -78,6 +69,17 @@ func main() {
 		}
 	}()
 
+	defer func() {
+		message_manager.Close()
+		cancel()
+	}()
+
+	go func() {
+		sigCn := make(chan os.Signal, 1)
+		signal.Notify(sigCn, os.Interrupt, syscall.SIGTERM)
+		<-sigCn
+		cancel()
+	}()
 	<-ctx.Done()
 	log.Println("shutting_down_the_server..")
 	grpcServer.GracefulStop()
