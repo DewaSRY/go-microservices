@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 const initState = {
-  open: true,
+  open: false,
 };
 
 type Action = {

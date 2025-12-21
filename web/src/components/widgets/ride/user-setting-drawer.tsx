@@ -1,14 +1,16 @@
 import { ScrollArea } from "@components/ui/scroll-area";
 
 import useSettingDrawerWidget from "@/hooks/state/useUserSettingDrawer";
-import useUserRideProfile from "@/hooks/state/useUserRideProfile";
 import UserSettingProfile from "@/components/widgets/ride/user-profile";
 import UserSelectMode from "@/components/widgets/ride/user-select-mode";
 import { cn } from "@/libs/utils";
-import { useEffect } from "react";
 
 import { useFlowContext } from "@components/provider/user-flow-provider";
-import { DriverFlowEvents, RiderFlowEvent } from "@/types/events";
+import {
+  DriverFlowEvents,
+  RideFlowEvents,
+  RiderFlowEvent,
+} from "@/types/events";
 import RiderListingDriver from "./driver-slug";
 import RiderSettingWaitingDriver from "./rider-listing-driver";
 import RiderCreateTrip from "./rider-create-trip";
@@ -17,15 +19,14 @@ import DriverWaitingRide from "./driver-waiting-ride";
 import RiderWaitingDriverConfirmation from "./rider-waiting-driver-confirmation";
 import RiderTransactionSuccess from "./rider-transaction-success";
 import DriverTransactionSuccess from "./driver-transaction-success";
+import { useUserLocationContext } from "@/components/provider/user-location-provider";
+import UserSettingSLocation from "./user-setting-location";
 
 export default function UserSettingSideSheet() {
   const { currentEvent } = useFlowContext();
   const { open } = useSettingDrawerWidget();
-  const { initData, mode } = useUserRideProfile();
 
-  useEffect(() => {
-    initData();
-  }, []);
+  const { locationPermission } = useUserLocationContext();
 
   return (
     <div
@@ -42,7 +43,11 @@ export default function UserSettingSideSheet() {
           </header>
 
           <div className="p-4 flex-1 overflow-auto grow h-5/6">
-            {mode === undefined && <UserSelectMode />}
+            {currentEvent === RideFlowEvents.LOCATION_NOT_SET && (
+              <UserSettingSLocation />
+            )}
+
+            {currentEvent === RideFlowEvents.MODE_NOT_SET && <UserSelectMode />}
 
             {currentEvent === RiderFlowEvent.TRIP_REQUESTED && (
               <RiderCreateTrip />

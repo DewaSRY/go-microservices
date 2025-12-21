@@ -3,7 +3,7 @@ import { Entity, PackageSlug } from "@/types/common";
 import { DriverEvents } from "@/contracts/common";
 
 import { useSocketContext } from "@components/provider/socket-provider";
-import useRiderStore from "@/hooks/store/use-rider-store";
+import useRiderStore from "@/hooks/store/use-ride-store";
 
 import { PackageSlugMeta } from "@components/common/PackagesMeta";
 

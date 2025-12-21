@@ -2,6 +2,11 @@
  TODO: think about negative event
 */
 
+export enum RideFlowEvents {
+  LOCATION_NOT_SET = "LOCATION_NOT_SET",
+  MODE_NOT_SET = "MODE_NOT_SET",
+}
+
 export enum RiderFlowEvent {
   /**
    * After connection mark as rider it will
@@ -21,4 +26,3 @@ export enum DriverFlowEvents {
   RIDER_CREATE_TRANSACTION = "RIDER_CREATE_TRANSACTION",
   DRIVER_TRANSACTION_SUCCESS = "DRIVER_TRANSACTION_SUCCESS",
 }
- 

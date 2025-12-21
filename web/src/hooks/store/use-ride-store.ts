@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import { Coordinate } from "@/types/common";
 
+const USER_LOCATION = "USER_LOCATION";
+
 const initState = {
   destination: undefined as Coordinate | undefined,
   currentLocation: {
@@ -13,9 +15,11 @@ type Action = {
   setDestination: (_data: Coordinate | undefined) => void;
   setLocation: (_data: Coordinate) => void;
   reset: () => void;
+
+  initData: () => void;
 };
 
-const useRiderStore = create<typeof initState & Action>((set) => {
+const useRideStore = create<typeof initState & Action>((set) => {
   function setDestination(data: Coordinate | undefined) {
     set((res) => {
       return {
@@ -26,6 +30,8 @@ const useRiderStore = create<typeof initState & Action>((set) => {
   }
 
   function setLocation(data: Coordinate) {
+    localStorage.setItem(USER_LOCATION, JSON.stringify(data));
+
     set((res) => {
       return {
         ...res,
@@ -35,9 +41,25 @@ const useRiderStore = create<typeof initState & Action>((set) => {
   }
 
   function reset() {
-    set(() => {
+    set((prev) => {
+      prev.destination = undefined;
+      return prev;
+    });
+  }
+
+  function initData() {
+    let userLocation: Coordinate = initState.currentLocation;
+
+    const storedLocation = localStorage.getItem(USER_LOCATION);
+
+    if (storedLocation) {
+      userLocation = JSON.parse(storedLocation);
+    }
+
+    set((res) => {
       return {
-        ...initState,
+        ...res,
+        currentLocation: initState.currentLocation,
       };
     });
   }
@@ -47,7 +69,8 @@ const useRiderStore = create<typeof initState & Action>((set) => {
     setDestination,
     setLocation,
     reset,
+    initData,
   };
 });
 
-export default useRiderStore;
+export default useRideStore;

@@ -4,7 +4,7 @@ import iconShadow from "leaflet/dist/images/marker-shadow.png";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import L from "leaflet";
 import { useEffect, useMemo, useRef } from "react";
-import useRiderStore from "@/hooks/store/use-rider-store";
+import useRiderStore from "@/hooks/store/use-ride-store";
 import MapClickHandler from "../../common/map-click-handler";
 import { useSocketContext } from "@components/provider/socket-provider";
 import { RoutingControl } from "@components/common/RoutingControl";
@@ -41,7 +41,6 @@ export default function HomeMapWidget() {
   const mapRef = useRef<L.Map>(null);
   const { destination, setDestination, currentLocation, setLocation } =
     useRiderStore();
-
   const { currentEvent, isLockDestination, setIsHaveRideRoute } =
     useFlowContext();
   const { routeData, driverActive } = useSocketContext();
@@ -69,41 +68,15 @@ export default function HomeMapWidget() {
 
   useEffect(() => {
     const map = mapRef.current;
-    if (map) {
-      const timer = setTimeout(() => {
-        map.invalidateSize();
-      }, 300);
+    if (!map) return;
 
-      if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const lat = position.coords.latitude;
-            const lon = position.coords.longitude;
-
-            setLocation({
-              latitude: lat,
-              longitude: lon,
-            });
-
-            if (mapRef.current) {
-              mapRef.current.flyTo([lat, lon], 13, { animate: true });
-            }
-
-            setTimeout(() => {
-              mapRef.current?.invalidateSize();
-            }, 300);
-          },
-          (error) => {
-            console.error("Error getting location:", error);
-          }
-        );
-      }
-
-      return () => {
-        clearTimeout(timer);
-      };
-    }
-  }, []);
+    map.whenReady(() => {
+      map.flyTo([currentLocation.latitude, currentLocation.longitude], 13, {
+        animate: true,
+      });
+      map.invalidateSize();
+    });
+  }, [currentLocation.latitude, currentLocation.longitude]);
 
   return (
     <div className="flex-1 h-full w-full">
