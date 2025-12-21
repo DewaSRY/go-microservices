@@ -5,6 +5,11 @@
       "riderMode": "Need a ride",
       "driverMode": "Want to give a ride"
     },
+    "settingLocation": {
+      "title": "Set your location",
+      "desc": "Allow location access to find your current location",
+      "enableLocation": "Enable Location"
+    },
     "rideCreateTrip": {
       "title": "Selected Destination to go",
       "startTrip": "Start Trip"

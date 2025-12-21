@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
-import useRiderStore from "@/hooks/store/use-rider-store";
+import useRiderStore from "@/hooks/store/use-ride-store";
 import { useSocketContext } from "@/components/provider/socket-provider";
 import { useFlowContext } from "@components/provider/user-flow-provider";
 import { RiderFlowEvent } from "@/types/events";

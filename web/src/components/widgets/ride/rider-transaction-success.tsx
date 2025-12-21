@@ -3,14 +3,14 @@ import { useTranslations } from "next-intl";
 import { Button } from "@components/ui/button";
 import { useSocketContext } from "@/components/provider/socket-provider";
 import { useFlowContext } from "@/components/provider/user-flow-provider";
-import useRiderStore from "@/hooks/store/use-rider-store";
+import useRideStore from "@/hooks/store/use-ride-store";
 import useUserRideProfile from "@/hooks/state/useUserRideProfile";
 
 export default function RiderTransactionSuccess() {
   const translate = useTranslations("ride.riderTransactionSuccess");
   const { handleReconnect } = useSocketContext();
   const { resetState } = useFlowContext();
-  const { reset: riderReset } = useRiderStore();
+  const { reset: riderReset } = useRideStore();
   const { reset: profileReset } = useUserRideProfile();
 
   function handleCloseRide() {

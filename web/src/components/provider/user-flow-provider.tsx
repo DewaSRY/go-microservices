@@ -8,13 +8,22 @@ import {
   createContext,
 } from "react";
 import { Entity } from "@/types/common";
-import { RiderFlowEvent, DriverFlowEvents } from "@/types/events";
+import {
+  RiderFlowEvent,
+  DriverFlowEvents,
+  RideFlowEvents,
+} from "@/types/events";
 
 import useRiderProfile from "@/hooks/state/useUserRideProfile";
-import useRiderStore from "@/hooks/store/use-rider-store";
+import useRiderStore from "@/hooks/store/use-ride-store";
 import { useSocketContext } from "./socket-provider";
+import { useUserLocationContext } from "./user-location-provider";
 
-type eventState = RiderFlowEvent | DriverFlowEvents | undefined;
+type eventState =
+  | RideFlowEvents
+  | RiderFlowEvent
+  | DriverFlowEvents
+  | undefined;
 
 const UserFlowProvider = createContext({
   currentEvent: undefined as eventState | undefined,
@@ -31,6 +40,7 @@ interface ProviderPops
     PropsWithChildren {}
 
 export default function Provider({ children }: ProviderPops) {
+  const { locationPermission } = useUserLocationContext();
   const { mode, packageSlug } = useRiderProfile();
   const { destination, setDestination } = useRiderStore();
   const { transactionId, isTransactionAccepted } = useSocketContext();
@@ -39,6 +49,14 @@ export default function Provider({ children }: ProviderPops) {
   const [isHaveRideRoute, setIsHaveRideRoute] = useState<boolean>(false);
 
   const currentEvent = useMemo(() => {
+    if (locationPermission !== "granted") {
+      return RideFlowEvents.LOCATION_NOT_SET;
+    }
+
+    if (mode === undefined) {
+      return RideFlowEvents.MODE_NOT_SET;
+    }
+
     if (mode === Entity.RIDER) {
       if (isTransactionAccepted) {
         return RiderFlowEvent.RIDER_TRANSACTION_SUCCESS;
@@ -80,6 +98,7 @@ export default function Provider({ children }: ProviderPops) {
     packageSlug,
     transactionId,
     isTransactionAccepted,
+    locationPermission,
   ]);
 
   useEffect(() => {

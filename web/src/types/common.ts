@@ -30,3 +30,9 @@ export type DriverActiveRecord = {
 export type RiderCreateTransactionResponse = {
   transactionId: string;
 };
+
+export type LocationPermissionState =
+  | "granted"
+  | "prompt"
+  | "denied"
+  | "unsupported";
